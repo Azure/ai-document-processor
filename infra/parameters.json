@@ -2,28 +2,31 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "function_app_name": {
-            "value": null
+        "functionAppBase": {
+            "value": "functionapp"
         },
-        "vault_name": {
-            "value": null
+        "vaultBase": {
+            "value": "keyvault"
         },
-        "components_functionapp_name": {
-            "value": null
+        "componentsFunctionAppBase": {
+            "value": "componentsfunctionapp"
         },
-        "searchServices_name": {
-            "value": null
+        "searchServicesBase": {
+            "value": "searchservice"
         },
-        "storageAccount_name": {
-            "value": null
-        },
-        "workspaces_DefaultWorkspace_253f778b_553f_4871_b143_123f314c45c1_CCAN_externalid": {
-            "value": null
+        "storageAccountBase": {
+            "value": "storage"
         },
         "serverfarms_ASP_functionapp_name": {
             "value": null
         },
         "workspaceName": {
+            "value": null
+        },
+        "location": {
+            "value": null
+        },
+        "tenantId": {
             "value": null
         }
     }
