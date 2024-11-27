@@ -32,8 +32,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
   kind: 'Storage'
   properties: {
-    supportsHttpsTrafficOnly: true
-    defaultToOAuthAuthentication: true
+    allowBlobPublicAccess: true
   }
 }
 
@@ -114,9 +113,9 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01'
 resource bronzeContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
   parent: blobService
   name: 'bronze'
-  properties: {
-    publicAccess: 'Blob'
-  }
+  // properties: {
+  //   publicAccess: 'Blob'
+  // }
 }
 
 resource silverContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
