@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: my-azd-function-app
+
+# Infrastructure configuration (optional if using Bicep/ARM for infra)
+infra:
+  bicep:
+    file: ./infra/main.bicep
+
+# Services: define each of your services here
+services:
+  myfunctionapp:
+    # The folder containing your host.json and Python code
+    project: .
+    # The language you are using
+    language: python
+    # Use "function" instead of "containerapp" so that azd knows you're using Azure Functions
+    host: function

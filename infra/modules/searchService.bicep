@@ -1,6 +1,5 @@
 param searchServiceName string
 
-
 resource searchService_resource 'Microsoft.Search/searchServices@2024-06-01-preview' = {
   name: searchServiceName
   location: 'Central US'

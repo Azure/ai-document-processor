@@ -43,13 +43,15 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
     name: 'Y1'
     tier: 'Dynamic'
   }
-  properties: {}
+  properties: {
+    reserved: true
+  }
 }
 
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
   location: location
-  kind: 'functionapp'
+  kind: 'functionapp,linux'
   identity: {
     type: 'SystemAssigned'
   }
@@ -87,6 +89,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         }
       ]
       ftpsState: 'FtpsOnly'
+      linuxFxVersion: 'Python|3.11'
       minTlsVersion: '1.2'
     }
     httpsOnly: true
@@ -113,9 +116,9 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01'
 resource bronzeContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
   parent: blobService
   name: 'bronze'
-  // properties: {
-  //   publicAccess: 'Blob'
-  // }
+  properties: {
+    publicAccess: 'Blob'
+  }
 }
 
 resource silverContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {

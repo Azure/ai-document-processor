@@ -12,4 +12,4 @@ transcribe/
 whisper
 transcribe
 call*
-process*
+process_*

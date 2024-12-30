@@ -1,7 +1,8 @@
 var tenantId = tenant().tenantId
 param location string = 'eastus'
-param functionAppName string = 'functionapp-${uniqueString(resourceGroup().id)}'
 param appInsightsLocation string = 'eastus'
+param environmentName string = 'dev'
+param functionAppName string = 'functionapp-${environmentName}-${uniqueString(resourceGroup().id)}'
 
 // Pass resources to functionApp module
 module functionApp './modules/functionApp.bicep' = {
