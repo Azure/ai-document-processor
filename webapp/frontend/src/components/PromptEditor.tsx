@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { BlobServiceClient } from '@azure/storage-blob';
 
 // Shape of your prompts file (adjust to match your JSON structure)
@@ -48,11 +48,26 @@ const PromptEditor: React.FC = () => {
     }
   };
 
+  const handleRefresh = () => {
+    fetchPromptsFromBlob();
+  };
+
   return (
     <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
       <Typography variant="h5" gutterBottom>
         Prompt Viewer
       </Typography>
+
+      <Box marginBottom={2}>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleRefresh}
+          disabled={loading}
+        >
+          {loading ? 'Refreshing...' : 'Refresh'}
+        </Button>
+      </Box>
 
       {loading && <Typography>Loading...</Typography>}
       {errorMessage && <Typography color="error">{errorMessage}</Typography>}

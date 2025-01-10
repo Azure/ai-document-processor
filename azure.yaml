@@ -16,3 +16,4 @@ services:
     language: python
     # Use "function" instead of "containerapp" so that azd knows you're using Azure Functions
     host: function
+    

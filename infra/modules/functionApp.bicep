@@ -32,7 +32,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
   kind: 'Storage'
   properties: {
-    allowBlobPublicAccess: true
+    // allowBlobPublicAccess: true
   }
 }
 
@@ -54,6 +54,9 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   kind: 'functionapp,linux'
   identity: {
     type: 'SystemAssigned'
+  }
+  tags: {
+    'azd-service-name': 'myfunctionapp'
   }
   properties: {
     serverFarmId: hostingPlan.id
@@ -117,7 +120,7 @@ resource bronzeContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   parent: blobService
   name: 'bronze'
   properties: {
-    publicAccess: 'Blob'
+    publicAccess: 'None'
   }
 }
 
@@ -125,7 +128,7 @@ resource silverContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   parent: blobService
   name: 'silver'
   properties: {
-    publicAccess: 'Blob'
+    publicAccess: 'None'
   }
 }
 
@@ -133,6 +136,6 @@ resource goldContainer 'Microsoft.Storage/storageAccounts/blobServices/container
   parent: blobService
   name: 'gold'
   properties: {
-    publicAccess: 'Blob'
+    publicAccess: 'None'
   }
 }

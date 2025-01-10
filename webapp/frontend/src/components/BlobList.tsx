@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Card, CardContent, Typography, Box, List, ListItem, ListItemText } from '@mui/material';
-import { BlobServiceClient } from '@azure/storage-blob';
 
-interface BlobItemInfo {
-  name: string;
-  containerName: string;
-}
-
-// For a real project, store this in .env and reference process.env.REACT_APP_STORAGE_CONNECTION_STRING
-const AZURE_STORAGE_CONNECTION_STRING = 'BlobEndpoint=https://azfunctionsyziy6wu4gytru.blob.core.windows.net/;QueueEndpoint=https://azfunctionsyziy6wu4gytru.queue.core.windows.net/;FileEndpoint=https://azfunctionsyziy6wu4gytru.file.core.windows.net/;TableEndpoint=https://azfunctionsyziy6wu4gytru.table.core.windows.net/;SharedAccessSignature=sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiyx&se=2025-03-01T01:37:35Z&st=2024-12-28T17:37:35Z&spr=https&sig=BDL0bKH4XWOgmtX4UADnG3IJHo%2BCXe%2B2whJujg4vm9o%3D'
-
-// The containers we always want to display
 const CONTAINER_NAMES = ['bronze', 'silver', 'gold'];
 
 const BlobList: React.FC = () => {
@@ -28,36 +18,15 @@ const BlobList: React.FC = () => {
     setError(null);
 
     try {
-      const blobServiceClient = BlobServiceClient.fromConnectionString(
-        AZURE_STORAGE_CONNECTION_STRING
-      );
-
-      // Prepare an object to collect blob names by container
-      const newBlobsByContainer: Record<string, string[]> = {
-        bronze: [],
-        silver: [],
-        gold: [],
-      };
-
-      // For each of the containers we care about, list blobs
-      for (const containerName of CONTAINER_NAMES) {
-        const containerClient = blobServiceClient.getContainerClient(containerName);
-
-        try {
-          // Iterate over all blobs in this container
-          const blobNames: string[] = [];
-          for await (const blob of containerClient.listBlobsFlat()) {
-            blobNames.push(blob.name);
-          }
-          // Store the results
-          newBlobsByContainer[containerName] = blobNames;
-        } catch (e) {
-          // If the container doesn't exist or is inaccessible, you can handle it here
-          console.warn(`Error fetching blobs for ${containerName}: ${(e as Error).message}`);
-        }
+      // Call our Node server endpoint (assumes same domain; adjust if different)
+      const response = await fetch('http://localhost:8080/api/blobs');
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }
 
-      setBlobsByContainer(newBlobsByContainer);
+      // This should return an object: { bronze: [...], silver: [...], gold: [...] }
+      const data = await response.json();
+      setBlobsByContainer(data);
     } catch (err: any) {
       console.error('Error fetching blobs:', err);
       setError(`Error: ${err.message || 'Unknown error'}`);
@@ -96,7 +65,6 @@ const BlobList: React.FC = () => {
         </Typography>
       )}
 
-      {/* Render a single "tile" (Card) per container */}
       {CONTAINER_NAMES.map((containerName) => {
         const blobNames = blobsByContainer[containerName] || [];
         return (
@@ -105,14 +73,16 @@ const BlobList: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Container: {containerName}
               </Typography>
-
               {blobNames.length === 0 ? (
                 <Typography variant="body2">No files present</Typography>
               ) : (
                 <List dense>
                   {blobNames.map((blobName) => (
                     <ListItem key={blobName} disablePadding>
-                      <ListItemText primary={blobName} primaryTypographyProps={{ align: 'center' }} />
+                      <ListItemText
+                        primary={blobName}
+                        primaryTypographyProps={{ align: 'center' }}
+                      />
                     </ListItem>
                   ))}
                 </List>
