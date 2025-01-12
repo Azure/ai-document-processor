@@ -27,12 +27,12 @@ app.get('/api/blobs', async (req, res) => {
     const credential = new DefaultAzureCredential();
     const scope = "https://management.azure.com/.default";
   
-  // Obtain the token (returns an AccessToken object with 'token' and 'expiresOnTimestamp')
+    // Obtain the token (returns an AccessToken object with 'token' and 'expiresOnTimestamp')
     const tokenResponse = await credential.getToken(scope);
     console.log('Token acquired:', tokenResponse.token);
     const decoded = jwtDecode(tokenResponse.token);
 
-  // Typically, the 'oid' field in the payload is the object ID of the principal
+    // Typically, the 'oid' field in the payload is the object ID of the principal
     console.log("Decoded token payload:", decoded);
     console.log("Principal (object) ID:", decoded.oid || decoded.sub || "Not found");
 

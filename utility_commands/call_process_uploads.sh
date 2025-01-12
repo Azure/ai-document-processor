@@ -1,0 +1,1 @@
+curl -X POST -v https://functionapp-env-1-10-f2edifarji5iq.azurewebsites.net/api/process_uploads?code=vP9-mam4o04-GaJzOsjeI-PFzRZvHTq-cNK6PTfIofuiAzFu2P0H4Q%3D%3D -H "Content-Type: application/json" -d '{"name": "test"}'

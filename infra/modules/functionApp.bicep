@@ -18,6 +18,8 @@ param appInsightsLocation string
 @description('The language worker runtime to load in the function app.')
 param runtime string = 'python'
 
+param fileStorageName string
+
 var functionAppName = appName
 var hostingPlanName = appName
 var applicationInsightsName = appName
@@ -61,6 +63,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
+      cors: {allowedOrigins: ['https://ms.portal.azure.com'] }
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
@@ -89,6 +92,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: functionWorkerRuntime
+        }
+        {
+          name: 'BLOB_ENDPOINT'
+          value: 'https://${fileStorageName}.blob.${environment().suffixes.storage}'
         }
       ]
       ftpsState: 'FtpsOnly'
@@ -139,3 +146,10 @@ resource goldContainer 'Microsoft.Storage/storageAccounts/blobServices/container
     publicAccess: 'None'
   }
 }
+
+output id string = functionApp.id
+output name string = functionApp.name
+output uri string = 'https://${functionApp.properties.defaultHostName}'
+output identityPrincipalId string = functionApp.identity.principalId
+output location string = functionApp.location
+output storageAccountName string = storageAccount.name
