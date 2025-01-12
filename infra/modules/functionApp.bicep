@@ -64,7 +64,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
-      cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com'] }
+      cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com', 'https://portal.azure.com'] }
       alwaysOn: true
       appSettings: [
         {
@@ -102,6 +102,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'BLOB_ENDPOINT'
           value: 'https://${fileStorageName}.blob.${environment().suffixes.storage}'
+        }
+        {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
         }
         {
           name: 'ENABLE_ORYX_BUILD'

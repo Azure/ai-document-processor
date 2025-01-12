@@ -28,7 +28,7 @@ const PromptEditor: React.FC = () => {
 
     try {
       const blobServiceClient = new BlobServiceClient(
-        'https://azfunctionsyziy6wu4gytru.blob.core.windows.net/?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiyx&se=2025-01-10T23:49:27Z&st=2024-12-30T15:49:27Z&spr=https&sig=4fYol8kPrccqzrAF%2Fy1EgF9TbPuY82qmn%2F%2FebG8RpwA%3D'
+        ''
       );
       const containerClient = blobServiceClient.getContainerClient(containerName);
       const blobClient = containerClient.getBlobClient(blobName);
