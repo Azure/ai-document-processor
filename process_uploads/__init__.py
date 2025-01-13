@@ -23,26 +23,26 @@ def extract_text_from_docx(blob_name):
   return text
 
 
-def call_whisper(blob_name):
-  audio_content = get_blob_content("bronze", blob_name)
+# def call_whisper(blob_name):
+#   audio_content = get_blob_content("bronze", blob_name)
   
-  credential = DefaultAzureCredential()
+#   credential = DefaultAzureCredential()
 
-  token = credential.get_token("https://openai.azure.com/.default").token
-  client = AzureOpenAI(
-      azure_ad_token=token,
-      api_version="2024-02-01",
-      azure_endpoint = os.getenv("OPENAI_API_BASE")
-  )
+#   token = credential.get_token("https://openai.azure.com/.default").token
+#   client = AzureOpenAI(
+#       azure_ad_token=token,
+#       api_version="2024-02-01",
+#       azure_endpoint = os.getenv("OPENAI_API_BASE")
+#   )
 
-  deployment_id = "whisper" #This will correspond to the custom name you chose for your deployment when you deployed a model."
+#   deployment_id = "whisper" #This will correspond to the custom name you chose for your deployment when you deployed a model."
 
-  result = client.audio.transcriptions.create(
-      file=audio_content,            
-      model=deployment_id
-  )
+#   result = client.audio.transcriptions.create(
+#       file=audio_content,            
+#       model=deployment_id
+#   )
 
-  print(result)
+#   print(result)
 
 def main(req: func.HttpRequest):
   logging.info('Python HTTP trigger function processed a request.')
@@ -60,6 +60,6 @@ def main(req: func.HttpRequest):
 
     elif blob_name.endswith((".mp3", ".m4a", ".wav", ".mp4" ".aac")):
       logging.info(f"Audio: {blob_name}")
-      response=call_whisper(blob_name)
-      sourcefile = os.path.splitext(os.path.basename(blob_name))[0]
-      write_to_blob(f"silver", f"{month}/{date}/{sourcefile}.txt", response.text)
+      # response=call_whisper(blob_name)
+      # sourcefile = os.path.splitext(os.path.basename(blob_name))[0]
+      # write_to_blob(f"silver", f"{month}/{date}/{sourcefile}.txt", response.text)

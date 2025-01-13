@@ -45,17 +45,18 @@ module aoai './modules/aoai.bicep' = {
   name: 'aoaiModule'
 }
 
-module functionStorageAccess './modules/rbac/blob-contributor.bicep' = {
+module functionStorageAccess './modules/rbac/blob-dataowner.bicep' = {
   name: 'functionstorage-access'
+  scope: resourceGroup()
   params: {
     resourceName: functionApp.outputs.storageAccountName
-    principalId: functionApp.outputs.identityPrincipalId
+    principalID: functionApp.outputs.identityPrincipalId
   }
 }
 
-
 module fileStorageAccess './modules/rbac/blob-contributor.bicep' = {
   name: 'blobstorage-access'
+  scope: resourceGroup()
   params: {
     resourceName: fileStorage.outputs.name
     principalId: functionApp.outputs.identityPrincipalId

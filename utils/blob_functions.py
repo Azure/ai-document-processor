@@ -18,7 +18,6 @@ def write_to_blob(container_name, blob_path, data):
 def get_blob_content(container_name, blob_path):
 
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_path)
-
     # Download the blob content
     blob_content = blob_client.download_blob().readall()
     return blob_content

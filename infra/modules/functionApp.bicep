@@ -63,11 +63,15 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
-      cors: {allowedOrigins: ['https://ms.portal.azure.com'] }
+      cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com'] }
       appSettings: [
         {
-          name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+          name: 'AzureWebJobsStorage__accountName'
+          value: storageAccount.name
+        }
+        {
+          name: 'AzureWebJobsStorage__credential'
+          value: 'managedidentity'
         }
         {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
@@ -97,11 +101,15 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           name: 'BLOB_ENDPOINT'
           value: 'https://${fileStorageName}.blob.${environment().suffixes.storage}'
         }
+        {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
+        }
       ]
       ftpsState: 'FtpsOnly'
       linuxFxVersion: 'Python|3.11'
       minTlsVersion: '1.2'
-    }
+    }  
     httpsOnly: true
   }
 }
