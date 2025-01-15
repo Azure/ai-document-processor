@@ -42,12 +42,13 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   name: hostingPlanName
   location: location
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
+    name: 'P0v3'
+    capacity: 1
   }
   properties: {
     reserved: true
   }
+  kind: 'linux'
 }
 
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
@@ -64,6 +65,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
     serverFarmId: hostingPlan.id
     siteConfig: {
       cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com'] }
+      alwaysOn: true
       appSettings: [
         {
           name: 'AzureWebJobsStorage__accountName'
@@ -73,22 +75,22 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           name: 'AzureWebJobsStorage__credential'
           value: 'managedidentity'
         }
-        {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
-        }
-        {
-          name: 'WEBSITE_CONTENTSHARE'
-          value: toLower(functionAppName)
-        }
+        // {
+        //   name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+        //   value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+        // }
+        // {
+        //   name: 'WEBSITE_CONTENTSHARE'
+        //   value: toLower(functionAppName)
+        // }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
         }
-        {
-          name: 'WEBSITE_NODE_DEFAULT_VERSION'
-          value: '~14'
-        }
+        // {
+        //   name: 'WEBSITE_NODE_DEFAULT_VERSION'
+        //   value: '~14'
+        // }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: applicationInsights.properties.InstrumentationKey
@@ -102,8 +104,12 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: 'https://${fileStorageName}.blob.${environment().suffixes.storage}'
         }
         {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: '1'
+          name: 'ENABLE_ORYX_BUILD'
+          value: 'true'
+        }
+        {
+          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+          value: 'true'
         }
       ]
       ftpsState: 'FtpsOnly'

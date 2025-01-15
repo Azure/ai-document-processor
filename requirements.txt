@@ -1,5 +1,6 @@
 annotated-types==0.7.0
 anyio==4.6.0
+azure-ai-documentintelligence==1.0.0b4
 azure-ai-textanalytics==5.2.0
 azure-cognitiveservices-speech==1.41.1
 azure-common==1.1.28
@@ -7,12 +8,14 @@ azure-core==1.31.0
 azure-functions==1.21.0
 azure-identity==1.18.0
 azure-keyvault-secrets==4.9.0
+azure-search-documents==11.5.2
 azure-storage-blob==12.23.1
 certifi==2024.8.30
 cffi==1.17.1
 charset-normalizer==3.3.2
 cryptography==43.0.1
 distro==1.9.0
+docx==0.2.4
 exceptiongroup==1.2.2
 h11==0.14.0
 httpcore==1.0.5
@@ -26,12 +29,15 @@ msal-extensions==1.2.0
 msrest==0.7.1
 oauthlib==3.2.2
 openai==1.50.2
+pillow==11.0.0
 portalocker==2.10.1
 pycparser==2.22
 pydantic==2.9.2
 pydantic_core==2.23.4
 PyJWT==2.9.0
+PyMuPDF==1.25.1
 python-docx==1.1.2
+python-dotenv==1.0.1
 requests==2.32.3
 requests-oauthlib==2.0.0
 six==1.16.0
