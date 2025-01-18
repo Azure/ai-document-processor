@@ -64,11 +64,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
-<<<<<<< HEAD
       cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com', 'https://portal.azure.com'] }
-=======
-      cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com'] }
->>>>>>> 850f067 (updates)
       alwaysOn: true
       appSettings: [
         {
