@@ -59,7 +59,7 @@ def main(req: func.HttpRequest):
         logging.info(f"PDF: {blob_name}")
         text = extract_text_from_pdf(blob_name)
         sourcefile = os.path.splitext(os.path.basename(blob_name))[0]
-        write_to_blob(f"silver", f"{month}/{date}/{sourcefile}.txt", text)
+        write_to_blob(f"silver", f"{sourcefile}.txt", text)
 
       else:
         logging.info(f"Other File {blob_name}")

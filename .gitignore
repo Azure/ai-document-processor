@@ -39,7 +39,7 @@ transcribe/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
-
+utility_commands
 # Unit test / coverage reports
 htmlcov/
 .tox/
@@ -137,3 +137,4 @@ __queuestorage__
 __azurite_db*__.json
 .python_packages
 .azure
+remote_appsettings.json

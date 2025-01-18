@@ -3,7 +3,8 @@ import logging
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
-BLOB_ENDPOINT=os.getenv("BLOB_ENDPOINT")
+ACCOUNT_NAME = os.getenv("AzureWebJobsStorage__accountName")
+BLOB_ENDPOINT=f"https://{ACCOUNT_NAME}.blob.core.windows.net"
     
 blob_credential = DefaultAzureCredential()  # Uses managed identity or local login
 blob_service_client = BlobServiceClient(account_url=BLOB_ENDPOINT, credential=blob_credential)

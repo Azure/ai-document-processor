@@ -64,7 +64,11 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
+<<<<<<< HEAD
       cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com', 'https://portal.azure.com'] }
+=======
+      cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com'] }
+>>>>>>> 850f067 (updates)
       alwaysOn: true
       appSettings: [
         {
@@ -75,22 +79,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           name: 'AzureWebJobsStorage__credential'
           value: 'managedidentity'
         }
-        // {
-        //   name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-        //   value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
-        // }
-        // {
-        //   name: 'WEBSITE_CONTENTSHARE'
-        //   value: toLower(functionAppName)
-        // }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
         }
-        // {
-        //   name: 'WEBSITE_NODE_DEFAULT_VERSION'
-        //   value: '~14'
-        // }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: applicationInsights.properties.InstrumentationKey
@@ -104,8 +96,16 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: 'https://${fileStorageName}.blob.${environment().suffixes.storage}'
         }
         {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: '1'
+          name: 'PROMPT_FILE'
+          value: 'prompt.yaml'
+        }
+        {
+          name: 'ENABLE_ORYX_BUILD'
+          value: 'true'
+        }
+        {
+          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+          value: 'true'
         }
         {
           name: 'ENABLE_ORYX_BUILD'

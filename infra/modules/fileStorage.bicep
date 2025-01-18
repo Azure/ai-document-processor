@@ -46,5 +46,13 @@ resource goldContainer 'Microsoft.Storage/storageAccounts/blobServices/container
   }
 }
 
+resource promptContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+  parent: blobService
+  name: 'prompts'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
 output name string = storageAccount.name
 output id string = storageAccount.id

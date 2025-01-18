@@ -62,3 +62,8 @@ module fileStorageAccess './modules/rbac/blob-contributor.bicep' = {
     principalId: functionApp.outputs.identityPrincipalId
   }
 }
+
+output RESOURCE_GROUP string = resourceGroup().name
+output FUNCTION_APP_NAME string = functionApp.outputs.name
+output AZURE_STORAGE_ACCOUNT string = functionApp.outputs.storageAccountName
+output functionUrl string = functionApp.outputs.uri

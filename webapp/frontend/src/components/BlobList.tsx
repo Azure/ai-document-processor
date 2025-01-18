@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, CardContent, Typography, Box, List, ListItem, ListItemText } from '@mui/material';
+import { Button, Card, CardContent, Typography, Box, List, ListItem, ListItemText, Link } from '@mui/material';
 
 const CONTAINER_NAMES = ['bronze', 'silver', 'gold'];
 
+const functionUrl = ""
+
+interface BlobItem {
+  name: string;
+  url: string;
+}
+
 const BlobList: React.FC = () => {
-  const [blobsByContainer, setBlobsByContainer] = useState<Record<string, string[]>>({
+  const [blobsByContainer, setBlobsByContainer] = useState<Record<string, BlobItem[]>>({
     bronze: [],
     silver: [],
     gold: [],
@@ -18,14 +25,14 @@ const BlobList: React.FC = () => {
     setError(null);
 
     try {
-      // Call our Node server endpoint (assumes same domain; adjust if different)
-      const response = await fetch('http://localhost:8080/api/blobs');
+      const response = await fetch(functionUrl); // Adjust API URL if needed
+      console.log("response", response)
+
       if (!response.ok) {
         throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }
 
-      // This should return an object: { bronze: [...], silver: [...], gold: [...] }
-      const data = await response.json();
+      const data: Record<string, BlobItem[]> = await response.json();
       setBlobsByContainer(data);
     } catch (err: any) {
       console.error('Error fetching blobs:', err);
@@ -39,22 +46,13 @@ const BlobList: React.FC = () => {
     fetchBlobsFromAllContainers();
   }, []);
 
-  const handleRefresh = () => {
-    fetchBlobsFromAllContainers();
-  };
-
   return (
     <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
       <Typography variant="h5" gutterBottom>
         Blob Viewer
       </Typography>
       <Box marginBottom={2}>
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleRefresh}
-          disabled={loading}
-        >
+        <Button variant="contained" color="secondary" onClick={fetchBlobsFromAllContainers} disabled={loading}>
           {loading ? 'Refreshing...' : 'Refresh'}
         </Button>
       </Box>
@@ -66,21 +64,25 @@ const BlobList: React.FC = () => {
       )}
 
       {CONTAINER_NAMES.map((containerName) => {
-        const blobNames = blobsByContainer[containerName] || [];
+        const blobItems = blobsByContainer[containerName] || [];
         return (
           <Card key={containerName} sx={{ marginBottom: 2 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Container: {containerName}
               </Typography>
-              {blobNames.length === 0 ? (
+              {blobItems.length === 0 ? (
                 <Typography variant="body2">No files present</Typography>
               ) : (
                 <List dense>
-                  {blobNames.map((blobName) => (
-                    <ListItem key={blobName} disablePadding>
+                  {blobItems.map((blob) => (
+                    <ListItem key={blob.name} disablePadding>
                       <ListItemText
-                        primary={blobName}
+                        primary={
+                          <Link href={blob.url} target="_blank" rel="noopener noreferrer">
+                            {blob.name}
+                          </Link>
+                        }
                         primaryTypographyProps={{ align: 'center' }}
                       />
                     </ListItem>

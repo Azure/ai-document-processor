@@ -1,28 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { BlobServiceClient } from '@azure/storage-blob';
 
-// Shape of your prompts file (adjust to match your JSON structure)
 interface Prompts {
-  prompt1: string;
-  prompt2: string;
+  [key: string]: string; // Allows dynamic key-value pairs
 }
+const functionUrl = ""
 
-const containerName = 'prompts';      // Adjust as needed
-const blobName = 'prompts.json';      // The blob storing your prompts
+// const functionUrl = "https://<your-function-app>.azurewebsites.net/api/getPrompts"; // Replace with your function URL
 
 const PromptEditor: React.FC = () => {
-  const [prompts, setPrompts] = useState<Prompts>({ prompt1: '', prompt2: '' });
+  const [prompts, setPrompts] = useState<Prompts>({});
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Fetch prompts from the blob when component mounts
+  // Fetch prompts from the Azure Function
   useEffect(() => {
-    fetchPromptsFromBlob();
+    fetchPrompts();
   }, []);
 
-  // Download the prompts blob and parse the JSON
-  const fetchPromptsFromBlob = async () => {
+  const fetchPrompts = async () => {
     setLoading(true);
     setErrorMessage(null);
 
@@ -32,24 +28,23 @@ const PromptEditor: React.FC = () => {
       );
       const containerClient = blobServiceClient.getContainerClient(containerName);
       const blobClient = containerClient.getBlobClient(blobName);
+      const response = await fetch(functionUrl);
 
-      // Download the blob
-      const downloadResponse = await blobClient.download();
-      const blobData = await downloadResponse.blobBody;
-      const textData = await blobData?.text();
-      if (textData) {
-        const parsedPrompts = JSON.parse(textData);
-        setPrompts(parsedPrompts);
+      if (!response.ok) {
+        throw new Error(`Error fetching prompts: ${response.statusText}`);
       }
+
+      const data: Prompts = await response.json();
+      setPrompts(data);
     } catch (error: any) {
-      setErrorMessage(`Error fetching prompts: ${error.message}`);
+      setErrorMessage(error.message || "Unknown error occurred");
     } finally {
       setLoading(false);
     }
   };
 
   const handleRefresh = () => {
-    fetchPromptsFromBlob();
+    fetchPrompts();
   };
 
   return (
@@ -72,15 +67,18 @@ const PromptEditor: React.FC = () => {
       {loading && <Typography>Loading...</Typography>}
       {errorMessage && <Typography color="error">{errorMessage}</Typography>}
 
-      {!loading && !errorMessage && (
-        <>
-          <Typography variant="body1">
-            <strong>Prompt 1:</strong> {prompts.prompt1}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Prompt 2:</strong> {prompts.prompt2}
-          </Typography>
-        </>
+      {!loading && !errorMessage && Object.keys(prompts).length > 0 && (
+        <Box>
+          {Object.entries(prompts).map(([key, value]) => (
+            <Typography key={key} variant="body1">
+              <strong>{key}:</strong> {value}
+            </Typography>
+          ))}
+        </Box>
+      )}
+
+      {!loading && !errorMessage && Object.keys(prompts).length === 0 && (
+        <Typography>No prompts available</Typography>
       )}
     </div>
   );

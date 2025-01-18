@@ -13,3 +13,4 @@ whisper
 transcribe
 call*
 process_*
+utility_commands
