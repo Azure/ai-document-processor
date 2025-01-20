@@ -1,2 +1,0 @@
-az functionapp log deployment show --name functionapp-new-env-1-12-an2sevgsxcrdi --resource-group llm-doc-1-12 --output table
-# az functionapp log deployment list --name functionapp-env-1-10-f2edifarji5iq --resource-group llm-processing-1-10

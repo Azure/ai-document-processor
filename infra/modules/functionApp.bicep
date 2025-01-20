@@ -103,14 +103,6 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
           value: 'true'
         }
-        {
-          name: 'ENABLE_ORYX_BUILD'
-          value: 'true'
-        }
-        {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'true'
-        }
       ]
       ftpsState: 'FtpsOnly'
       linuxFxVersion: 'Python|3.11'

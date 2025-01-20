@@ -3,6 +3,7 @@ param location string = 'eastus'
 param appInsightsLocation string = 'eastus'
 param environmentName string = 'dev'
 param functionAppName string = 'functionapp-${environmentName}-${uniqueString(resourceGroup().id)}'
+param userPrincipalId string = '133c73f8-b870-4c8a-943f-6b45407eb121'
 
 var fileStorageName = 'storage${uniqueString(resourceGroup().id)}'
 
@@ -63,7 +64,18 @@ module fileStorageAccess './modules/rbac/blob-contributor.bicep' = {
   }
 }
 
+
+resource functionAppContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().subscriptionId, resourceGroup().name, functionApp.name, 'contributor')
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c') // Contributor Role ID
+    principalId: userPrincipalId
+    principalType: 'User'  // Your User Object ID
+  }
+}
+
 output RESOURCE_GROUP string = resourceGroup().name
 output FUNCTION_APP_NAME string = functionApp.outputs.name
 output AZURE_STORAGE_ACCOUNT string = functionApp.outputs.storageAccountName
-output functionUrl string = functionApp.outputs.uri
+output FUNCTION_URL string = functionApp.outputs.uri
