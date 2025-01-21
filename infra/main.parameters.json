@@ -8,9 +8,6 @@
       "location": {
         "value": "${AZURE_LOCATION}"
       },
-      "functionApp": {
-        "value": "${AZURE_FUNCTION_APP}"
-      },
       "storageAccountName": {
         "value": "${AZURE_STORAGE_ACCOUNT}"
       },

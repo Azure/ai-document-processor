@@ -18,20 +18,20 @@ module functionApp './modules/functionApp.bicep' = {
   }
 }
 
-module fileStorage './modules/fileStorage.bicep' = {
-  name: 'fileStorageModule'
-  params: {
-    storageAccountName: fileStorageName
-    location: location
-  }
-}
+// module fileStorage './modules/fileStorage.bicep' = {
+//   name: 'fileStorageModule'
+//   params: {
+//     storageAccountName: fileStorageName
+//     location: location
+//   }
+// }
 
-module searchService './modules/searchService.bicep' = {
-  name: 'searchServiceModule'
-  params: {
-    searchServiceName: 'searchservice-${uniqueString(resourceGroup().id)}'
-  }
-}
+// module searchService './modules/searchService.bicep' = {
+//   name: 'searchServiceModule'
+//   params: {
+//     searchServiceName: 'searchservice-${uniqueString(resourceGroup().id)}'
+//   }
+// }
 
 module keyVault './modules/keyVault.bicep' = {
   name: 'keyVaultModule'
@@ -55,14 +55,14 @@ module functionStorageAccess './modules/rbac/blob-dataowner.bicep' = {
   }
 }
 
-module fileStorageAccess './modules/rbac/blob-contributor.bicep' = {
-  name: 'blobstorage-access'
-  scope: resourceGroup()
-  params: {
-    resourceName: fileStorage.outputs.name
-    principalId: functionApp.outputs.identityPrincipalId
-  }
-}
+// module fileStorageAccess './modules/rbac/blob-contributor.bicep' = {
+//   name: 'blobstorage-access'
+//   scope: resourceGroup()
+//   params: {
+//     resourceName: fileStorage.outputs.name
+//     principalId: functionApp.outputs.identityPrincipalId
+//   }
+// }
 
 
 resource functionAppContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {

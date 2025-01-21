@@ -4,7 +4,6 @@ __azurite_db*__.json
 __blobstorage__
 __queuestorage__
 local.settings.json
-test
 .venv
 azurite
 service_principal
@@ -14,3 +13,5 @@ transcribe
 call*
 process_*
 utility_commands
+get*
+process*
