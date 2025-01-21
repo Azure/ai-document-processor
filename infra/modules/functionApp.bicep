@@ -157,6 +157,14 @@ resource goldContainer 'Microsoft.Storage/storageAccounts/blobServices/container
   }
 }
 
+resource promptContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+  parent: blobService
+  name: 'prompts'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
 output id string = functionApp.id
 output name string = functionApp.name
 output uri string = 'https://${functionApp.properties.defaultHostName}'

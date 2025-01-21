@@ -1,7 +1,7 @@
 import azure.functions as func
 import logging
-import fitz
 from docx import Document
+import fitz
 from utils.blob_functions import list_blobs, get_blob_content, write_to_blob
 from utils import get_month_date
 import io
