@@ -3,7 +3,7 @@ param location string = 'eastus'
 param appInsightsLocation string = 'eastus'
 param environmentName string = 'dev'
 param functionAppName string = 'functionapp-${environmentName}-${uniqueString(resourceGroup().id)}'
-param userPrincipalId string = '133c73f8-b870-4c8a-943f-6b45407eb121'
+param userPrincipalId string
 
 var fileStorageName = 'storage${uniqueString(resourceGroup().id)}'
 
