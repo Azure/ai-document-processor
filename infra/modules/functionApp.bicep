@@ -17,6 +17,7 @@ param appInsightsLocation string
 
 @description('The language worker runtime to load in the function app.')
 param runtime string = 'python'
+param aoaiEndpoint string
 
 param fileStorageName string
 
@@ -104,8 +105,16 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: 'true'
         }
         {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: '1'
+          name: 'OPENAI_API_VERSION'
+          value: '2024-05-01-preview'
+        }
+        {
+          name: 'OPENAI_API_BASE'
+          value: aoaiEndpoint
+        }
+        {
+          name: 'OPENAI_MODEL'
+          value: 'gpt-4o'
         }
       ]
       ftpsState: 'FtpsOnly'

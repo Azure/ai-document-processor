@@ -7,16 +7,6 @@ param userPrincipalId string
 
 var fileStorageName = 'storage${uniqueString(resourceGroup().id)}'
 
-// Pass resources to functionApp module
-module functionApp './modules/functionApp.bicep' = {
-  name: 'functionAppModule'
-  params: {
-    appName: functionAppName
-    location: location
-    appInsightsLocation: appInsightsLocation
-    fileStorageName: fileStorageName
-  }
-}
 
 // module fileStorage './modules/fileStorage.bicep' = {
 //   name: 'fileStorageModule'
@@ -45,6 +35,20 @@ module keyVault './modules/keyVault.bicep' = {
 module aoai './modules/aoai.bicep' = {
   name: 'aoaiModule'
 }
+
+
+// Pass resources to functionApp module
+module functionApp './modules/functionApp.bicep' = {
+  name: 'functionAppModule'
+  params: {
+    appName: functionAppName
+    location: location
+    appInsightsLocation: appInsightsLocation
+    fileStorageName: fileStorageName
+    aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
+  }
+}
+
 
 module functionStorageAccess './modules/rbac/blob-dataowner.bicep' = {
   name: 'functionstorage-access'

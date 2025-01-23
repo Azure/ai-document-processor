@@ -24,3 +24,5 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
     // restore: true
   }
 }
+
+output AOAI_ENDPOINT string = account.properties.endpoint
