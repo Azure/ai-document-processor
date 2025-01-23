@@ -10,8 +10,4 @@ service_principal
 transcribe/
 whisper
 transcribe
-call*
-process_*
 utility_commands
-get*
-process*
