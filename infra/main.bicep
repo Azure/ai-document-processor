@@ -55,6 +55,15 @@ module functionStorageAccess './modules/rbac/blob-dataowner.bicep' = {
   }
 }
 
+module functionQueueAccess './modules/rbac/blob-queue-contributor.bicep' = {
+  name: 'functionqueue-access'
+  scope: resourceGroup()
+  params: {
+    resourceName: functionApp.outputs.storageAccountName
+    principalId: functionApp.outputs.identityPrincipalId
+  }
+}
+
 // module fileStorageAccess './modules/rbac/blob-contributor.bicep' = {
 //   name: 'blobstorage-access'
 //   scope: resourceGroup()
@@ -74,6 +83,8 @@ resource functionAppContributorRole 'Microsoft.Authorization/roleAssignments@202
     principalType: 'User'  // Your User Object ID
   }
 }
+
+
 
 output RESOURCE_GROUP string = resourceGroup().name
 output FUNCTION_APP_NAME string = functionApp.outputs.name
