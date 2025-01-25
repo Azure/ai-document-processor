@@ -3,7 +3,10 @@ import { Button, Card, CardContent, Typography, Box, List, ListItem, ListItemTex
 
 const CONTAINER_NAMES = ['bronze', 'silver', 'gold'];
 
-const functionUrl = `${process.env.FUNCTION_URL}/api/getBlobsByContainer`;
+const baseFunctionUrl = process.env.FUNCTION_URL;
+console.log("baseFunctionUrl", baseFunctionUrl)
+
+const functionUrl = `${baseFunctionUrl}/api/getBlobsByContainer`;
 
 interface BlobItem {
   name: string;
