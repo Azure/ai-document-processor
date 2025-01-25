@@ -24,7 +24,7 @@ resource vault_resource 'Microsoft.KeyVault/vaults@2024-04-01-preview' = {
     enableSoftDelete: true
     softDeleteRetentionInDays: 90
     enableRbacAuthorization: true
-    vaultUri: 'https://${vaultName}.vault.azure.net/'
+    vaultUri: 'https://${vaultName}${environment().suffixes.keyvaultDns}/'
     provisioningState: 'Succeeded'
     publicNetworkAccess: 'Enabled'
   }

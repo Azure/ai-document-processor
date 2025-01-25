@@ -27,6 +27,14 @@ var applicationInsightsName = appName
 var storageAccountName = 'azfunctions${uniqueString(resourceGroup().id)}'
 var functionWorkerRuntime = runtime
 
+var blobEndpoint = 'https://${fileStorageName}.blob.${environment().suffixes.storage}'
+var promptFile = 'prompts.yaml'
+// var enableOryxBuild = 'true'
+// var scmDoBuildDuringDeployment = 'true'
+var openaiApiVersion = '2024-05-01-preview'
+var openaiApiBase = aoaiEndpoint
+var openaiModel = 'gpt-4o'
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
   location: location
@@ -90,11 +98,11 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         }
         {
           name: 'BLOB_ENDPOINT'
-          value: 'https://${fileStorageName}.blob.${environment().suffixes.storage}'
+          value: blobEndpoint
         }
         {
           name: 'PROMPT_FILE'
-          value: 'prompt.yaml'
+          value: promptFile
         }
         {
           name: 'ENABLE_ORYX_BUILD'
@@ -106,7 +114,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         }
         {
           name: 'OPENAI_API_VERSION'
-          value: '2024-05-01-preview'
+          value: openaiApiVersion
         }
         {
           name: 'OPENAI_API_BASE'
@@ -114,7 +122,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         }
         {
           name: 'OPENAI_MODEL'
-          value: 'gpt-4o'
+          value: openaiModel
         }
       ]
       ftpsState: 'FtpsOnly'
@@ -180,3 +188,9 @@ output uri string = 'https://${functionApp.properties.defaultHostName}'
 output identityPrincipalId string = functionApp.identity.principalId
 output location string = functionApp.location
 output storageAccountName string = storageAccount.name
+output blobEndpoint string = blobEndpoint
+output promptFile string = promptFile
+output openaiApiVersion string = openaiApiVersion
+output openaiApiBase string = openaiApiBase
+output openaiModel string = openaiModel
+output functionWorkerRuntime string = functionWorkerRuntime

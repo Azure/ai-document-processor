@@ -78,7 +78,7 @@ module functionQueueAccess './modules/rbac/blob-queue-contributor.bicep' = {
 // }
 
 
-resource functionAppContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource functionAppContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
   name: guid(subscription().subscriptionId, resourceGroup().name, functionApp.name, 'contributor')
   scope: resourceGroup()
   properties: {
@@ -94,3 +94,9 @@ output RESOURCE_GROUP string = resourceGroup().name
 output FUNCTION_APP_NAME string = functionApp.outputs.name
 output AZURE_STORAGE_ACCOUNT string = functionApp.outputs.storageAccountName
 output FUNCTION_URL string = functionApp.outputs.uri
+output BLOB_ENDPOINT string = functionApp.outputs.blobEndpoint
+output PROMPT_FILE string = functionApp.outputs.promptFile
+output OPENAI_API_VERSION string = functionApp.outputs.openaiApiVersion
+output OPENAI_API_BASE string = functionApp.outputs.openaiApiBase
+output OPENAI_MODEL string = functionApp.outputs.openaiModel
+output FUNCTIONS_WORKER_RUNTIME string = functionApp.outputs.functionWorkerRuntime

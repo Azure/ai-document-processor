@@ -8,11 +8,7 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL")
 OPENAI_API_VERSION = os.getenv("OPENAI_API_VERSION")
 OPENAI_API_EMBEDDING_MODEL = os.getenv("OPENAI_API_EMBEDDING_MODEL")
 
-credential = DefaultAzureCredential()
-token_provider = get_bearer_token_provider(  
-    DefaultAzureCredential(),  
-    "https://cognitiveservices.azure.com/.default"  
-)  
+
 
 def get_embeddings(text):
     
@@ -31,8 +27,16 @@ def get_embeddings(text):
 
 
 def run_prompt(prompt,system_prompt):
+    credential = DefaultAzureCredential()
+    token_provider = get_bearer_token_provider(  
+        DefaultAzureCredential(),  
+        "https://cognitiveservices.azure.com/.default"  
+    )  
+
+    
     openai_client = AzureOpenAI(
-            azure_ad_token=token_provider,
+
+            azure_ad_token=credential.get_token("https://cognitiveservices.azure.com/.default").token,
             api_version = OPENAI_API_VERSION,
             azure_endpoint =OPENAI_API_BASE
             )

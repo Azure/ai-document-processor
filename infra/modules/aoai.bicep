@@ -9,7 +9,13 @@ param location string = resourceGroup().location
 ])
 param sku string = 'S0'
 
-resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+@description('Azure OpenAI model deployment name.')
+param deploymentName string = 'gpt-4o'
+
+@description('Azure OpenAI model name, e.g. "gpt-35-turbo".')
+param modelName string = 'gpt-4o'
+
+resource openAIAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: aiServicesName
   location: location
   identity: {
@@ -18,11 +24,28 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   sku: {
     name: sku
   }
-  kind: 'AIServices'
+  kind: 'OpenAI'
   properties: {
     publicNetworkAccess: 'Enabled'
     // restore: true
   }
 }
 
-output AOAI_ENDPOINT string = account.properties.endpoint
+resource openAIDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+  name: deploymentName
+  parent: openAIAccount
+  sku: {
+    name: 'Standard'
+    capacity: 40
+
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: modelName
+      // version: '0301' // Optionally specify version
+    }
+  }
+}
+
+output AOAI_ENDPOINT string = openAIAccount.properties.endpoint
