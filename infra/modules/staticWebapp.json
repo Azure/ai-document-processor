@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "staticSites_doc_processing_static_webapp_name": {
+          "defaultValue": "doc-processing-static-webapp",
+          "type": "String"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.Web/staticSites",
+          "apiVersion": "2024-04-01",
+          "name": "[parameters('staticSites_doc_processing_static_webapp_name')]",
+          "location": "East US 2",
+          "sku": {
+              "name": "Free",
+              "tier": "Free"
+          },
+          "properties": {
+              "repositoryUrl": "https://github.com/markremmey/llm-doc-processing",
+              "branch": "main",
+              "stagingEnvironmentPolicy": "Enabled",
+              "allowConfigFileUpdates": true,
+              "provider": "GitHub",
+              "enterpriseGradeCdnStatus": "Disabled"
+          }
+      },
+      {
+          "type": "Microsoft.Web/staticSites/basicAuth",
+          "apiVersion": "2024-04-01",
+          "name": "[concat(parameters('staticSites_doc_processing_static_webapp_name'), '/default')]",
+          "location": "East US 2",
+          "dependsOn": [
+              "[resourceId('Microsoft.Web/staticSites', parameters('staticSites_doc_processing_static_webapp_name'))]"
+          ],
+          "properties": {
+              "applicableEnvironmentsMode": "SpecifiedEnvironments"
+          }
+      }
+  ]
+}

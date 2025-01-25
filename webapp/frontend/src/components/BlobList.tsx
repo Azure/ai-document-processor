@@ -3,7 +3,7 @@ import { Button, Card, CardContent, Typography, Box, List, ListItem, ListItemTex
 
 const CONTAINER_NAMES = ['bronze', 'silver', 'gold'];
 
-const functionUrl = ""
+const functionUrl = `${process.env.FUNCTION_URL}/api/getBlobsByContainer`;
 
 interface BlobItem {
   name: string;
@@ -34,9 +34,10 @@ const BlobList: React.FC = () => {
 
       const data: Record<string, BlobItem[]> = await response.json();
       setBlobsByContainer(data);
-    } catch (err: any) {
-      console.error('Error fetching blobs:', err);
-      setError(`Error: ${err.message || 'Unknown error'}`);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Error: ${err.message || 'Unknown error'}`);
+      }
     } finally {
       setLoading(false);
     }

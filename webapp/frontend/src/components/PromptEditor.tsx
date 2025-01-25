@@ -4,8 +4,10 @@ import { Box, Button, Typography } from '@mui/material';
 interface Prompts {
   [key: string]: string; // Allows dynamic key-value pairs
 }
-const functionUrl = ""
 
+const functionUrl = `${process.env.FUNCTION_URL}/api/getPrompts`;
+// const containerName = "prompts"
+// const blobName = process.env.PROMPT_FILE
 // const functionUrl = "https://<your-function-app>.azurewebsites.net/api/getPrompts"; // Replace with your function URL
 
 const PromptEditor: React.FC = () => {
@@ -23,21 +25,27 @@ const PromptEditor: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const blobServiceClient = new BlobServiceClient(
-        ''
-      );
-      const containerClient = blobServiceClient.getContainerClient(containerName);
-      const blobClient = containerClient.getBlobClient(blobName);
+      // const blobServiceClient = new BlobServiceClient(
+      //   ''
+      // );
+      // const containerClient = blobServiceClient.getContainerClient(containerName);
+      // const blobClient = containerClient.getBlobClient(blobName);
+      
+      if (!functionUrl) {
+        throw new Error('Function URL is not set');
+      }
+      
       const response = await fetch(functionUrl);
-
       if (!response.ok) {
         throw new Error(`Error fetching prompts: ${response.statusText}`);
       }
 
       const data: Prompts = await response.json();
       setPrompts(data);
-    } catch (error: any) {
-      setErrorMessage(error.message || "Unknown error occurred");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message || "Unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }
