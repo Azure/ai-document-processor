@@ -3,7 +3,12 @@ param location string = 'eastus'
 param appInsightsLocation string = 'eastus'
 param environmentName string = 'dev'
 param functionAppName string = 'functionapp-${environmentName}-${uniqueString(resourceGroup().id)}'
+param staticWebAppName string = 'static-${environmentName}-${uniqueString(resourceGroup().id)}'
 param userPrincipalId string
+
+@description('Git repository URL for the Static Web App')
+param user_gh_url string
+
 
 var fileStorageName = 'storage${uniqueString(resourceGroup().id)}'
 
@@ -49,6 +54,15 @@ module functionApp './modules/functionApp.bicep' = {
   }
 }
 
+
+module staticWebApp './modules/staticWebapp-new.bicep' = {
+  name: 'staticWebAppModule'
+  params: {
+    staticWebAppName: 'static-web-app'
+    functionAppResourceId: functionApp.outputs.id
+    user_gh_url: user_gh_url
+  }
+}
 
 module functionStorageAccess './modules/rbac/blob-dataowner.bicep' = {
   name: 'functionstorage-access'

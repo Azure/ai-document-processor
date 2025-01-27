@@ -27,7 +27,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         prompts_json = json.dumps(prompts, indent=4)
 
         # Return JSON response
-        return func.HttpResponse(json.dumps(prompts_json), mimetype="application/json")
+        return func.HttpResponse(prompts_json, mimetype="application/json")
 
     except Exception as e:
         logging.error(f"Error fetching prompts: {str(e)}")

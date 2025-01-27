@@ -1,0 +1,506 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_functionapp_env_1_24_izzpsdxjdrpdm_name": {
+            "defaultValue": "functionapp-env-1-24-izzpsdxjdrpdm",
+            "type": "String"
+        },
+        "serverfarms_functionapp_env_1_24_izzpsdxjdrpdm_externalid": {
+            "defaultValue": "/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/llm-1-24/providers/Microsoft.Web/serverfarms/functionapp-env-1-24-izzpsdxjdrpdm",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2024-04-01",
+            "name": "[parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name')]",
+            "location": "East US",
+            "tags": {
+                "azd-service-name": "myfunctionapp"
+            },
+            "kind": "functionapp,linux",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[parameters('serverfarms_functionapp_env_1_24_izzpsdxjdrpdm_externalid')]",
+                "reserved": true,
+                "isXenon": false,
+                "hyperV": false,
+                "dnsConfiguration": {},
+                "vnetRouteAllEnabled": false,
+                "vnetImagePullEnabled": false,
+                "vnetContentShareEnabled": false,
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "linuxFxVersion": "Python|3.11",
+                    "acrUseManagedIdentityCreds": false,
+                    "alwaysOn": false,
+                    "http20Enabled": false,
+                    "functionAppScaleLimit": 0,
+                    "minimumElasticInstanceCount": 0
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": false,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "ipMode": "IPv4",
+                "vnetBackupRestoreEnabled": false,
+                "customDomainVerificationId": "799804A9311D5BE0A804FB20F417C8445751EEE55C6662A510C1720C57B460AF",
+                "containerSize": 1536,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true,
+                "endToEndEncryptionEnabled": false,
+                "redundancyMode": "None",
+                "storageAccountRequired": false,
+                "keyVaultReferenceIdentity": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/ftp')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "tags": {
+                "azd-service-name": "myfunctionapp"
+            },
+            "properties": {
+                "allow": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/scm')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "tags": {
+                "azd-service-name": "myfunctionapp"
+            },
+            "properties": {
+                "allow": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/web')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "tags": {
+                "azd-service-name": "myfunctionapp"
+            },
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "linuxFxVersion": "Python|3.11",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "acrUseManagedIdentityCreds": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "REDACTED",
+                "scmType": "None",
+                "use32BitWorkerProcess": false,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetRouteAllEnabled": false,
+                "vnetPrivatePortsCount": 0,
+                "cors": {
+                    "allowedOrigins": [
+                        "https://ms.portal.azure.com",
+                        "https://portal.azure.com"
+                    ],
+                    "supportCredentials": false
+                },
+                "localMySqlEnabled": false,
+                "managedServiceIdentityId": 15014,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "scmMinTlsVersion": "1.2",
+                "ftpsState": "FtpsOnly",
+                "preWarmedInstanceCount": 0,
+                "functionAppScaleLimit": 0,
+                "functionsRuntimeScaleMonitoringEnabled": false,
+                "minimumElasticInstanceCount": 0,
+                "azureStorageAccounts": {}
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/48b6b479-ddf5-461d-a6d3-4d80ff80d256')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "N/A",
+                "deployer": "Push-Deployer",
+                "message": "Created via a push deployment",
+                "start_time": "2025-01-27T19:55:56.2418099Z",
+                "end_time": "2025-01-27T19:57:14.7750197Z",
+                "active": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/c45624f6-faef-4e09-8a2e-7ccbe90e8f30')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "N/A",
+                "deployer": "Push-Deployer",
+                "message": "Created via a push deployment",
+                "start_time": "2025-01-27T19:29:32.6636132Z",
+                "end_time": "2025-01-27T19:30:42.201187Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/f0761e87-b29c-4057-ae94-766d91c764ff')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "N/A",
+                "deployer": "Push-Deployer",
+                "message": "Created via a push deployment",
+                "start_time": "2025-01-27T19:40:50.3848349Z",
+                "end_time": "2025-01-27T19:41:46.383893Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/call_aoai')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/call_aoai/",
+                "script_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/call_aoai/__init__.py",
+                "config_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/call_aoai/function.json",
+                "test_data_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/call_aoai.dat",
+                "href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/functions/call_aoai",
+                "config": {
+                    "bindings": [
+                        {
+                            "name": "myblob",
+                            "type": "blobTrigger",
+                            "direction": "in",
+                            "path": "silver/{name}",
+                            "connection": "AzureWebJobsStorage"
+                        }
+                    ]
+                },
+                "language": "python",
+                "isDisabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/get_sas')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/get_sas/",
+                "script_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/get_sas/__init__.py",
+                "config_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/get_sas/function.json",
+                "test_data_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/get_sas.dat",
+                "href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/functions/get_sas",
+                "config": {
+                    "bindings": [
+                        {
+                            "authLevel": "anonymous",
+                            "type": "httpTrigger",
+                            "direction": "in",
+                            "name": "req",
+                            "methods": [
+                                "get"
+                            ]
+                        },
+                        {
+                            "type": "http",
+                            "direction": "out",
+                            "name": "$return"
+                        }
+                    ]
+                },
+                "invoke_url_template": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/api/get_sas",
+                "language": "python",
+                "isDisabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/getBlobsByContainer')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/getBlobsByContainer/",
+                "script_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/getBlobsByContainer/__init__.py",
+                "config_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/getBlobsByContainer/function.json",
+                "test_data_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/getBlobsByContainer.dat",
+                "href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/functions/getBlobsByContainer",
+                "config": {
+                    "bindings": [
+                        {
+                            "authLevel": "anonymous",
+                            "type": "httpTrigger",
+                            "direction": "in",
+                            "name": "req",
+                            "methods": [
+                                "get"
+                            ]
+                        },
+                        {
+                            "type": "http",
+                            "direction": "out",
+                            "name": "$return"
+                        }
+                    ]
+                },
+                "invoke_url_template": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/api/getblobsbycontainer",
+                "language": "python",
+                "isDisabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/getPrompts')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/getPrompts/",
+                "script_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/getPrompts/__init__.py",
+                "config_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/getPrompts/function.json",
+                "test_data_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/getPrompts.dat",
+                "href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/functions/getPrompts",
+                "config": {
+                    "bindings": [
+                        {
+                            "authLevel": "anonymous",
+                            "type": "httpTrigger",
+                            "direction": "in",
+                            "name": "req",
+                            "methods": [
+                                "get"
+                            ]
+                        },
+                        {
+                            "type": "http",
+                            "direction": "out",
+                            "name": "$return"
+                        }
+                    ]
+                },
+                "invoke_url_template": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/api/getprompts",
+                "language": "python",
+                "isDisabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/process_uploads')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/process_uploads/",
+                "script_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/process_uploads/__init__.py",
+                "config_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/process_uploads/function.json",
+                "test_data_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/process_uploads.dat",
+                "href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/functions/process_uploads",
+                "config": {
+                    "bindings": [
+                        {
+                            "authLevel": "function",
+                            "type": "httpTrigger",
+                            "direction": "in",
+                            "name": "req",
+                            "methods": [
+                                "get",
+                                "post"
+                            ]
+                        }
+                    ]
+                },
+                "invoke_url_template": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/api/process_uploads",
+                "language": "python",
+                "isDisabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/test-function')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/test-function/",
+                "script_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/test-function/__init__.py",
+                "config_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/test-function/function.json",
+                "test_data_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/test-function.dat",
+                "href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/functions/test-function",
+                "config": {
+                    "bindings": [
+                        {
+                            "authLevel": "function",
+                            "type": "httpTrigger",
+                            "direction": "in",
+                            "name": "req",
+                            "methods": [
+                                "get",
+                                "post"
+                            ]
+                        }
+                    ]
+                },
+                "invoke_url_template": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/api/test-function",
+                "language": "python",
+                "isDisabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/whisper')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/whisper/",
+                "script_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/whisper/__init__.py",
+                "config_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/site/wwwroot/whisper/function.json",
+                "test_data_href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/vfs/home/data/Functions/sampledata/whisper.dat",
+                "href": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/admin/functions/whisper",
+                "config": {
+                    "bindings": [
+                        {
+                            "authLevel": "function",
+                            "type": "httpTrigger",
+                            "direction": "in",
+                            "name": "req",
+                            "methods": [
+                                "get",
+                                "post"
+                            ]
+                        }
+                    ]
+                },
+                "invoke_url_template": "https://functionapp-env-1-24-izzpsdxjdrpdm.azurewebsites.net/api/whisper",
+                "language": "python",
+                "isDisabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2024-04-01",
+            "name": "[concat(parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '/', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'), '.azurewebsites.net')]",
+            "location": "East US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_functionapp_env_1_24_izzpsdxjdrpdm_name'))]"
+            ],
+            "properties": {
+                "siteName": "functionapp-env-1-24-izzpsdxjdrpdm",
+                "hostNameType": "Verified"
+            }
+        }
+    ]
+}
