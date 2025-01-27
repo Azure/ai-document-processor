@@ -5,7 +5,7 @@ interface Prompts {
   [key: string]: string; // Allows dynamic key-value pairs
 }
 
-const functionUrl = `${process.env.REACT_APP_FUNCTION_URL}/api/getPrompts`;
+const functionUrl = `/api/getPrompts`;
 // const containerName = "prompts"
 // const blobName = process.env.PROMPT_FILE
 // const functionUrl = "https://<your-function-app>.azurewebsites.net/api/getPrompts"; // Replace with your function URL
