@@ -5,7 +5,7 @@ import PromptEditor from './components/PromptEditor';
 
 function App() {
   // Replace this URL with your actual Azure Function endpoint
-  const azureFunctionUrl = 'https://<YOUR_AZURE_FUNCTION>.azurewebsites.net/api/HttpTriggerFunction'; 
+  const azureFunctionUrl = '/api/process_uploads'; 
 
   const callAzureFunction = async () => {
     try {
