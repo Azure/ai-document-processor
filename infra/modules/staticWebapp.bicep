@@ -1,14 +1,20 @@
-param staticSites_doc_processing_static_webapp_name string = 'doc-processing-static-webapp'
+param staticWebAppName string = 'static-web-app'
+param functionAppResourceId string
+param user_gh_url string
+param location string = 'eastus2'
 
-resource staticSites_doc_processing_static_webapp_name_resource 'Microsoft.Web/staticSites@2024-04-01' = {
-  name: staticSites_doc_processing_static_webapp_name
-  location: 'East US 2'
+resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
+  name: staticWebAppName
+  location: location
   sku: {
-    name: 'Free'
-    tier: 'Free'
+    name: 'Standard'
+    tier: 'Standard'
+  }
+  identity: {
+    type: 'SystemAssigned'
   }
   properties: {
-    repositoryUrl: 'https://github.com/markremmey/llm-doc-processing'
+    repositoryUrl: user_gh_url
     branch: 'main'
     stagingEnvironmentPolicy: 'Enabled'
     allowConfigFileUpdates: true
@@ -17,11 +23,21 @@ resource staticSites_doc_processing_static_webapp_name_resource 'Microsoft.Web/s
   }
 }
 
-resource staticSites_doc_processing_static_webapp_name_default 'Microsoft.Web/staticSites/basicAuth@2024-04-01' = {
-  parent: staticSites_doc_processing_static_webapp_name_resource
+resource staticWebAppBasicAuth 'Microsoft.Web/staticSites/basicAuth@2024-04-01' = {
+  parent: staticWebApp
   name: 'default'
-  location: 'East US 2'
+  location: location
   properties: {
     applicableEnvironmentsMode: 'SpecifiedEnvironments'
+  }
+}
+
+resource linkedFunctionApp 'Microsoft.Web/staticSites/linkedBackends@2024-04-01' = {
+  parent: staticWebApp
+  name: 'backend1'
+  location: location
+  properties: {
+    backendResourceId: functionAppResourceId
+    region: 'eastus'
   }
 }
