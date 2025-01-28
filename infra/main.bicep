@@ -6,7 +6,7 @@ param functionAppName string = 'functionapp-${environmentName}-${uniqueString(re
 param staticWebAppName string = 'static-${environmentName}-${uniqueString(resourceGroup().id)}'
 param userPrincipalId string
 
-@description('Git repository URL for the Static Web App')
+@description('Forked Git repository URL for the Static Web App')
 param user_gh_url string
 
 
@@ -55,10 +55,10 @@ module functionApp './modules/functionApp.bicep' = {
 }
 
 
-module staticWebApp './modules/staticWebapp-new.bicep' = {
+module staticWebApp './modules/staticWebapp.bicep' = {
   name: 'staticWebAppModule'
   params: {
-    staticWebAppName: 'static-web-app'
+    staticWebAppName: staticWebAppName
     functionAppResourceId: functionApp.outputs.id
     user_gh_url: user_gh_url
   }
