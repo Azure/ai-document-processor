@@ -10,7 +10,7 @@ function App() {
   const callAzureFunction = async () => {
     try {
       const response = await fetch(azureFunctionUrl, {
-        method: 'GET', // or 'POST', depending on your function
+        method: 'POST', // or 'POST', depending on your function
       });
       if (!response.ok) {
         throw new Error(`Error calling Azure Function: ${response.statusText}`);
