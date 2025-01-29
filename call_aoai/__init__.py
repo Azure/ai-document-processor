@@ -23,6 +23,7 @@ def main(myblob: func.InputStream):
               f"Blob Size: {myblob.length} bytes")
   
   logging.info("Loading Prompts")
+  
   try: 
     prompts = load_prompts()
 

@@ -15,7 +15,7 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   }
   properties: {
     repositoryUrl: user_gh_url
-    branch: 'main'
+    branch: 'dev'
     stagingEnvironmentPolicy: 'Enabled'
     allowConfigFileUpdates: true
     provider: 'GitHub'
