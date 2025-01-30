@@ -49,8 +49,9 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 
 
 ##  MIT License
+https://opensource.org/license/MIT 
 
-Copyright (c) [2025] [Mark Remmey]
+Copyright (c) 2025
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
