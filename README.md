@@ -1,5 +1,24 @@
 # AI Document Processor (ADP)
 
+## Description
+AI Document Processor Accelerator is designed to help companies leverage LLMs to automate document and file processing tasks. The accelerator uses bicep templates to provision Azure Function App, Storage account, and static web app to manage your documents life cycle from raw PDF, word doc, or .mp3, extract meaningful entities and insights, and write an output report, CSV, or JSON to a blob storage container. 
+
+## Business Value
+- *Developer Foundation* -  AI Document Processor is intended to serve as an initial foundation to build your workflow on top of. Developers can write custom logic within the azure functions and leverage existing utility functions to write to blob and call Azure OpenAI models.
+- *Business User UI* - Business users can leverage the UI to update prompts and files to immediately test the results.
+- *RBAC Configuration* - The bicep templates spin up infrastructure with managed identities and appropriate access to reduce initial overhead tasks such as granting permissions between services. 
+
+## Resources
+- Azure Function App
+- Azure Storage Account
+- Azure Static Web App
+
+## Pre-Requisites
+- az cli
+- azd cli
+- npm 9.x.x
+- node 18.x.x
+  
 ## Instructions
 
 1. Fork repo to your GH account
