@@ -9,9 +9,13 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 - *RBAC Configuration* - The bicep templates spin up infrastructure with managed identities and appropriate access to reduce initial overhead tasks such as granting permissions between services. 
 
 ## Resources
+- Azure OpenAI
 - Azure Function App
+- App Service Plan
 - Azure Storage Account
 - Azure Static Web App
+- Key Vault
+- Application insights
 
 ## Pre-Requisites
 - az cli
