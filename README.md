@@ -23,6 +23,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 - azd cli
 - npm 9.x.x
 - node 18.x.x
+- Python 3.11
   
 ## Instructions
 
