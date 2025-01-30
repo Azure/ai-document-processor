@@ -1,4 +1,4 @@
-# AI Document Processing Assistant (DPA)
+# AI Document Processor (ADP)
 
 ## Instructions
 
