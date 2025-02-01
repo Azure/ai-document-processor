@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
-
+import { Box, Button, Typography, Grid, Card, CardContent } from '@mui/material';
 interface Prompts {
   [key: string]: string; // Allows dynamic key-value pairs
 }
 
 const functionUrl = `/api/getPrompts`;
-// const containerName = "prompts"
-// const blobName = process.env.PROMPT_FILE
-// const functionUrl = "https://<your-function-app>.azurewebsites.net/api/getPrompts"; // Replace with your function URL
 
 const PromptEditor: React.FC = () => {
   const [prompts, setPrompts] = useState<Prompts>({});
@@ -25,12 +21,6 @@ const PromptEditor: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      // const blobServiceClient = new BlobServiceClient(
-      //   ''
-      // );
-      // const containerClient = blobServiceClient.getContainerClient(containerName);
-      // const blobClient = containerClient.getBlobClient(blobName);
-      
       if (!functionUrl) {
         throw new Error('Function URL is not set');
       }
@@ -76,13 +66,18 @@ const PromptEditor: React.FC = () => {
       {errorMessage && <Typography color="error">{errorMessage}</Typography>}
 
       {!loading && !errorMessage && Object.keys(prompts).length > 0 && (
-        <Box>
+          <Grid container spacing={2}>
           {Object.entries(prompts).map(([key, value]) => (
-            <Typography key={key} variant="body1">
-              <strong>{key}:</strong> {value}
-            </Typography>
+            <Grid item xs={12} sm={6} md={4} key={key}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1" fontWeight="bold">{key}</Typography>
+                  <Typography variant="body2">{value}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
       )}
 
       {!loading && !errorMessage && Object.keys(prompts).length === 0 && (

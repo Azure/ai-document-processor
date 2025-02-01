@@ -1,5 +1,6 @@
 from openai import AzureOpenAI
 import os 
+import logging
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -11,9 +12,15 @@ OPENAI_API_EMBEDDING_MODEL = os.getenv("OPENAI_API_EMBEDDING_MODEL")
 
 
 def get_embeddings(text):
-    
+    credential = DefaultAzureCredential()
+    token_provider = get_bearer_token_provider(  
+        DefaultAzureCredential(),  
+        "https://cognitiveservices.azure.com/.default"  
+    )  
+
+    token = credential.get_token("https://cognitiveservices.azure.com/.default").token
     openai_client = AzureOpenAI(
-            azure_ad_token=token_provider,
+            azure_ad_token=token,
             api_version = OPENAI_API_VERSION,
             azure_endpoint =OPENAI_API_BASE
             )
@@ -33,13 +40,16 @@ def run_prompt(prompt,system_prompt):
         "https://cognitiveservices.azure.com/.default"  
     )  
 
+    token = credential.get_token("https://cognitiveservices.azure.com/.default").token
+
+    logging.info(f"Token: {token}")
     
     openai_client = AzureOpenAI(
+        azure_ad_token=token,
+        api_version = OPENAI_API_VERSION,
+        azure_endpoint =OPENAI_API_BASE
+    )
 
-            azure_ad_token=credential.get_token("https://cognitiveservices.azure.com/.default").token,
-            api_version = OPENAI_API_VERSION,
-            azure_endpoint =OPENAI_API_BASE
-            )
     
     response = openai_client.chat.completions.create(
         model=OPENAI_MODEL,

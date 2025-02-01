@@ -133,6 +133,20 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   }
 }
 
+resource authConfig 'Microsoft.Web/sites/config@2022-03-01' = {
+  parent: functionApp
+  name: 'authsettingsV2'  // ✅ Correct way to configure authentication
+  properties: {
+    globalValidation: {
+      requireAuthentication: false  // ✅ Disables authentication (allows anonymous access)
+    }
+    platform: {
+      enabled: false  // ✅ Ensures platform authentication is disabled
+    }
+  }
+}
+
+
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName
   location: appInsightsLocation

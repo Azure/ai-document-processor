@@ -1,9 +1,10 @@
 @description('That name is the name of our application. It has to be unique.Type a name followed by your resource group name. (<name>-<resourceGroupName>)')
-param aiServicesName string = 'aiServices-${uniqueString(resourceGroup().id)}'
+param aiServicesName string = 'aiServices-new-${uniqueString(resourceGroup().id)}'
+param name string
 
 @description('Location for all resources.')
 param location string = resourceGroup().location
-
+param customSubDomainName string = name
 @allowed([
   'S0'
 ])
@@ -26,6 +27,7 @@ resource openAIAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   }
   kind: 'OpenAI'
   properties: {
+    customSubDomainName: customSubDomainName
     publicNetworkAccess: 'Enabled'
     // restore: true
   }
@@ -36,7 +38,7 @@ resource openAIDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023
   parent: openAIAccount
   sku: {
     name: 'Standard'
-    capacity: 40
+    capacity: 30
 
   }
   properties: {

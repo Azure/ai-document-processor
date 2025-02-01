@@ -6,6 +6,16 @@ param functionAppName string = 'functionapp-${environmentName}-${uniqueString(re
 param staticWebAppName string = 'static-${environmentName}-${uniqueString(resourceGroup().id)}'
 param userPrincipalId string
 
+@description('Location for the Static Web App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
+@allowed([
+  'centralus'
+  'eastus2'
+  'westeurope'
+  'westus2'
+  'southeastasia'
+])
+param staticWebAppLocation string 
+
 @description('Forked Git repository URL for the Static Web App')
 param user_gh_url string
 
@@ -39,6 +49,10 @@ module keyVault './modules/keyVault.bicep' = {
 
 module aoai './modules/aoai.bicep' = {
   name: 'aoaiModule'
+  params: {
+    location: location
+    name: 'aoai-${uniqueString(resourceGroup().id)}'
+  }
 }
 
 
@@ -61,6 +75,7 @@ module staticWebApp './modules/staticWebapp.bicep' = {
     staticWebAppName: staticWebAppName
     functionAppResourceId: functionApp.outputs.id
     user_gh_url: user_gh_url
+    location: staticWebAppLocation
   }
 }
 
@@ -102,7 +117,15 @@ resource functionAppContributorRole 'Microsoft.Authorization/roleAssignments@202
   }
 }
 
-
+resource aiServicesOaiUser 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(resourceGroup().id, aoai.name)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')
+    principalId: functionApp.outputs.identityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
 
 output RESOURCE_GROUP string = resourceGroup().name
 output FUNCTION_APP_NAME string = functionApp.outputs.name
