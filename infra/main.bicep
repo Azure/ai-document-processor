@@ -6,6 +6,16 @@ param functionAppName string = 'functionapp-${environmentName}-${uniqueString(re
 param staticWebAppName string = 'static-${environmentName}-${uniqueString(resourceGroup().id)}'
 param userPrincipalId string
 
+@description('Location for the Static Web App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
+@allowed([
+  'centralus'
+  'eastus2'
+  'westeurope'
+  'westus2'
+  'southeastasia'
+])
+param staticWebAppLocation string 
+
 @description('Forked Git repository URL for the Static Web App')
 param user_gh_url string
 
@@ -65,6 +75,7 @@ module staticWebApp './modules/staticWebapp.bicep' = {
     staticWebAppName: staticWebAppName
     functionAppResourceId: functionApp.outputs.id
     user_gh_url: user_gh_url
+    location: staticWebAppLocation
   }
 }
 

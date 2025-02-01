@@ -1,7 +1,8 @@
-param staticWebAppName string = 'static-web-app'
+param staticWebAppName string
 param functionAppResourceId string
 param user_gh_url string
-param location string = 'eastus2'
+
+param location string
 
 resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   name: staticWebAppName
@@ -15,7 +16,7 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   }
   properties: {
     repositoryUrl: user_gh_url
-    branch: 'dev'
+    branch: 'main'
     stagingEnvironmentPolicy: 'Enabled'
     allowConfigFileUpdates: true
     provider: 'GitHub'
