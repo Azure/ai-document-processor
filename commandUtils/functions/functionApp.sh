@@ -1,0 +1,2 @@
+az functionapp function list --name $FUNCTION_APP_NAME --resource-group $RESOURCE_GROUP --query "[].{Name:name}" --output table
+# az functionapp function list --name $FUNCTION_APP_NAME --resource-group $RESOURCE_GROUP --function-name $FUNCTION_NAME --query properties.config.disabled

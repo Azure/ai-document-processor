@@ -4,7 +4,8 @@ param appInsightsLocation string = 'eastus'
 param environmentName string = 'dev'
 param functionAppName string = 'functionapp-${environmentName}-${uniqueString(resourceGroup().id)}'
 param staticWebAppName string = 'static-${environmentName}-${uniqueString(resourceGroup().id)}'
-param userPrincipalId string
+param storageAccountName string = 'storage${environmentName}${uniqueString(resourceGroup().id)}'
+param keyVaultName string = 'keyvault-${uniqueString(resourceGroup().id)}'
 
 @description('Location for the Static Web App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
 @allowed([
@@ -15,33 +16,17 @@ param userPrincipalId string
   'southeastasia'
 ])
 param staticWebAppLocation string 
+@description('Location for the Azure OpenAI account')
+param aoaiLocation string
 
 @description('Forked Git repository URL for the Static Web App')
 param user_gh_url string
-
-
-var fileStorageName = 'storage${uniqueString(resourceGroup().id)}'
-
-
-// module fileStorage './modules/fileStorage.bicep' = {
-//   name: 'fileStorageModule'
-//   params: {
-//     storageAccountName: fileStorageName
-//     location: location
-//   }
-// }
-
-// module searchService './modules/searchService.bicep' = {
-//   name: 'searchServiceModule'
-//   params: {
-//     searchServiceName: 'searchservice-${uniqueString(resourceGroup().id)}'
-//   }
-// }
+param userPrincipalId string
 
 module keyVault './modules/keyVault.bicep' = {
   name: 'keyVaultModule'
   params: {
-    vaultName: 'keyvault-${uniqueString(resourceGroup().id)}'
+    vaultName: keyVaultName
     location: location
     tenantId: tenantId
   }
@@ -50,7 +35,7 @@ module keyVault './modules/keyVault.bicep' = {
 module aoai './modules/aoai.bicep' = {
   name: 'aoaiModule'
   params: {
-    location: location
+    location: aoaiLocation
     name: 'aoai-${uniqueString(resourceGroup().id)}'
   }
 }
@@ -63,7 +48,7 @@ module functionApp './modules/functionApp.bicep' = {
     appName: functionAppName
     location: location
     appInsightsLocation: appInsightsLocation
-    fileStorageName: fileStorageName
+    fileStorageName: storageAccountName
     aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
   }
 }
@@ -79,6 +64,7 @@ module staticWebApp './modules/staticWebapp.bicep' = {
   }
 }
 
+// RBAC Permissions
 module functionStorageAccess './modules/rbac/blob-dataowner.bicep' = {
   name: 'functionstorage-access'
   scope: resourceGroup()
@@ -97,16 +83,6 @@ module functionQueueAccess './modules/rbac/blob-queue-contributor.bicep' = {
   }
 }
 
-// module fileStorageAccess './modules/rbac/blob-contributor.bicep' = {
-//   name: 'blobstorage-access'
-//   scope: resourceGroup()
-//   params: {
-//     resourceName: fileStorage.outputs.name
-//     principalId: functionApp.outputs.identityPrincipalId
-//   }
-// }
-
-
 resource functionAppContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
   name: guid(subscription().subscriptionId, resourceGroup().name, functionApp.name, 'contributor')
   scope: resourceGroup()
@@ -122,6 +98,19 @@ resource aiServicesOaiUser 'Microsoft.Authorization/roleAssignments@2020-04-01-p
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')
+    principalId: functionApp.outputs.identityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+
+// New assignment: Assign Key Vault Secrets User Role to the Function App’s managed identity
+resource functionAppKeyVaultSecretsUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  // Create a unique name using the Key Vault id, Function App’s identity, and a fixed string
+  name: guid(resourceGroup().id, keyVaultName)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6') // Key Vault Secrets User Role ID
     principalId: functionApp.outputs.identityPrincipalId
     principalType: 'ServicePrincipal'
   }
