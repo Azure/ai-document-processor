@@ -41,14 +41,14 @@ param aoaiLocation string
 @description('Forked Git repository URL for the Static Web App')
 param user_gh_url string
 param userPrincipalId string
-param functionAppName string = 'functionapp-${environmentName}-${uniqueString(appLocation)}'
-param staticWebAppName string = 'static-${environmentName}-${uniqueString(appLocation)}'
+param functionAppName string = 'functionapp-${environmentName}-${uniqueString('${appLocation}${resourceGroup().id}')}'
+param staticWebAppName string = 'static-${environmentName}-${uniqueString('${appLocation}${resourceGroup().id}')}'
 var tenantId = tenant().tenantId
 param location string
 param appInsightsLocation string
 param environmentName string = 'dev'
-param storageAccountName string = 'storage${environmentName}${uniqueString(resourceGroup().id)}'
-param keyVaultName string = 'keyvault-${uniqueString(resourceGroup().id)}'
+param storageAccountName string = 'azfn${uniqueString('${location}${resourceGroup().id}')}'
+param keyVaultName string = 'keyvault-${uniqueString('${location}${resourceGroup().id}')}'
 
 module keyVault './modules/keyVault.bicep' = {
   name: 'keyVaultModule'
@@ -75,7 +75,7 @@ module functionApp './modules/functionApp.bicep' = {
     appName: functionAppName
     location: appLocation
     appInsightsLocation: appInsightsLocation
-    fileStorageName: storageAccountName
+    storageAccountName: storageAccountName
     aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
   }
 }

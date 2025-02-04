@@ -18,19 +18,16 @@ param appInsightsLocation string
 @description('The language worker runtime to load in the function app.')
 param runtime string = 'python'
 param aoaiEndpoint string
-
-param fileStorageName string
+param storageAccountName string
 
 var functionAppName = appName
 var hostingPlanName = appName
 var applicationInsightsName = appName
-var storageAccountName = 'azfunctions${uniqueString(location)}'
 var functionWorkerRuntime = runtime
 
-var blobEndpoint = 'https://${fileStorageName}.blob.${environment().suffixes.storage}'
+var blobEndpoint = 'https://${storageAccountName}.blob.${environment().suffixes.storage}'
 var promptFile = 'prompts.yaml'
-// var enableOryxBuild = 'true'
-// var scmDoBuildDuringDeployment = 'true'
+
 var openaiApiVersion = '2024-05-01-preview'
 var openaiApiBase = aoaiEndpoint
 var openaiModel = 'gpt-4o'

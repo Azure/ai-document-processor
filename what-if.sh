@@ -1,0 +1,1 @@
+az deployment group what-if --resource-group rg-env-2-4-v2 --template-file ./infra/main.bicep
