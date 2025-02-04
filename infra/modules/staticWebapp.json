@@ -1,0 +1,73 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.33.13.18514",
+      "templateHash": "5034550045439419865"
+    }
+  },
+  "parameters": {
+    "staticWebAppName": {
+      "type": "string"
+    },
+    "functionAppResourceId": {
+      "type": "string"
+    },
+    "user_gh_url": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/staticSites",
+      "apiVersion": "2024-04-01",
+      "name": "[parameters('staticWebAppName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard"
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "repositoryUrl": "[parameters('user_gh_url')]",
+        "branch": "main",
+        "stagingEnvironmentPolicy": "Enabled",
+        "allowConfigFileUpdates": true,
+        "provider": "GitHub",
+        "enterpriseGradeCdnStatus": "Disabled"
+      }
+    },
+    {
+      "type": "Microsoft.Web/staticSites/basicAuth",
+      "apiVersion": "2024-04-01",
+      "name": "[format('{0}/{1}', parameters('staticWebAppName'), 'default')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "applicableEnvironmentsMode": "SpecifiedEnvironments"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/staticSites', parameters('staticWebAppName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/staticSites/linkedBackends",
+      "apiVersion": "2024-04-01",
+      "name": "[format('{0}/{1}', parameters('staticWebAppName'), 'backend1')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "backendResourceId": "[parameters('functionAppResourceId')]",
+        "region": "eastus"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/staticSites', parameters('staticWebAppName'))]"
+      ]
+    }
+  ]
+}

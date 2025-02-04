@@ -27,7 +27,6 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
 resource staticWebAppBasicAuth 'Microsoft.Web/staticSites/basicAuth@2024-04-01' = {
   parent: staticWebApp
   name: 'default'
-  location: location
   properties: {
     applicableEnvironmentsMode: 'SpecifiedEnvironments'
   }
@@ -36,9 +35,8 @@ resource staticWebAppBasicAuth 'Microsoft.Web/staticSites/basicAuth@2024-04-01' 
 resource linkedFunctionApp 'Microsoft.Web/staticSites/linkedBackends@2024-04-01' = {
   parent: staticWebApp
   name: 'backend1'
-  location: location
   properties: {
     backendResourceId: functionAppResourceId
-    region: 'eastus'
+    region: location
   }
 }

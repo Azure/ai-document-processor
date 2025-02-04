@@ -1,13 +1,4 @@
-var tenantId = tenant().tenantId
-param location string = 'eastus'
-param appInsightsLocation string = 'eastus'
-param environmentName string = 'dev'
-param functionAppName string = 'functionapp-${environmentName}-${uniqueString(resourceGroup().id)}'
-param staticWebAppName string = 'static-${environmentName}-${uniqueString(resourceGroup().id)}'
-param storageAccountName string = 'storage${environmentName}${uniqueString(resourceGroup().id)}'
-param keyVaultName string = 'keyvault-${uniqueString(resourceGroup().id)}'
-
-@description('Location for the Static Web App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
+@description('Location for the Static Web App and Azure Function App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
 @allowed([
   'centralus'
   'eastus2'
@@ -15,13 +6,21 @@ param keyVaultName string = 'keyvault-${uniqueString(resourceGroup().id)}'
   'westus2'
   'southeastasia'
 ])
-param staticWebAppLocation string 
+param appLocation string 
 @description('Location for the Azure OpenAI account')
 param aoaiLocation string
 
 @description('Forked Git repository URL for the Static Web App')
 param user_gh_url string
 param userPrincipalId string
+param functionAppName string = 'functionapp-${environmentName}-${uniqueString(appLocation)}'
+param staticWebAppName string = 'static-${environmentName}-${uniqueString(appLocation)}'
+var tenantId = tenant().tenantId
+param location string
+param appInsightsLocation string
+param environmentName string = 'dev'
+param storageAccountName string = 'storage${environmentName}${uniqueString(resourceGroup().id)}'
+param keyVaultName string = 'keyvault-${uniqueString(resourceGroup().id)}'
 
 module keyVault './modules/keyVault.bicep' = {
   name: 'keyVaultModule'
@@ -46,7 +45,7 @@ module functionApp './modules/functionApp.bicep' = {
   name: 'functionAppModule'
   params: {
     appName: functionAppName
-    location: location
+    location: appLocation
     appInsightsLocation: appInsightsLocation
     fileStorageName: storageAccountName
     aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
@@ -60,7 +59,7 @@ module staticWebApp './modules/staticWebapp.bicep' = {
     staticWebAppName: staticWebAppName
     functionAppResourceId: functionApp.outputs.id
     user_gh_url: user_gh_url
-    location: staticWebAppLocation
+    location: appLocation
   }
 }
 

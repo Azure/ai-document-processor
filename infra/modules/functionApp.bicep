@@ -10,7 +10,7 @@ param appName string
 param storageAccountType string = 'Standard_LRS'
 
 @description('Location for all resources.')
-param location string = resourceGroup().location
+param location string
 
 @description('Location for Application Insights')
 param appInsightsLocation string
@@ -24,7 +24,7 @@ param fileStorageName string
 var functionAppName = appName
 var hostingPlanName = appName
 var applicationInsightsName = appName
-var storageAccountName = 'azfunctions${uniqueString(resourceGroup().id)}'
+var storageAccountName = 'azfunctions${uniqueString(location)}'
 var functionWorkerRuntime = runtime
 
 var blobEndpoint = 'https://${fileStorageName}.blob.${environment().suffixes.storage}'
