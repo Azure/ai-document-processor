@@ -18,6 +18,10 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 - Key Vault
 - Application insights
 
+## Architecture
+![image](https://github.com/user-attachments/assets/47a64ff8-1185-48ec-904f-2cebefc26687)
+
+
 ## Pre-Requisites
 - az cli
 - azd cli
