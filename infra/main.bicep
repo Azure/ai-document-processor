@@ -8,6 +8,34 @@
 ])
 param appLocation string 
 @description('Location for the Azure OpenAI account')
+@allowed([
+  'Australia East'
+  'Brazil South'
+  'Canada Central'
+  'Canada East'
+  'East US'
+  'East US 2'
+  'France Central'
+  'Germany West Central'
+  'Japan East'
+  'Korea Central'
+  'North Central US'
+  'Norway East'
+  'Poland Central'
+  'South Africa North'
+  'South Central US'
+  'South India'
+  'Southeast Asia'
+  'Spain Central'
+  'Sweden Central'
+  'Switzerland North'
+  'Switzerland West'
+  'UAE North'
+  'UK South'
+  'West Europe'
+  'West US'
+  'West US 3'
+])
 param aoaiLocation string
 
 @description('Forked Git repository URL for the Static Web App')
@@ -65,7 +93,7 @@ module staticWebApp './modules/staticWebapp.bicep' = {
 
 // RBAC Permissions
 module functionStorageAccess './modules/rbac/blob-dataowner.bicep' = {
-  name: 'functionstorage-access'
+  name: 'functionstorage-access-2'
   scope: resourceGroup()
   params: {
     resourceName: functionApp.outputs.storageAccountName
@@ -74,7 +102,7 @@ module functionStorageAccess './modules/rbac/blob-dataowner.bicep' = {
 }
 
 module functionQueueAccess './modules/rbac/blob-queue-contributor.bicep' = {
-  name: 'functionqueue-access'
+  name: 'functionqueue-access-2'
   scope: resourceGroup()
   params: {
     resourceName: functionApp.outputs.storageAccountName
