@@ -153,3 +153,4 @@ output OPENAI_API_VERSION string = functionApp.outputs.openaiApiVersion
 output OPENAI_API_BASE string = functionApp.outputs.openaiApiBase
 output OPENAI_MODEL string = functionApp.outputs.openaiModel
 output FUNCTIONS_WORKER_RUNTIME string = functionApp.outputs.functionWorkerRuntime
+output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name

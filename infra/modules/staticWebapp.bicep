@@ -40,3 +40,5 @@ resource linkedFunctionApp 'Microsoft.Web/staticSites/linkedBackends@2024-04-01'
     region: location
   }
 }
+
+output name string = staticWebApp.name
