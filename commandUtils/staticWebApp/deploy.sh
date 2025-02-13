@@ -1,6 +1,6 @@
 eval $(azd env get-values)
-STATIC_WEB_APP_NAME="static-test"
-AZURE_RESOURCE_GROUP="rg-env-2-4-v3"
+STATIC_WEB_APP_NAME="default"
+AZURE_RESOURCE_GROUP="test-deployment"
 
 az login --use-device-code
 

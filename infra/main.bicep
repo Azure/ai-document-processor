@@ -6,7 +6,8 @@
   'westus2'
   'southeastasia'
 ])
-param appLocation string 
+param location string
+
 @description('Location for the Azure OpenAI account')
 @allowed([
   'Australia East'
@@ -39,16 +40,22 @@ param appLocation string
 param aoaiLocation string
 
 @description('Forked Git repository URL for the Static Web App')
-param user_gh_url string
+param user_gh_url string = ''
 param userPrincipalId string
-param functionAppName string = 'functionapp-${environmentName}-${uniqueString('${appLocation}${resourceGroup().id}')}'
-param staticWebAppName string = 'static-${environmentName}-${uniqueString('${appLocation}${resourceGroup().id}')}'
+param functionAppName string = 'functionapp-${environmentName}-${uniqueString('${location}${resourceGroup().id}')}'
+param staticWebAppName string = 'static-${environmentName}-${uniqueString('${location}${resourceGroup().id}')}'
 var tenantId = tenant().tenantId
-param location string
-param appInsightsLocation string
+param appInsightsLocation string = location
 param environmentName string = 'dev'
 param storageAccountName string = 'azfn${uniqueString('${location}${resourceGroup().id}')}'
 param keyVaultName string = 'keyvault-${uniqueString('${location}${resourceGroup().id}')}'
+
+@description('Choose the deployment method: GitHubActions or SWA_CLI')
+@allowed([
+  'GitHubActions'
+  'SWA_CLI'
+])
+param deploymentMethod string = 'GitHubActions'
 
 module keyVault './modules/keyVault.bicep' = {
   name: 'keyVaultModule'
@@ -73,21 +80,39 @@ module functionApp './modules/functionApp.bicep' = {
   name: 'functionAppModule'
   params: {
     appName: functionAppName
-    location: appLocation
+    location: location
     appInsightsLocation: appInsightsLocation
     storageAccountName: storageAccountName
     aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
   }
 }
 
+module cosmos './modules/cosmos.bicep' = {
+  name: 'cosmosModule'
+  params: {
+    location: location
+  }
+}
 
-module staticWebApp './modules/staticWebapp.bicep' = {
+module staticWebApp './modules/staticWebapp.bicep' = if (deploymentMethod == 'GitHubActions') {
   name: 'staticWebAppModule'
   params: {
     staticWebAppName: staticWebAppName
     functionAppResourceId: functionApp.outputs.id
     user_gh_url: user_gh_url
-    location: appLocation
+    location: location
+    cosmosId: cosmos.outputs.cosmosResourceId
+  }
+}
+
+module staticWebAppSWA './modules/staticWebapp.bicep' = if (deploymentMethod == 'SWA_CLI') {
+  name: 'staticWebAppModuleSWA'
+  params: {
+    staticWebAppName: staticWebAppName
+    functionAppResourceId: functionApp.outputs.id
+    user_gh_url: ''
+    location: location
+    cosmosId: cosmos.outputs.cosmosResourceId
   }
 }
 
@@ -131,9 +156,9 @@ resource aiServicesOaiUser 'Microsoft.Authorization/roleAssignments@2020-04-01-p
 }
 
 
-// New assignment: Assign Key Vault Secrets User Role to the Function App’s managed identity
+// New assignment: Assign Key Vault Secrets User Role to the Function App's managed identity
 resource functionAppKeyVaultSecretsUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  // Create a unique name using the Key Vault id, Function App’s identity, and a fixed string
+  // Create a unique name using the Key Vault id, Function App's identity, and a fixed string
   name: guid(resourceGroup().id, keyVaultName)
   scope: resourceGroup()
   properties: {

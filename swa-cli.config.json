@@ -1,0 +1,15 @@
+{
+  "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
+  "configurations": {
+    "ai-document-processor-v1": {
+      "appLocation": "frontend",
+      "apiLocation": "",
+      "outputLocation": "dist",
+      "appBuildCommand": "npm run build",
+      "run": "npm run dev",
+      "appDevserverUrl": "http://localhost:5173",
+      "appName": "static-env-2-12-5tcglgi6o2nr2",
+      "resourceGroup": "rg-env-2-12"
+    }
+  }
+}
