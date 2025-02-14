@@ -22,6 +22,9 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 ![image](https://github.com/user-attachments/assets/47a64ff8-1185-48ec-904f-2cebefc26687)
 
 
+![image](https://github.com/user-attachments/assets/4ef01588-fe21-46da-85cf-23c532cebee0)
+
+
 ## Pre-Requisites
 - az cli
 - azd cli
