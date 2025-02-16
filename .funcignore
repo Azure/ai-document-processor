@@ -10,4 +10,6 @@ service_principal
 transcribe/
 whisper
 transcribe
-utility_commands
+commandUtils
+frontend
+infra

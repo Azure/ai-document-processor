@@ -12,13 +12,11 @@ param storageAccountType string = 'Standard_LRS'
 @description('Location for all resources.')
 param location string
 
-@description('Location for Application Insights')
-param appInsightsLocation string
-
 @description('The language worker runtime to load in the function app.')
 param runtime string = 'python'
 param aoaiEndpoint string
 param storageAccountName string
+param aoaiName string
 
 var functionAppName = appName
 var hostingPlanName = appName
@@ -132,7 +130,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
 
 resource authConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   parent: functionApp
-  name: 'authsettingsV2'  // ✅ Correct way to configure authentication
+  name: 'authsettingsV2' 
   properties: {
     globalValidation: {
       requireAuthentication: false  // ✅ Disables authentication (allows anonymous access)
@@ -146,7 +144,7 @@ resource authConfig 'Microsoft.Web/sites/config@2022-03-01' = {
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName
-  location: appInsightsLocation
+  location: location
   kind: 'web'
   properties: {
     Application_Type: 'web'
@@ -192,6 +190,46 @@ resource promptContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
     publicAccess: 'None'
   }
 }
+
+// Invoke the role assignment module for Storage Blob Data Contributor
+module blobStorageDataContributor './rbac/blob-contributor.bicep' = {
+  name: 'blobRoleAssignmentModule'
+  scope: resourceGroup(storageAccountName) // Role assignment applies to the storage account
+  params: {
+    principalId: functionApp.identity.principalId
+    resourceName: storageAccountName
+  }
+}
+
+// Invoke the role assignment module for Storage Queue Data Contributor
+module blobQueueContributor './rbac/blob-queue-contributor.bicep' = {
+  name: 'blobQueueAssignmentModule'
+  scope: resourceGroup() // Role assignment applies to the storage account
+  params: {
+    principalId: functionApp.identity.principalId
+    resourceName: storageAccountName
+  }
+}
+
+// Invoke the role assignment module for Storage Queue Data Contributor
+module aiServicesOpenAIUser './rbac/cogservices-openai-user.bicep' = {
+  name: 'aiServicesOpenAIUserModule'
+  scope: resourceGroup() // Role assignment applies to the storage account
+  params: {
+    principalId: functionApp.identity.principalId
+    resourceName: aoaiName
+  }
+}
+
+// // Invoke the role assignment module for Storage Queue Data Contributor
+// module aiServicesUser './rbac/blob-queue-contributor.bicep' = {
+//   name: 'aiServicesFuncAssignmentModule'
+//   scope: resourceGroup() // Role assignment applies to the storage account
+//   params: {
+//     principalId: functionApp.identity.principalId
+//     resourceName: aoaiName
+//   }
+// }
 
 output id string = functionApp.id
 output name string = functionApp.name

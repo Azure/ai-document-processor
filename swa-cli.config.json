@@ -5,11 +5,13 @@
       "appLocation": "frontend",
       "apiLocation": "",
       "outputLocation": "dist",
+      "apiLanguage": "python",
+      "apiVersion": "3.8",
       "appBuildCommand": "npm run build",
       "run": "npm run dev",
       "appDevserverUrl": "http://localhost:5173",
-      "appName": "static-env-2-12-5tcglgi6o2nr2",
-      "resourceGroup": "rg-env-2-12"
+      "appName": "static-dev-2-15-tuugvus7c6v6a",
+      "resourceGroup": "rg-dev-2-15"
     }
   }
 }

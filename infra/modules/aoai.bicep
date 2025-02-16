@@ -1,5 +1,5 @@
 @description('That name is the name of our application. It has to be unique.Type a name followed by your resource group name. (<name>-<resourceGroupName>)')
-param aiServicesName string = 'aiServices-new-${uniqueString(resourceGroup().id)}'
+param aiServicesName string
 param name string
 
 @description('Location for all resources.')
@@ -9,6 +9,8 @@ param customSubDomainName string = name
   'S0'
 ])
 param sku string = 'S0'
+param kind string = 'OpenAI'
+param publicNetworkAccess string = 'Enabled'
 
 @description('Azure OpenAI model deployment name.')
 param deploymentName string = 'gpt-4o'
@@ -25,11 +27,10 @@ resource openAIAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   sku: {
     name: sku
   }
-  kind: 'OpenAI'
+  kind: kind
   properties: {
     customSubDomainName: customSubDomainName
-    publicNetworkAccess: 'Enabled'
-    // restore: true
+    publicNetworkAccess: publicNetworkAccess
   }
 }
 
@@ -51,3 +52,4 @@ resource openAIDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023
 }
 
 output AOAI_ENDPOINT string = openAIAccount.properties.endpoint
+output name string = openAIAccount.name

@@ -41,8 +41,6 @@ def run_prompt(prompt,system_prompt):
     )  
 
     token = credential.get_token("https://cognitiveservices.azure.com/.default").token
-
-    logging.info(f"Token: {token}")
     
     openai_client = AzureOpenAI(
         azure_ad_token=token,

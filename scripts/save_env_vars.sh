@@ -1,1 +1,0 @@
-eval "$(azd env get-values)"

@@ -1,5 +1,5 @@
 @description('Cosmos DB account name (lowercase, max 44 characters)')
-param accountName string = 'cosmos-${uniqueString(resourceGroup().id)}'
+param accountName string
 
 @description('Location for the Cosmos DB account.')
 param location string = resourceGroup().location
@@ -72,7 +72,7 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
 }
 
 output resourceGroupName string = resourceGroup().name
-output cosmosDBName string = account.name
+output accountName string = account.name
 output databaseName string = database.name
 output containerName string = container.name
 output cosmosResourceId string = account.id
