@@ -44,7 +44,14 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
   - Enter your User Principal ID when prompted
   - To get your User principal ID run `az ad signed-in-user show --query id -o tsv`
 
-2. After deployment is complete configure Static Web App
+### Deploy Static Web App from CLI
+1. `swa init`
+2. `swa build`
+3. `swa deploy --env Production -d {deployment_token}`
+     - Retrieve deployment token from overview page of the static web app in Azure portal under "Manage Deployment Token"
+
+### Deploy Static Web App with a GH Actions Pipeline
+1. After deployment is complete configure Static Web App
    - Navigate to **"Configuration"**
    - Switch **Deployment Authorization Policy** to Github
    - Enter "./webapp/frontend/" in the **App Location** field
