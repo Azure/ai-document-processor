@@ -38,22 +38,24 @@ param aoaiLocation string
 @description('Forked Git repository URL for the Static Web App')
 param user_gh_url string = ''
 param userPrincipalId string
+// Environment name. This is automatically set by the 'azd' tool.
+@description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
+param environmentName string = 'dev'
 param functionAppName string = 'functionapp-${environmentName}-${uniqueString('${location}${resourceGroup().id}')}'
 param staticWebAppName string = 'static-${environmentName}-${uniqueString('${location}${resourceGroup().id}')}'
 var tenantId = tenant().tenantId
-param environmentName string = 'dev'
 param storageAccountName string = 'azfn${uniqueString('${location}${resourceGroup().id}')}'
 param keyVaultName string = 'keyvault-${uniqueString('${location}${resourceGroup().id}')}'
 param aoaiName string = 'aoai-${uniqueString(resourceGroup().id)}'
 param aiServicesName string = 'aiServices-${uniqueString(resourceGroup().id)}'
 param cosmosAccountName string = 'cosmos-${uniqueString(resourceGroup().id)}'
 
-@description('Choose the deployment method: GitHubActions or SWA_CLI')
-@allowed([
-  'GitHubActions'
-  'SWA_CLI'
-])
-param deploymentMethod string = 'GitHubActions'
+// @description('Choose the deployment method: GitHubActions or SWA_CLI')
+// @allowed([
+//   'GitHubActions'
+//   'SWA_CLI'
+// ])
+// param deploymentMethod string = 'SWA_CLI'
 
 // 1. Key Vault
 module keyVault './modules/keyVault.bicep' = {
@@ -97,7 +99,7 @@ module cosmos './modules/cosmos.bicep' = {
 }
 
 // 5. Static Web App
-module staticWebApp './modules/staticWebapp.bicep' = if (deploymentMethod == 'GitHubActions') {
+module staticWebApp './modules/staticWebapp.bicep' = {
   name: 'staticWebAppModule'
   params: {
     staticWebAppName: staticWebAppName
@@ -108,16 +110,37 @@ module staticWebApp './modules/staticWebapp.bicep' = if (deploymentMethod == 'Gi
   }
 }
 
-module staticWebAppSWA './modules/staticWebapp.bicep' = if (deploymentMethod == 'SWA_CLI') {
-  name: 'staticWebAppModuleSWA'
+
+// Invoke the role assignment module for Storage Blob Data Contributor
+module blobStorageDataContributor './modules/rbac/blob-contributor.bicep' = {
+  name: 'blobRoleAssignmentModule'
+  scope: resourceGroup() // Role assignment applies to the storage account
   params: {
-    staticWebAppName: staticWebAppName
-    functionAppResourceId: functionApp.outputs.id
-    user_gh_url: ''
-    location: location
-    cosmosId: cosmos.outputs.cosmosResourceId
+    principalId: functionApp.outputs.identityPrincipalId
+    resourceName: functionApp.outputs.storageAccountName
   }
 }
+
+// Invoke the role assignment module for Storage Queue Data Contributor
+module blobQueueContributor './modules/rbac/blob-queue-contributor.bicep' = {
+  name: 'blobQueueAssignmentModule'
+  scope: resourceGroup() // Role assignment applies to the storage account
+  params: {
+    principalId: functionApp.outputs.identityPrincipalId
+    resourceName: functionApp.outputs.storageAccountName
+  }
+}
+
+// Invoke the role assignment module for Storage Queue Data Contributor
+module aiServicesOpenAIUser './modules/rbac/cogservices-openai-user.bicep' = {
+  name: 'aiServicesOpenAIUserModule'
+  scope: resourceGroup() // Role assignment applies to the storage account
+  params: {
+    principalId: functionApp.outputs.identityPrincipalId
+    resourceName: aoai.outputs.name
+  }
+}
+
 
 // Invoke the role assignment module for Storage Queue Data Contributor
 module blobContributor './modules/rbac/blob-contributor.bicep' = if (userPrincipalId != '') {
@@ -125,82 +148,10 @@ module blobContributor './modules/rbac/blob-contributor.bicep' = if (userPrincip
   scope: resourceGroup() // Role assignment applies to the storage account
   params: {
     principalId: userPrincipalId
-    resourceName: storageAccountName
+    resourceName: functionApp.outputs.storageAccountName
+    principalType: 'User'
   }
 }
-
-// module aiServicesOAIUser './modules/rbac/role.bicep' = {
-//   name: 'aiServicesAssignment'
-//   // scope: resource // Role assignment applies to the storage account
-//   params: {
-//     principalId: functionApp.outputs.identityPrincipalId
-//     principalType: 'ServicePrincipal'
-//     roleDefinitionId: 'a97b65f3-24c7-4388-baec-2e87135dc908'
-//     resourceName: aoai.outputs.name
-//   }
-// }
-
-// resource aiServicesOaiUser 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-//   name: guid(resourceGroup().id, aoai.name)
-//   scope: resourceGroup()
-//   properties: {
-//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')
-//     principalId: functionApp.outputs.identityPrincipalId
-//     principalType: 'ServicePrincipal'
-//   }
-// }
-
-// RBAC Permissions
-// module functionStorageAccess './modules/rbac/blob-dataowner.bicep' = {
-//   name: 'functionstorage-access-2'
-//   scope: resourceGroup()
-//   params: {
-//     resourceName: functionApp.outputs.storageAccountName
-//     principalID: functionApp.outputs.identityPrincipalId
-//   }
-// }
-
-// module functionQueueAccess './modules/rbac/blob-queue-contributor.bicep' = {
-//   name: 'functionqueue-access-2'
-//   scope: resourceGroup()
-//   params: {
-//     resourceName: functionApp.outputs.storageAccountName
-//     principalId: functionApp.outputs.identityPrincipalId
-//   }
-// }
-
-// resource functionAppContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
-//   name: guid(subscription().subscriptionId, resourceGroup().name, functionApp.name, 'contributor')
-//   scope: resourceGroup()
-//   properties: {
-//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c') // Contributor Role ID
-//     principalId: userPrincipalId
-//     principalType: 'User'  // Your User Object ID
-//   }
-// }
-
-// resource aiServicesOaiUser 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-//   name: guid(resourceGroup().id, aoai.name)
-//   scope: resourceGroup()
-//   properties: {
-//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')
-//     principalId: functionApp.outputs.identityPrincipalId
-//     principalType: 'ServicePrincipal'
-//   }
-// }
-
-
-// // New assignment: Assign Key Vault Secrets User Role to the Function App's managed identity
-// resource functionAppKeyVaultSecretsUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-//   // Create a unique name using the Key Vault id, Function App's identity, and a fixed string
-//   name: guid(resourceGroup().id, keyVaultName)
-//   scope: resourceGroup()
-//   properties: {
-//     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6') // Key Vault Secrets User Role ID
-//     principalId: functionApp.outputs.identityPrincipalId
-//     principalType: 'ServicePrincipal'
-//   }
-// }
 
 output RESOURCE_GROUP string = resourceGroup().name
 output FUNCTION_APP_NAME string = functionApp.outputs.name
@@ -213,10 +164,3 @@ output OPENAI_API_BASE string = functionApp.outputs.openaiApiBase
 output OPENAI_MODEL string = functionApp.outputs.openaiModel
 output FUNCTIONS_WORKER_RUNTIME string = functionApp.outputs.functionWorkerRuntime
 output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
-
-resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2023-03-15' existing = {
-  name: cosmosAccountName
-
-}
-
-output DATABASE_CONNECTION_STRING string = cosmosDb.listConnectionStrings().connectionStrings[0].connectionString

@@ -1,6 +1,6 @@
 param staticWebAppName string
 param functionAppResourceId string
-param user_gh_url string
+param user_gh_url string = ''
 @allowed([
   'centralus'
   'eastus2'
@@ -24,12 +24,10 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   properties: {
     stagingEnvironmentPolicy: 'Enabled'
     allowConfigFileUpdates: true
-
     // When a GitHub URL is provided, include repositoryUrl, branch, and CDN status.
     repositoryUrl: user_gh_url != '' ? user_gh_url : null
     branch: user_gh_url != '' ? 'main' : null
     enterpriseGradeCdnStatus: null
-
     // When no GitHub URL is provided, include buildProperties.
     buildProperties: user_gh_url == '' ? {
       skipGithubActionWorkflowGeneration: true

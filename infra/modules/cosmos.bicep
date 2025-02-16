@@ -8,7 +8,7 @@ param location string = resourceGroup().location
 param databaseName string = 'openaiPromptsDB'
 
 @description('The name for the container')
-param containerName string = 'conversationHistory'
+param containerName string = 'promptscontainer'
 
 @description('The partition key for the container')
 param partitionKeyPath string = '/id'

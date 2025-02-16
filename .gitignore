@@ -4,7 +4,7 @@ command_utilities
 __pycache__/
 *.py[cod]
 *$py.class
-
+swa-cli.config.json
 # C extensions
 *.so
 service_principal

@@ -1,5 +1,6 @@
 param principalId string
 param resourceName string
+param principalType string = 'ServicePrincipal'
 
 resource resource 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
   name: resourceName
@@ -13,6 +14,6 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-prev
   properties: {
     roleDefinitionId: roleDefinitionId
     principalId: principalId
-    principalType: 'ServicePrincipal'
+    principalType: principalType
   }
 }

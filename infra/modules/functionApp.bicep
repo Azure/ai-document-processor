@@ -141,7 +141,6 @@ resource authConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   }
 }
 
-
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: applicationInsightsName
   location: location
@@ -191,35 +190,7 @@ resource promptContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   }
 }
 
-// Invoke the role assignment module for Storage Blob Data Contributor
-module blobStorageDataContributor './rbac/blob-contributor.bicep' = {
-  name: 'blobRoleAssignmentModule'
-  scope: resourceGroup(storageAccountName) // Role assignment applies to the storage account
-  params: {
-    principalId: functionApp.identity.principalId
-    resourceName: storageAccountName
-  }
-}
 
-// Invoke the role assignment module for Storage Queue Data Contributor
-module blobQueueContributor './rbac/blob-queue-contributor.bicep' = {
-  name: 'blobQueueAssignmentModule'
-  scope: resourceGroup() // Role assignment applies to the storage account
-  params: {
-    principalId: functionApp.identity.principalId
-    resourceName: storageAccountName
-  }
-}
-
-// Invoke the role assignment module for Storage Queue Data Contributor
-module aiServicesOpenAIUser './rbac/cogservices-openai-user.bicep' = {
-  name: 'aiServicesOpenAIUserModule'
-  scope: resourceGroup() // Role assignment applies to the storage account
-  params: {
-    principalId: functionApp.identity.principalId
-    resourceName: aoaiName
-  }
-}
 
 // // Invoke the role assignment module for Storage Queue Data Contributor
 // module aiServicesUser './rbac/blob-queue-contributor.bicep' = {
