@@ -46,8 +46,25 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 
 ### Deploy Static Web App from CLI
 1. `swa init`
-2. `swa build`
-3. `swa deploy --env Production -d {deployment_token}`
+   - Ensure api_location = ""
+   - {
+        "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
+        "configurations": {
+          "ai-document-processor-v1": {
+            "appLocation": "frontend",
+            "apiLocation": "",
+            "outputLocation": "dist",
+            "dataApiLocation": "frontend/swa-db-connections",
+            "apiLanguage": "python",
+            "apiVersion": "3.8",
+            "appBuildCommand": "npm run build",
+            "run": "npm run dev",
+            "appDevserverUrl": "http://localhost:5173"
+          }
+        }
+      }
+3. `swa build`
+4. `swa deploy --env Production -d {deployment_token}`
      - Retrieve deployment token from overview page of the static web app in Azure portal under "Manage Deployment Token"
 
 ### Deploy Static Web App with a GH Actions Pipeline
