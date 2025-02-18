@@ -17,10 +17,13 @@ day = current_date.day
 # OPENAI_CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL")
 
 # Comment out following code to process blob trigger
-def main(myblob: func.InputStream):
-  logging.info(f"Processing blob \n"
-              f"Name: {myblob.name}\n"
-              f"Blob Size: {myblob.length} bytes")
+# def main(myblob: func.InputStream):
+#   logging.info(f"Processing blob \n"
+#               f"Name: {myblob.name}\n"
+#               f"Blob Size: {myblob.length} bytes")
+
+def main(req: func.HttpRequest):
+  logging.info('Python HTTP trigger function processed a request.')
   
   logging.info("Loading Prompts")
   

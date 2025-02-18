@@ -7,7 +7,7 @@
       "outputLocation": "dist",
       "dataApiLocation": "frontend/swa-db-connections",
       "apiLanguage": "python",
-      "apiVersion": "3.8",
+      "apiVersion": "3.10",
       "appBuildCommand": "npm run build",
       "run": "npm run dev",
       "appDevserverUrl": "http://localhost:5173"

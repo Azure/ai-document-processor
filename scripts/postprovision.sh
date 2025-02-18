@@ -17,4 +17,18 @@ echo "Uploading Blob"
   echo "file prompts.yaml may already exist. Skipping upload"
 }
 
+
+{
+  az storage blob upload \
+    --account-name $AZURE_STORAGE_ACCOUNT \
+    --container-name "bronze" \
+    --name role_library-3.pdf \
+    --file ./data/role_library-3.pdf \
+    --auth-mode login
+  echo "Upload completed successfully."
+} || {
+  echo "file role_library-3.pdf may already exist. Skipping upload"
+}
+
+
 echo "Post-provision script finished."

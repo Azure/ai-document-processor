@@ -1,7 +1,7 @@
 param principalId string
 param resourceName string
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
+resource resource 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
   name: resourceName
 }
 
@@ -9,7 +9,7 @@ var queueContributorRoleId = subscriptionResourceId('Microsoft.Authorization/rol
 
 resource queueRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(resourceGroup().id, principalId, queueContributorRoleId)
-  scope: storageAccount
+  scope: resource
   properties: {
     roleDefinitionId: queueContributorRoleId
     principalId: principalId
