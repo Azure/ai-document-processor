@@ -46,6 +46,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 
 ### Deploy Static Web App from CLI
 1. `swa init`
+   - Ensure SWA CLI is intalled `npm install -g @azure/static-web-apps-cli`
    - Ensure apiLocation = ""
    - `{
         "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
