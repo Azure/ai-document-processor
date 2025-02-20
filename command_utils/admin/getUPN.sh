@@ -1,0 +1,1 @@
+az ad user show --id ${principalId} --query "{UPN: userPrincipalName}" -o json

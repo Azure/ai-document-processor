@@ -1,0 +1,1 @@
+curl -X POST -v  -H "Content-Type: application/json" -d '{"name": "test"}'

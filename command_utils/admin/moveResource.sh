@@ -1,0 +1,1 @@
+az resource move --destination-group  --ids 
