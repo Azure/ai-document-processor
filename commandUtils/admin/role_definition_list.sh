@@ -1,0 +1,1 @@
+az cosmosdb sql role definition list --resource-group "rg-env-2-18" --account-name "cosmos-ywj5mxscsuces"

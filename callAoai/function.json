@@ -1,11 +1,11 @@
 {
   "bindings": [
     {
-      "name": "myblob",
-      "type": "blobTrigger",
+      "authLevel": "function",
+      "type": "httpTrigger",
       "direction": "in",
-      "path": "silver/{name}",
-      "connection": "AzureWebJobsStorage"
+      "name": "req",
+      "methods": ["get", "post"]
     }
   ]
 }

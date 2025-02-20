@@ -1,7 +1,7 @@
 // import React from 'react';
 import { Container, Typography, Button, Box, Grid } from '@mui/material';
 import BlobList from './components/BlobList';
-import PromptEditor from './components/PromptEditor';
+import PromptEditor from './components/PromptEditorCosmos';
 
 function App() {
   // Replace this URL with your actual Azure Function endpoint

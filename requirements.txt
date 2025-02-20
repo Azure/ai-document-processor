@@ -1,9 +1,10 @@
 annotated-types==0.7.0
-anyio
+anyio==4.8.0
 azure-ai-textanalytics==5.2.0
 azure-cognitiveservices-speech==1.41.1
 azure-common==1.1.28
 azure-core==1.31.0
+azure-cosmos==4.9.0
 azure-functions==1.21.0
 azure-identity==1.18.0
 azure-keyvault-secrets==4.9.0

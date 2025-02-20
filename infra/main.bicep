@@ -77,6 +77,15 @@ module aoai './modules/aoai.bicep' = {
   }
 }
 
+// 4. Cosmos DB
+module cosmos './modules/cosmos.bicep' = {
+  name: 'cosmosModule'
+  params: {
+    location: location
+    accountName: cosmosAccountName
+  }
+}
+
 // 3. FunctionApp
 module functionApp './modules/functionApp.bicep' = {
   name: 'functionAppModule'
@@ -85,16 +94,7 @@ module functionApp './modules/functionApp.bicep' = {
     location: location
     storageAccountName: storageAccountName
     aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
-    aoaiName: aoai.outputs.name
-  }
-}
-
-// 4. Cosmos DB
-module cosmos './modules/cosmos.bicep' = {
-  name: 'cosmosModule'
-  params: {
-    location: location
-    accountName: cosmosAccountName
+    cosmosName: cosmos.outputs.accountName
   }
 }
 
@@ -107,6 +107,17 @@ module staticWebApp './modules/staticWebapp.bicep' = {
     user_gh_url: user_gh_url
     location: location
     cosmosId: cosmos.outputs.cosmosResourceId
+  }
+}
+
+
+// Invoke the role assignment module for Storage Queue Data Contributor
+module cosmosContributor './modules/rbac/cosmos-contributor.bicep' = {
+  name: 'cosmosContributorModule'
+  scope: resourceGroup() // Role assignment applies to the storage account
+  params: {
+    principalId: functionApp.outputs.identityPrincipalId
+    resourceName: cosmos.outputs.accountName
   }
 }
 
@@ -130,6 +141,9 @@ module blobQueueContributor './modules/rbac/blob-queue-contributor.bicep' = {
     resourceName: functionApp.outputs.storageAccountName
   }
 }
+
+
+
 
 // Invoke the role assignment module for Storage Queue Data Contributor
 module aiServicesOpenAIUser './modules/rbac/cogservices-openai-user.bicep' = {

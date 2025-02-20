@@ -16,7 +16,7 @@ param location string
 param runtime string = 'python'
 param aoaiEndpoint string
 param storageAccountName string
-param aoaiName string
+param cosmosName string
 
 var functionAppName = appName
 var hostingPlanName = appName
@@ -118,6 +118,22 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'OPENAI_MODEL'
           value: openaiModel
+        }
+        {
+          name: 'COSMOS_DB_PROMPTS_CONTAINER'
+          value: 'promptscontainer'
+        }
+        {
+          name: 'COSMOS_DB_PROMPTS_DB'
+          value: 'openaiPromptsDB'
+        }
+        {
+          name: 'COSMOS_DB_CONFIG_CONTAINER'
+          value: 'config'
+        }
+        {
+          name: 'COSMOS_DB_URI'
+          value: 'https://${cosmosName}.documents.azure.com:443/'
         }
       ]
       ftpsState: 'FtpsOnly'

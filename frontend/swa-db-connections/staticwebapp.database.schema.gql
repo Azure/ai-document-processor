@@ -1,5 +1,0 @@
-type Prompt @model {
-  id: ID
-  name: String
-  promptvalue: String
-}
