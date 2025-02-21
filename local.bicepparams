@@ -1,6 +1,0 @@
-using './main.bicep'
-
-param subscriptionId string = '58360d6a-cbcb-4991-83ad-0466b411a59e'
-param location string = 'eastus2'
-param aoaiLocation string = 'North Central US'
-param userPrincipalId string = 'c4742010-9806-43ee-a5d2-c18b4657fe6e'
