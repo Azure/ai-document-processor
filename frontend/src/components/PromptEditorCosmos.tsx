@@ -14,6 +14,7 @@ import {
   DialogActions,
   TextField
 } from '@mui/material';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface Prompt {
   id: string;
@@ -52,8 +53,8 @@ const PromptEditor: React.FC = () => {
       const data = await response.json();
       setPrompts(data.prompts);
       setLivePromptId(data.livePromptId);
-    } catch (err: any) {
-      setError(err.message || 'Error fetching prompts');
+    } catch {
+      setError('Error deleting prompt');
     } finally {
       setLoading(false);
     }
@@ -71,7 +72,7 @@ const PromptEditor: React.FC = () => {
       } else {
         setError('Error deleting prompt');
       }
-    } catch (err) {
+    } catch {
       setError('Error deleting prompt');
     }
   };
@@ -123,11 +124,15 @@ const PromptEditor: React.FC = () => {
 
   // Handle Create Prompt submission
   const handleCreatePromptSubmit = async () => {
+    const generatedId = uuidv4();
+    console.log('Generated ID:', generatedId);
+
     const newPrompt = {
       name: newPromptName,
       system_prompt: newSystemPrompt,
       user_prompt: newUserPrompt
     };
+    
     try {
       const res = await fetch('/api/create_prompt', {
         method: 'POST',
@@ -265,9 +270,17 @@ const PromptEditor: React.FC = () => {
 
       {/* Create New Prompt button at the bottom, centered */}
       <Box display="flex" justifyContent="center" mt={4}>
-        <Button variant="contained" color="primary" onClick={() => setCreateDialogOpen(true)}>
-          Create New Prompt
-        </Button>
+      <Button 
+        variant="contained" 
+        color="primary" 
+        onClick={() => {
+          console.log('Create New Prompt button clicked');
+          setCreateDialogOpen(true);
+        }}
+      >
+        Create New Prompt
+      </Button>
+
       </Box>
 
       {/* Update Dialog */}

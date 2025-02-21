@@ -27,7 +27,7 @@ function App() {
   return (
     <Container maxWidth={false} disableGutters sx={{ textAlign: 'center', py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Digital Reporting Assistant
+        AI Document Processor
       </Typography>
 
       <Box marginY={2}>
