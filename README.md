@@ -48,6 +48,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 1. `swa init`
    - Ensure SWA CLI is intalled `npm install -g @azure/static-web-apps-cli`
    - Ensure apiLocation = ""
+   - Resulting swa-cli.config should look like:
    - `{
         "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
         "configurations": {
