@@ -49,6 +49,10 @@ param keyVaultName string = 'keyvault-${uniqueString('${location}${resourceGroup
 param aoaiName string = 'aoai-${uniqueString(resourceGroup().id)}'
 param aiServicesName string = 'aiServices-${uniqueString(resourceGroup().id)}'
 param cosmosAccountName string = 'cosmos-${uniqueString(resourceGroup().id)}'
+param promptsContainer string = 'promptscontainer'
+param configContainerName string = 'config'
+param cosmosDatabaseName string = 'openaiPromptsDB'
+
 
 // @description('Choose the deployment method: GitHubActions or SWA_CLI')
 // @allowed([
@@ -83,6 +87,9 @@ module cosmos './modules/cosmos.bicep' = {
   params: {
     location: location
     accountName: cosmosAccountName
+    databaseName: cosmosDatabaseName
+    containerName: promptsContainer
+    configContainerName: configContainerName
   }
 }
 
@@ -117,6 +124,16 @@ module cosmosContributor './modules/rbac/cosmos-contributor.bicep' = {
   scope: resourceGroup() // Role assignment applies to the storage account
   params: {
     principalId: functionApp.outputs.identityPrincipalId
+    resourceName: cosmos.outputs.accountName
+  }
+}
+
+// Invoke the role assignment module for Storage Queue Data Contributor
+module cosmosContributorUser './modules/rbac/cosmos-contributor.bicep' = {
+  name: 'cosmosContributorUserModule'
+  scope: resourceGroup() // Role assignment applies to the storage account
+  params: {
+    principalId: userPrincipalId
     resourceName: cosmos.outputs.accountName
   }
 }
@@ -178,3 +195,8 @@ output OPENAI_API_BASE string = functionApp.outputs.openaiApiBase
 output OPENAI_MODEL string = functionApp.outputs.openaiModel
 output FUNCTIONS_WORKER_RUNTIME string = functionApp.outputs.functionWorkerRuntime
 output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
+output COSMOS_DB_PROMPTS_CONTAINER string = promptsContainer
+output COSMOS_DB_CONFIG_CONTAINER string = configContainerName
+output COSMOS_DB_PROMPTS_DB string = cosmosDatabaseName
+output COSMOS_DB_ACCOUNT_NAME string = cosmos.outputs.accountName
+output COSMOS_DB_URI string = 'https://${cosmosAccountName}.documents.azure.com:443/'

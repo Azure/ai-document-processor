@@ -1,8 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 echo "Post-provision script started."
 
 echo "Current Path: $(pwd)"
 eval "$(azd env get-values)"
+eval "$(azd env get-values | sed 's/^/export /')"
 echo "Uploading Blob"
 
 {
@@ -30,5 +31,14 @@ echo "Uploading Blob"
   echo "file role_library-3.pdf may already exist. Skipping upload"
 }
 
+
+# Establish a Python virtual environment and install dependencies
+echo "Setting up Python environment..."
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+echo "Running uploadCosmos.py..."
+python scripts/uploadCosmos.py
 
 echo "Post-provision script finished."

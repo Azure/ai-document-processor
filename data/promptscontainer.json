@@ -1,6 +1,6 @@
-{
+[{
   "id": "hash1",
   "name": "first_prompt",
   "system_prompt": "This is a new prompt",
   "user_prompt": "This is a new user prompt"
-}
+}]

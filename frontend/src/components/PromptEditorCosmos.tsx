@@ -128,6 +128,7 @@ const PromptEditor: React.FC = () => {
     console.log('Generated ID:', generatedId);
 
     const newPrompt = {
+      id: generatedId,
       name: newPromptName,
       system_prompt: newSystemPrompt,
       user_prompt: newUserPrompt

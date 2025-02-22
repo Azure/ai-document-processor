@@ -1,10 +1,10 @@
+*.bicepparam
 command_utilities
 *.ipynb
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-swa-cli.config.json
 # C extensions
 *.so
 service_principal

@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Retrieve Cosmos DB settings from environment variables
 COSMOS_DB_URI = os.environ.get("COSMOS_DB_URI")
-COSMOS_DB_DATABASE = os.environ.get("COSMOS_DB_DATABASE")
+COSMOS_DB_DATABASE = os.environ.get("COSMOS_DB_PROMPTS_DB")
 COSMOS_DB_PROMPTS_CONTAINER = os.environ.get("COSMOS_DB_PROMPTS_CONTAINER")
 COSMOS_DB_CONFIG_CONTAINER = os.environ.get("COSMOS_DB_CONFIG_CONTAINER")
 
@@ -50,7 +50,7 @@ def get_live_prompt_id():
             partition_key="live_prompt_config"
         )
         return config_item.get("prompt_id")
-    except exceptions.CosmosHttpResponseError as e:
+    except Exception as e:
         logging.error(f"Error retrieving live prompt config: {str(e)}")
         return None
 

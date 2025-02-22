@@ -9,6 +9,7 @@ param databaseName string = 'openaiPromptsDB'
 
 @description('The name for the container')
 param containerName string = 'promptscontainer'
+param configContainerName string = 'config'
 
 @description('The partition key for the container')
 param partitionKeyPath string = '/id'
@@ -48,6 +49,36 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
   properties: {
     resource: {
       id: containerName
+      partitionKey: {
+        paths: [
+          partitionKeyPath
+        ]
+        kind: 'Hash'
+      }
+      indexingPolicy: {
+        indexingMode: 'consistent'  // Default indexing for efficient queries
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/_etag/?'
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+resource configcontainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  parent: database
+  name: configContainerName
+  properties: {
+    resource: {
+      id: configContainerName
       partitionKey: {
         paths: [
           partitionKeyPath

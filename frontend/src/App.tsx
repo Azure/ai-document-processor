@@ -25,14 +25,24 @@ function App() {
   };
 
   return (
-    <Container maxWidth={false} disableGutters sx={{ textAlign: 'center', py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        AI Document Processor
-      </Typography>
-
+    <Container maxWidth={false} disableGutters sx={{ textAlign: 'center', py: 0 }}>
+      <Box
+        sx={{
+          backgroundColor: '#0A1F44',
+          color: 'white',
+          py: 3,
+          px: 2,
+          textAlign: 'center',
+          boxShadow: 3,
+        }}
+      >
+        <Typography variant="h4" gutterBottom>
+          AI Document Processor
+        </Typography>
+      </Box>
       <Box marginY={2}>
         <Button variant="contained" color="primary" onClick={callAzureFunction}>
-          Call Azure Function
+          Start Workflow
         </Button>
       </Box>
 

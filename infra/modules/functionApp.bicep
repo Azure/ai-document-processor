@@ -17,6 +17,12 @@ param runtime string = 'python'
 param aoaiEndpoint string
 param storageAccountName string
 param cosmosName string
+@description('The name for the Cosmos database')
+param cosmosDatabaseName string = 'openaiPromptsDB'
+
+@description('The name for the container')
+param cosmosContainerName string = 'promptscontainer'
+param cosmosConfigContainerName string = 'config'
 
 var functionAppName = appName
 var hostingPlanName = appName
@@ -121,15 +127,15 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         }
         {
           name: 'COSMOS_DB_PROMPTS_CONTAINER'
-          value: 'promptscontainer'
+          value: cosmosContainerName
         }
         {
           name: 'COSMOS_DB_PROMPTS_DB'
-          value: 'openaiPromptsDB'
+          value: cosmosDatabaseName
         }
         {
           name: 'COSMOS_DB_CONFIG_CONTAINER'
-          value: 'config'
+          value: cosmosConfigContainerName
         }
         {
           name: 'COSMOS_DB_URI'
@@ -205,18 +211,6 @@ resource promptContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
     publicAccess: 'None'
   }
 }
-
-
-
-// // Invoke the role assignment module for Storage Queue Data Contributor
-// module aiServicesUser './rbac/blob-queue-contributor.bicep' = {
-//   name: 'aiServicesFuncAssignmentModule'
-//   scope: resourceGroup() // Role assignment applies to the storage account
-//   params: {
-//     principalId: functionApp.identity.principalId
-//     resourceName: aoaiName
-//   }
-// }
 
 output id string = functionApp.id
 output name string = functionApp.name
