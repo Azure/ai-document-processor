@@ -48,6 +48,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 1. `swa init`
    - Ensure SWA CLI is intalled `npm install -g @azure/static-web-apps-cli`
    - Ensure apiLocation = ""
+   - Resulting swa-cli.config should look like:
    - `{
         "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
         "configurations": {
@@ -67,19 +68,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 3. `swa build`
 4. `swa deploy --env Production -d {deployment_token}`
      - Retrieve deployment token from overview page of the static web app in Azure portal under "Manage Deployment Token"
-
-### Deploy Static Web App with a GH Actions Pipeline
-1. After deployment is complete configure Static Web App
-   - Navigate to **"Configuration"**
-   - Switch **Deployment Authorization Policy** to Github
-   - Enter "./webapp/frontend/" in the **App Location** field
-   - Ensure the **Api Location** field is empty
-   - Enter "dist" in the **App artifact location** field
-   - Click **Apply**
-   - GH Actions workflow should be created in your GH repo
   
-
-
 ##  MIT License
 https://opensource.org/license/MIT 
 
