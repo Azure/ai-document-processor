@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, CardContent, Typography, Box, List, ListItem, ListItemText, Link } from '@mui/material';
+import { Button, Card, CardContent, Typography, Box, List, ListItem, ListItemText, Link, Checkbox } from '@mui/material';
 
 const CONTAINER_NAMES = ['bronze', 'silver', 'gold'];
 
@@ -13,7 +13,16 @@ interface BlobItem {
   url: string;
 }
 
-const BlobList: React.FC = () => {
+export interface SelectedBlob extends BlobItem {
+  container: string;
+}
+
+interface BlobListProps {
+  onSelectionChange?: (selected: SelectedBlob[]) => void;
+}
+
+
+const BlobList: React.FC<BlobListProps> = ( {onSelectionChange}) => {
   const [blobsByContainer, setBlobsByContainer] = useState<Record<string, BlobItem[]>>({
     bronze: [],
     silver: [],
@@ -23,6 +32,8 @@ const BlobList: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [selectedBlobs, setSelectedBlobs] = useState<SelectedBlob[]>([]);
+  
   const fetchBlobsFromAllContainers = async () => {
     setLoading(true);
     setError(null);
@@ -49,6 +60,27 @@ const BlobList: React.FC = () => {
   useEffect(() => {
     fetchBlobsFromAllContainers();
   }, []);
+
+
+  // Toggle selection for a blob file
+  const toggleSelection = (container: string, blob: BlobItem) => {
+    const exists = selectedBlobs.some(
+      (b) => b.name === blob.name && b.container === container
+    );
+    let newSelection: SelectedBlob[];
+    if (exists) {
+      newSelection = selectedBlobs.filter(
+        (b) => !(b.name === blob.name && b.container === container)
+      );
+    } else {
+      newSelection = [...selectedBlobs, { ...blob, container }];
+    }
+    setSelectedBlobs(newSelection);
+    
+    if (onSelectionChange) {
+      onSelectionChange(newSelection);
+    }
+  };
 
   return (
     <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
@@ -81,6 +113,13 @@ const BlobList: React.FC = () => {
                 <List dense>
                   {blobItems.map((blob) => (
                     <ListItem key={blob.name} disablePadding>
+                      <Checkbox
+                        checked={selectedBlobs.some(
+                          (b) => b.name === blob.name && b.container === containerName
+                        )}
+                        onChange={() => toggleSelection(containerName, blob)}
+                      />
+                      
                       <ListItemText
                         primary={
                           <Link href={blob.url} target="_blank" rel="noopener noreferrer">

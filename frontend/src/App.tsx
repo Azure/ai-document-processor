@@ -1,23 +1,38 @@
-// import React from 'react';
 import { Container, Typography, Button, Box, Grid } from '@mui/material';
-import BlobList from './components/BlobList';
-import PromptEditor from './components/PromptEditorCosmos';
+import BlobList, { SelectedBlob } from './components/BlobList';
+import PromptEditor from './components/PromptEditor';
+import { useState } from 'react';
 
 function App() {
-  // Replace this URL with your actual Azure Function endpoint
-  const azureFunctionUrl = '/api/processUploads'; 
+  const [selectedBlobs, setSelectedBlobs] = useState<SelectedBlob[]>([]);
 
-  const callAzureFunction = async () => {
+  // Azure Function URLs
+  const azureFunctionUrls = {
+    processUploads: '/api/processUploads',
+    callAoai: '/api/callAoai'
+  };
+
+  // Generic function to call Azure Functions
+  const callAzureFunction = async (url: string) => {
     try {
-      const response = await fetch(azureFunctionUrl, {
-        method: 'POST', // or 'POST', depending on your function
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ blobs: selectedBlobs })
       });
+
+      const responseText = await response.text();
+      const data = responseText ? JSON.parse(responseText) : {};
+
       if (!response.ok) {
-        throw new Error(`Error calling Azure Function: ${response.statusText}`);
+        console.error('Azure Function response:', data);
+        alert(`Error: ${data.errors?.join('\n') || 'Unknown error'}`);
+      } else {
+        console.log('Azure Function response:', data);
+        alert(`Azure Function completed successfully! Processed files: ${data.processedFiles?.join(', ')}`);
       }
-      const data = await response.json();
-      console.log('Azure Function response:', data);
-      alert(`Azure Function called successfully! Response: ${JSON.stringify(data)}`);
     } catch (error) {
       console.error('Error calling Azure Function:', error);
       alert(`Error: ${error}`);
@@ -39,26 +54,39 @@ function App() {
         <Typography variant="h4" gutterBottom>
           AI Document Processor
         </Typography>
-      </Box>
-      <Box marginY={2}>
-        <Button variant="contained" color="primary" onClick={callAzureFunction}>
-          Start Workflow
-        </Button>
+
+        {/* Two buttons at the top */}
+        <Box display="flex" justifyContent="center" gap={2} marginTop={2}>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={() => callAzureFunction(azureFunctionUrls.processUploads)}
+          >
+            Extract Text
+          </Button>
+
+          <Button 
+            variant="contained" 
+            color="secondary" 
+            onClick={() => callAzureFunction(azureFunctionUrls.callAoai)}
+          >
+            Call AOAI
+          </Button>
+        </Box>
       </Box>
 
       {/* Two-column layout */}
       <Grid container spacing={2}>
         {/* Left column: Blob viewer */}
-        <Grid item xs={12} md={6} >
-          <BlobList />
+        <Grid item xs={12} md={6}>
+          <BlobList onSelectionChange={setSelectedBlobs} />
         </Grid>
 
         {/* Right column: Prompt Editor */}
-        <Grid item xs={12} md={6} >
+        <Grid item xs={12} md={6}>
           <PromptEditor />
         </Grid>
       </Grid>
-
     </Container>
   );
 }
