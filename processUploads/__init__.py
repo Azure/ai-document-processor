@@ -7,6 +7,42 @@ from utils import get_month_date
 import io
 import os
 import json
+import base64
+
+# Libraries used in the future Document Processing client code - Migrate to utils
+from azure.identity import DefaultAzureCredential
+from azure.ai.documentintelligence import DocumentIntelligenceClient
+from azure.ai.documentintelligence.models import AnalyzeResult, AnalyzeDocumentRequest
+
+# Variables used in the future Document Processing client code - Migrate to utils
+endpoint = "" # Add the endpoint URL for the Document Processing service
+
+def extract_text_from_blob(blob_name):
+    try:
+        credential = DefaultAzureCredential()
+        
+        client = DocumentIntelligenceClient(
+            endpoint=endpoint, credential=credential
+        )
+        
+        content = get_blob_content("bronze", blob_name)
+        
+        base64_content = base64.b64encode(content).decode('utf-8')    
+
+        poller = client.begin_analyze_document(
+            # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
+            "prebuilt-read", AnalyzeDocumentRequest(bytes_source=base64_content
+        ))
+        result: AnalyzeResult = poller.result()
+        
+        if result.paragraphs:    
+            paragraphs = "\n".join([paragraph.content for paragraph in result.paragraphs])            
+        
+        return paragraphs
+        
+    except Exception as e:
+        logging.error(f"Error processing {blob_name}: {e}")
+        return None
 
 def extract_text_from_docx(blob_name):
     try:
@@ -48,6 +84,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     
     processed_files = []
     errors = []
+    
+    # Document Intelligence supported suffixes
+    suffixes = (".jpg", ".jpeg", ".png", ".tiff", ".docx", ".xlsx", ".pptx", ".pdf")
 
     # Lists blobs in the 'bronze' container
     if selected_blobs:
@@ -57,6 +96,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 continue
             try:
                 blob_name = blob.get("name")
+
+                # Extract text from supported file types using Document Intelligence
+                # if blob_name.endswith(suffixes):
+                #     logging.info(f"Processing: {blob_name}")
+                #     text = extract_text_from_blob(blob_name)
+                #     if text:
+                #         sourcefile = os.path.splitext(os.path.basename(blob_name))[0]
+                #         write_to_blob(f"silver", f"{sourcefile}.txt", text)
+                #         processed_files.append(blob_name)
+                #     else:
+                #         errors.append(f"Failed to extract text from: {blob_name}")
 
                 if blob_name.endswith(".docx"):
                     logging.info(f"Processing DOCX: {blob_name}")
