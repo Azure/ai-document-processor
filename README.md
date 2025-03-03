@@ -45,7 +45,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
   - To get your User principal ID run `az ad signed-in-user show --query id -o tsv`
 
 ### Deploy Static Web App from CLI
-1. `swa init`
+1. Check SWA configuration `swa-cli.config.json`
    - Ensure SWA CLI is intalled `npm install -g @azure/static-web-apps-cli`
    - Ensure apiLocation = ""
    - Resulting swa-cli.config should look like:
@@ -65,6 +65,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
           }
         }
       }`
+    - If changes are desired `swa init` may be run
 3. `swa build`
 4. `swa deploy --env Production -d {deployment_token}`
      - Retrieve deployment token from overview page of the static web app in Azure portal under "Manage Deployment Token"

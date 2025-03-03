@@ -13,7 +13,19 @@ function App() {
   };
 
   // Generic function to call Azure Functions
-  const callAzureFunction = async (url: string) => {
+  const callAzureFunction = async (url: string, requiredContainer: string) => {
+    const validBlobs = selectedBlobs.filter(blob => blob.container === requiredContainer);
+    if (validBlobs.length === 0) {
+      alert(`Please select a file in the ${requiredContainer} container for this function to process`);
+      return;
+    }
+
+    // Check: Ensure that no files outside the required container are selected
+    if (selectedBlobs.some(blob => blob.container !== requiredContainer)) {
+      alert(`Please select only files in the ${requiredContainer} container for this function to process`);
+      return;
+    }
+    
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -60,7 +72,7 @@ function App() {
           <Button 
             variant="contained" 
             color="primary" 
-            onClick={() => callAzureFunction(azureFunctionUrls.processUploads)}
+            onClick={() => callAzureFunction(azureFunctionUrls.processUploads, "bronze")}
           >
             Extract Text
           </Button>
@@ -68,7 +80,7 @@ function App() {
           <Button 
             variant="contained" 
             color="secondary" 
-            onClick={() => callAzureFunction(azureFunctionUrls.callAoai)}
+            onClick={() => callAzureFunction(azureFunctionUrls.callAoai, "silver")}
           >
             Call AOAI
           </Button>
