@@ -24,6 +24,7 @@ param cosmosDatabaseName string = 'openaiPromptsDB'
 param cosmosContainerName string = 'promptscontainer'
 param cosmosConfigContainerName string = 'config'
 
+@description('The endpoint for the AI Multi Services Account')
 param aiMultiServicesEndpoint string
 
 var functionAppName = appName
