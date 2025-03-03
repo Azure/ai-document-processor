@@ -103,6 +103,7 @@ module functionApp './modules/functionApp.bicep' = {
     storageAccountName: storageAccountName
     aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
     cosmosName: cosmos.outputs.accountName
+    aiMultiServicesEndpoint: aiMultiServices.outputs.aiMultiServicesEndpoint
   }
 }
 

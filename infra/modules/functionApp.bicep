@@ -24,6 +24,8 @@ param cosmosDatabaseName string = 'openaiPromptsDB'
 param cosmosContainerName string = 'promptscontainer'
 param cosmosConfigContainerName string = 'config'
 
+param aiMultiServicesEndpoint string
+
 var functionAppName = appName
 var hostingPlanName = appName
 var applicationInsightsName = appName
@@ -140,6 +142,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'COSMOS_DB_URI'
           value: 'https://${cosmosName}.documents.azure.com:443/'
+        }
+        {
+          name: 'AIMULTISERVICES_ENDPOINT'
+          value: aiMultiServicesEndpoint
         }
       ]
       ftpsState: 'FtpsOnly'
