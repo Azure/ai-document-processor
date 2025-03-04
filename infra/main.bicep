@@ -52,6 +52,7 @@ param cosmosAccountName string = 'cosmos-${uniqueString(resourceGroup().id)}'
 param promptsContainer string = 'promptscontainer'
 param configContainerName string = 'config'
 param cosmosDatabaseName string = 'openaiPromptsDB'
+param aiMultiServicesName string = 'aimultiservices-${uniqueString('${location}${resourceGroup().id}')}'
 
 
 // @description('Choose the deployment method: GitHubActions or SWA_CLI')
@@ -102,6 +103,7 @@ module functionApp './modules/functionApp.bicep' = {
     storageAccountName: storageAccountName
     aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
     cosmosName: cosmos.outputs.accountName
+    aiMultiServicesEndpoint: aiMultiServices.outputs.aiMultiServicesEndpoint
   }
 }
 
@@ -117,6 +119,14 @@ module staticWebApp './modules/staticWebapp.bicep' = {
   }
 }
 
+// 6. Azure AI Multi Services
+module aiMultiServices './modules/aimultiservices.bicep' = {
+  name: 'aiMultiServicesModule'
+  params: {
+    aiMultiServicesName: aiMultiServicesName
+    location: location
+  }
+}
 
 // Invoke the role assignment module for Storage Queue Data Contributor
 module cosmosContributor './modules/rbac/cosmos-contributor.bicep' = {
@@ -138,7 +148,6 @@ module cosmosContributorUser './modules/rbac/cosmos-contributor.bicep' = {
   }
 }
 
-
 // Invoke the role assignment module for Storage Blob Data Contributor
 module blobStorageDataContributor './modules/rbac/blob-contributor.bicep' = {
   name: 'blobRoleAssignmentModule'
@@ -159,9 +168,6 @@ module blobQueueContributor './modules/rbac/blob-queue-contributor.bicep' = {
   }
 }
 
-
-
-
 // Invoke the role assignment module for Storage Queue Data Contributor
 module aiServicesOpenAIUser './modules/rbac/cogservices-openai-user.bicep' = {
   name: 'aiServicesOpenAIUserModule'
@@ -172,6 +178,15 @@ module aiServicesOpenAIUser './modules/rbac/cogservices-openai-user.bicep' = {
   }
 }
 
+// Invoke the role assignment module for Azure AI Multi Services User
+module aiMultiServicesUser './modules/rbac/aiservices-user.bicep' = {
+  name: 'aiMultiServicesUserModule'
+  scope: resourceGroup() // Role assignment applies to the Azure Function App
+  params: {
+    principalId: functionApp.outputs.identityPrincipalId
+    resourceName: aiMultiServices.outputs.aiMultiServicesName
+  }
+}
 
 // Invoke the role assignment module for Storage Queue Data Contributor
 module blobContributor './modules/rbac/blob-contributor.bicep' = if (userPrincipalId != '') {
@@ -200,3 +215,5 @@ output COSMOS_DB_CONFIG_CONTAINER string = configContainerName
 output COSMOS_DB_PROMPTS_DB string = cosmosDatabaseName
 output COSMOS_DB_ACCOUNT_NAME string = cosmos.outputs.accountName
 output COSMOS_DB_URI string = 'https://${cosmosAccountName}.documents.azure.com:443/'
+output AIMULTISERVICES_NAME string = aiMultiServices.outputs.aiMultiServicesName
+output AIMULTISERVICES_ENDPOINT string = aiMultiServices.outputs.aiMultiServicesEndpoint

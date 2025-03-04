@@ -1,5 +1,6 @@
 annotated-types==0.7.0
 anyio==4.8.0
+azure-ai-documentintelligence==1.0.0
 azure-ai-textanalytics==5.2.0
 azure-cognitiveservices-speech==1.41.1
 azure-common==1.1.28

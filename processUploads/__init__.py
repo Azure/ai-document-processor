@@ -7,37 +7,72 @@ from utils import get_month_date
 import io
 import os
 import json
+import base64
 
-def extract_text_from_docx(blob_name):
+# Libraries used in the future Document Processing client code
+from azure.identity import DefaultAzureCredential
+from azure.ai.documentintelligence import DocumentIntelligenceClient
+from azure.ai.documentintelligence.models import AnalyzeResult, AnalyzeDocumentRequest
+
+# Variables used by Document Processing client code
+endpoint =os.getenv("AIMULTISERVICES_ENDPOINT") # Add the AI Services Endpoint value from Azure Function App settings
+
+def extract_text_from_blob(blob_name):
     try:
-        # Get the content of the blob
+        credential = DefaultAzureCredential()                
+        client = DocumentIntelligenceClient(
+            endpoint=endpoint, credential=credential
+        )
+        
         content = get_blob_content("bronze", blob_name)
-        # Load the content into a Document object
-        doc = Document(io.BytesIO(content))
-        # Extract and print the text
-        full_text = []
-        for paragraph in doc.paragraphs:
-            full_text.append(paragraph.text)
+        
+        base64_content = base64.b64encode(content).decode('utf-8')    
 
-        # Combine paragraphs into a single string
-        text = "\n".join(full_text)
-        return text
+        poller = client.begin_analyze_document(
+            # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
+            "prebuilt-read", AnalyzeDocumentRequest(bytes_source=base64_content
+        ))
+        result: AnalyzeResult = poller.result()
+        
+        if result.paragraphs:    
+            paragraphs = "\n".join([paragraph.content for paragraph in result.paragraphs])            
+        
+        return paragraphs
+        
     except Exception as e:
         logging.error(f"Error processing {blob_name}: {e}")
         return None
 
-def extract_text_from_pdf(blob_name):
-    try:
-        # Get the content of the blob
-        content = get_blob_content("bronze", blob_name)
-        # Load the PDF document
-        doc = fitz.open(stream=content, filetype="pdf")
-        # Extract text from all pages
-        text = "\n".join(page.get_text() for page in doc)
-        return text
-    except Exception as e:
-        logging.error(f"Error processing {blob_name}: {e}")
-        return None
+# def extract_text_from_docx(blob_name):
+#     try:
+#         # Get the content of the blob
+#         content = get_blob_content("bronze", blob_name)
+#         # Load the content into a Document object
+#         doc = Document(io.BytesIO(content))
+#         # Extract and print the text
+#         full_text = []
+#         for paragraph in doc.paragraphs:
+#             full_text.append(paragraph.text)
+
+#         # Combine paragraphs into a single string
+#         text = "\n".join(full_text)
+#         return text
+#     except Exception as e:
+#         logging.error(f"Error processing {blob_name}: {e}")
+#         return None
+
+# def extract_text_from_pdf(blob_name):
+#     try:
+#         # Get the content of the blob
+#         content = get_blob_content("bronze", blob_name)
+#         # Load the PDF document
+#         doc = fitz.open(stream=content, filetype="pdf")
+#         # Extract text from all pages
+#         text = "\n".join(page.get_text() for page in doc)
+#         return text
+#     except Exception as e:
+#         logging.error(f"Error processing {blob_name}: {e}")
+#         return None
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
@@ -48,6 +83,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     
     processed_files = []
     errors = []
+    
+    # Document Intelligence supported suffixes
+    suffixes = (".jpg", ".jpeg", ".png", ".tiff", ".docx", ".xlsx", ".pptx", ".pdf")
 
     # Lists blobs in the 'bronze' container
     if selected_blobs:
@@ -58,25 +96,36 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 blob_name = blob.get("name")
 
-                if blob_name.endswith(".docx"):
-                    logging.info(f"Processing DOCX: {blob_name}")
-                    text = extract_text_from_docx(blob_name)
+                # Extract text from supported file types using Document Intelligence
+                if blob_name.endswith(suffixes):
+                    logging.info(f"Processing: {blob_name}")
+                    text = extract_text_from_blob(blob_name)
                     if text:
                         sourcefile = os.path.splitext(os.path.basename(blob_name))[0]
                         write_to_blob(f"silver", f"{sourcefile}.txt", text)
                         processed_files.append(blob_name)
                     else:
-                        errors.append(f"Failed to extract text from DOCX: {blob_name}")
+                        errors.append(f"Failed to extract text from: {blob_name}")
 
-                elif blob_name.endswith(".pdf"):
-                    logging.info(f"Processing PDF: {blob_name}")
-                    text = extract_text_from_pdf(blob_name)
-                    if text:
-                        sourcefile = os.path.splitext(os.path.basename(blob_name))[0]
-                        write_to_blob(f"silver", f"{sourcefile}.txt", text)
-                        processed_files.append(blob_name)
-                    else:
-                        errors.append(f"Failed to extract text from PDF: {blob_name}")
+                # if blob_name.endswith(".docx"):
+                #     logging.info(f"Processing DOCX: {blob_name}")
+                #     text = extract_text_from_docx(blob_name)
+                #     if text:
+                #         sourcefile = os.path.splitext(os.path.basename(blob_name))[0]
+                #         write_to_blob(f"silver", f"{sourcefile}.txt", text)
+                #         processed_files.append(blob_name)
+                #     else:
+                #         errors.append(f"Failed to extract text from DOCX: {blob_name}")
+
+                # elif blob_name.endswith(".pdf"):
+                #     logging.info(f"Processing PDF: {blob_name}")
+                #     text = extract_text_from_pdf(blob_name)
+                #     if text:
+                #         sourcefile = os.path.splitext(os.path.basename(blob_name))[0]
+                #         write_to_blob(f"silver", f"{sourcefile}.txt", text)
+                #         processed_files.append(blob_name)
+                #     else:
+                #         errors.append(f"Failed to extract text from PDF: {blob_name}")
 
                 else:
                     logging.info(f"Skipping unsupported file type: {blob_name}")
