@@ -15,7 +15,7 @@ resource aiMultiServices 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   sku: {
     name: sku
   }
-  kind: 'AIServices'
+  kind: 'CognitiveServices'
   properties: {
     customSubDomainName: aiMultiServicesName
     publicNetworkAccess: 'Enabled'
