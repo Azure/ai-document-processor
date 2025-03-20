@@ -35,8 +35,21 @@ function App() {
         body: JSON.stringify({ blobs: selectedBlobs })
       });
 
-      const responseText = await response.text();
-      const data = responseText ? JSON.parse(responseText) : {};
+      // const responseText = await response.text();
+      // const data = responseText ? JSON.parse(responseText) : {};
+
+      const contentType = response.headers.get("content-type");
+
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+          data = await response.json(); // Parse only if JSON
+      } else {
+          const responseText = await response.text(); // Read as plain text
+          console.error("Unexpected response format:", responseText);
+          throw new Error(`Unexpected response format: ${responseText}`);
+      }
+      
+
 
       if (!response.ok) {
         console.error('Azure Function response:', data);

@@ -1,7 +1,7 @@
 {
   "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
   "configurations": {
-    "ai-document-processor-v1": {
+    "ai-document-processor": {
       "appLocation": "frontend",
       "apiLocation": "",
       "outputLocation": "dist",

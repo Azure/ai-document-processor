@@ -6,7 +6,7 @@ const CONTAINER_NAMES = ['bronze', 'silver', 'gold'];
 // const baseFunctionUrl = process.env.REACT_APP_FUNCTION_URL;
 // console.log("baseFunctionUrl", baseFunctionUrl)
 
-const functionUrl = `/api/getBlobsByContainer`;
+const functionUrl = `/api/app_getBlobsByContainer`;
 
 interface BlobItem {
   name: string;

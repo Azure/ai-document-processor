@@ -38,29 +38,24 @@ param aoaiLocation string
 @description('Forked Git repository URL for the Static Web App')
 param user_gh_url string = ''
 param userPrincipalId string
+param suffix string = uniqueString('${location}${resourceGroup().id}')
 // Environment name. This is automatically set by the 'azd' tool.
 @description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
-param environmentName string = 'dev'
-param functionAppName string = 'functionapp-${environmentName}-${uniqueString('${location}${resourceGroup().id}')}'
-param staticWebAppName string = 'static-${environmentName}-${uniqueString('${location}${resourceGroup().id}')}'
+// param environmentName string = 'dev'
+param functionAppName string = 'functionapp-${suffix}'
+param staticWebAppName string = 'static-${suffix}'
 var tenantId = tenant().tenantId
-param storageAccountName string = 'azfn${uniqueString('${location}${resourceGroup().id}')}'
-param keyVaultName string = 'keyvault-${uniqueString('${location}${resourceGroup().id}')}'
-param aoaiName string = 'aoai-${uniqueString(resourceGroup().id)}'
-param aiServicesName string = 'aiServices-${uniqueString(resourceGroup().id)}'
-param cosmosAccountName string = 'cosmos-${uniqueString(resourceGroup().id)}'
+param storageAccountName string = 'azfn${suffix}'
+param keyVaultName string = 'keyvault-${suffix}'
+param aoaiName string = 'aoai-${suffix}'
+param aiServicesName string = 'aiServices-${suffix}'
+param cosmosAccountName string = 'cosmos-${suffix}'
 param promptsContainer string = 'promptscontainer'
 param configContainerName string = 'config'
 param cosmosDatabaseName string = 'openaiPromptsDB'
-param aiMultiServicesName string = 'aimultiservices-${uniqueString('${location}${resourceGroup().id}')}'
-
-
-// @description('Choose the deployment method: GitHubActions or SWA_CLI')
-// @allowed([
-//   'GitHubActions'
-//   'SWA_CLI'
-// ])
-// param deploymentMethod string = 'SWA_CLI'
+param aiMultiServicesName string = 'aimultiservices-${suffix}'
+@description('Deploy a Static Web App front end? Set to true to deploy, false to skip.')
+param deployStaticWebApp bool
 
 // 1. Key Vault
 module keyVault './modules/keyVault.bicep' = {
@@ -108,7 +103,7 @@ module functionApp './modules/functionApp.bicep' = {
 }
 
 // 5. Static Web App
-module staticWebApp './modules/staticWebapp.bicep' = {
+module staticWebApp './modules/staticWebapp.bicep' = if (deployStaticWebApp) {
   name: 'staticWebAppModule'
   params: {
     staticWebAppName: staticWebAppName
@@ -209,7 +204,7 @@ output OPENAI_API_VERSION string = functionApp.outputs.openaiApiVersion
 output OPENAI_API_BASE string = functionApp.outputs.openaiApiBase
 output OPENAI_MODEL string = functionApp.outputs.openaiModel
 output FUNCTIONS_WORKER_RUNTIME string = functionApp.outputs.functionWorkerRuntime
-output STATIC_WEB_APP_NAME string = staticWebApp.outputs.name
+output STATIC_WEB_APP_NAME string = deployStaticWebApp ? staticWebApp.outputs.name : '0'
 output COSMOS_DB_PROMPTS_CONTAINER string = promptsContainer
 output COSMOS_DB_CONFIG_CONTAINER string = configContainerName
 output COSMOS_DB_PROMPTS_DB string = cosmosDatabaseName
