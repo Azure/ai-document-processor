@@ -12,24 +12,21 @@ param storageAccountType string = 'Standard_LRS'
 @description('Location for all resources.')
 param location string
 
+@description('Tags.')
+param tags object
+
+@description('Suffix.')
+param suffix string
+
 @description('The language worker runtime to load in the function app.')
 param runtime string = 'python'
 param aoaiEndpoint string
 param storageAccountName string
-param cosmosName string
-@description('The name for the Cosmos database')
-param cosmosDatabaseName string = 'openaiPromptsDB'
-
-@description('The name for the container')
-param cosmosContainerName string = 'promptscontainer'
-param cosmosConfigContainerName string = 'config'
-
-@description('The endpoint for the AI Multi Services Account')
-param aiMultiServicesEndpoint string
+param appConfigName string
 
 var functionAppName = appName
 var hostingPlanName = appName
-var applicationInsightsName = appName
+var applicationInsightsName = concat('appinsights-', suffix)
 var functionWorkerRuntime = runtime
 
 var blobEndpoint = 'https://${storageAccountName}.blob.${environment().suffixes.storage}'
@@ -39,19 +36,7 @@ var openaiApiVersion = '2024-05-01-preview'
 var openaiApiBase = aoaiEndpoint
 var openaiModel = 'gpt-4o'
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
-  name: storageAccountName
-  location: location
-  sku: {
-    name: storageAccountType
-  }
-  kind: 'Storage'
-  properties: {
-    // allowBlobPublicAccess: true
-  }
-}
-
-resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
+resource hostingPlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: hostingPlanName
   location: location
   sku: {
@@ -64,25 +49,51 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   kind: 'linux'
 }
 
-resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
+/** Resources **/
+@description('User Assigned Identity for App Configuration')
+resource uaiAppConfig 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  location: location
+  name: 'uai-funcapp-${suffix}'
+  tags: tags
+}
+
+resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp,linux'
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${uaiAppConfig.id}': {}
+    }
   }
-  tags: {
-    'azd-service-name': 'myfunctionapp'
-  }
+  tags: union(tags , { 'azd-service-name' : 'myfunctionapp' })
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
       cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com'] }
       alwaysOn: true
+      connectionStrings: [
+        /*
+        {
+          name: 'AzureWebJobsStorage'
+          connectionString: concat('DefaultEndpointsProtocol=https;AccountName=', storageAccountName, ';AccountKey=', listKeys(storageAccountName, '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)
+          type: 'Custom'
+        }
+          */
+      ]
       appSettings: [
         {
+          name: 'AZURE_CLIENT_ID'
+          value: uaiAppConfig.properties.clientId
+        }
+        {
+          name: 'AZURE_TENANT_ID'
+          value: subscription().tenantId
+        }
+        {
           name: 'AzureWebJobsStorage__accountName'
-          value: storageAccount.name
+          value: storageAccountName
         }
         {
           name: 'AzureWebJobsStorage__credential'
@@ -97,17 +108,14 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: applicationInsights.properties.InstrumentationKey
         }
         {
+          name: 'ApplicationInsights__InstrumentationKey'
+          value: applicationInsights.properties.InstrumentationKey
+        }
+        {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: functionWorkerRuntime
         }
-        {
-          name: 'BLOB_ENDPOINT'
-          value: blobEndpoint
-        }
-        {
-          name: 'PROMPT_FILE'
-          value: promptFile
-        }
+        
         {
           name: 'ENABLE_ORYX_BUILD'
           value: 'true'
@@ -117,36 +125,8 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           value: 'true'
         }
         {
-          name: 'OPENAI_API_VERSION'
-          value: openaiApiVersion
-        }
-        {
-          name: 'OPENAI_API_BASE'
-          value: aoaiEndpoint
-        }
-        {
-          name: 'OPENAI_MODEL'
-          value: openaiModel
-        }
-        {
-          name: 'COSMOS_DB_PROMPTS_CONTAINER'
-          value: cosmosContainerName
-        }
-        {
-          name: 'COSMOS_DB_PROMPTS_DB'
-          value: cosmosDatabaseName
-        }
-        {
-          name: 'COSMOS_DB_CONFIG_CONTAINER'
-          value: cosmosConfigContainerName
-        }
-        {
-          name: 'COSMOS_DB_URI'
-          value: 'https://${cosmosName}.documents.azure.com:443/'
-        }
-        {
-          name: 'AIMULTISERVICES_ENDPOINT'
-          value: aiMultiServicesEndpoint
+          name: 'APP_CONFIGURATION_URI'
+          value: concat('https://', appConfigName, '.azconfig.io')
         }
       ]
       ftpsState: 'FtpsOnly'
@@ -157,7 +137,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   }
 }
 
-resource authConfig 'Microsoft.Web/sites/config@2022-03-01' = {
+resource authConfig 'Microsoft.Web/sites/config@2024-04-01' = {
   parent: functionApp
   name: 'authsettingsV2' 
   properties: {
@@ -180,54 +160,18 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-// Blob Services 
-resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
-  parent: storageAccount
-  name: 'default'
-}
-
-// Storage Containers
-resource bronzeContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
-  parent: blobService
-  name: 'bronze'
-  properties: {
-    publicAccess: 'None'
-  }
-}
-
-resource silverContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
-  parent: blobService
-  name: 'silver'
-  properties: {
-    publicAccess: 'None'
-  }
-}
-
-resource goldContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
-  parent: blobService
-  name: 'gold'
-  properties: {
-    publicAccess: 'None'
-  }
-}
-
-resource promptContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
-  parent: blobService
-  name: 'prompts'
-  properties: {
-    publicAccess: 'None'
-  }
-}
-
 output id string = functionApp.id
 output name string = functionApp.name
 output uri string = 'https://${functionApp.properties.defaultHostName}'
-output identityPrincipalId string = functionApp.identity.principalId
+//output identityPrincipalId string = functionApp.identity.principalId
+output identityPrincipalId string = uaiAppConfig.properties.principalId
 output location string = functionApp.location
-output storageAccountName string = storageAccount.name
+output storageAccountName string = storageAccountName
 output blobEndpoint string = blobEndpoint
 output promptFile string = promptFile
 output openaiApiVersion string = openaiApiVersion
 output openaiApiBase string = openaiApiBase
 output openaiModel string = openaiModel
 output functionWorkerRuntime string = functionWorkerRuntime
+output hostingPlanName string = hostingPlan.name
+output hostingPlanId string = hostingPlan.id

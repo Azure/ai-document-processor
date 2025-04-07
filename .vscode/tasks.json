@@ -1,0 +1,35 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "func",
+			"label": "func: host start",
+			"command": "host start --python",
+			"problemMatcher": "$func-python-watch",
+			"isBackground": true,
+			"dependsOn": "pip install (functions)",
+			"options": {
+				"env": {
+					"PYTHONPATH": "${workspaceFolder};",
+                    "APP_CONFIGURATION_URI" : "https://YOUR_ENDPOIN.azconfig.io",
+                    "AZURE_APPCONFIG_CONNECTION_STRING": "CONNECTION_STRING",
+					"AZURE_TENANT_ID": "YOUR_TENANT_ID",
+				}
+			}
+		},
+		{
+			"label": "pip install (functions)",
+			"type": "shell",
+			"osx": {
+				"command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt"
+			},
+			"windows": {
+				"command": "${config:azureFunctions.pythonVenv}\\Scripts\\python -m pip install -r requirements.txt"
+			},
+			"linux": {
+				"command": "${config:azureFunctions.pythonVenv}/bin/python -m pip install -r requirements.txt"
+			},
+			"problemMatcher": []
+		}
+	]
+}

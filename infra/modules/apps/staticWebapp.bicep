@@ -10,6 +10,17 @@ param user_gh_url string = ''
 ])
 param location string
 param cosmosId string
+param appConfigName string
+param suffix string
+param tags object
+
+/** Resources **/
+@description('User Assigned Identity for App Configuration')
+resource uaiAppConfig 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  location: location
+  name: 'uai-webapp-${suffix}'
+  tags: tags
+}
 
 resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
   name: staticWebAppName
@@ -19,7 +30,10 @@ resource staticWebApp 'Microsoft.Web/staticSites@2024-04-01' = {
     tier: 'Standard'
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${uaiAppConfig.id}': {}
+    }
   }
   properties: {
     stagingEnvironmentPolicy: 'Enabled'
@@ -50,7 +64,7 @@ resource dbConnection 'Microsoft.Web/staticSites/databaseConnections@2024-04-01'
   name: 'default'  // Must be alphanumeric (e.g. "CosmosDb")
   kind: 'CosmosDb'
   properties: {
-    connectionIdentity: 'SystemAssigned'
+    connectionIdentity: uaiAppConfig.id
     connectionString: listConnectionStrings(cosmosId, '2021-04-15').connectionStrings[0].connectionString
     region: location
     resourceId: cosmosId
@@ -59,3 +73,4 @@ resource dbConnection 'Microsoft.Web/staticSites/databaseConnections@2024-04-01'
 
 // Now that there's only one staticWebApp resource, you can output its name directly.
 output name string = staticWebApp.name
+output identityPrincipalId string = uaiAppConfig.properties.principalId

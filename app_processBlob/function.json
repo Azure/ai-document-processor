@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "name": "myblob",
+      "type": "blobTrigger",
+      "direction": "in",
+      "path": "requests/{name}",
+      "connection": "AzureWebJobsStorage"
+    }
+  ]
+}

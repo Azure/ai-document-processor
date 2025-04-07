@@ -10,10 +10,10 @@ resourceGroup="${AZURE_RESOURCE_GROUP}"
 endpoint="${COSMOS_DB_URI}"
 
 # Delete before push (override env values for testing)
-accountName="cosmos-qylnraw6fs7hk"
-databaseName="openaiPromptsDB"
-promptsContainer="promptscontainer"
-configContainer="config"
+#accountName="cosmos-qylnraw6fs7hk"
+#databaseName="openaiPromptsDB"
+#promptsContainer="promptscontainer"
+#configContainer="config"
 
 # Get the Cosmos DB endpoint using Azure CLI
 endpoint=$(az cosmosdb show \

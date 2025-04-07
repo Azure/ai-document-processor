@@ -5,13 +5,17 @@ import azure.functions as func
 from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from azure.identity import DefaultAzureCredential
 import logging
+
+from configuration import Configuration
+config = Configuration()
 # Get environment variables
-STORAGE_ACCOUNT_NAME = os.getenv("AzureWebJobsStorage__accountName")
+BLOB_ENDPOINT = config.get_value("BLOB_ENDPOINT")
+STORAGE_ACCOUNT_NAME = config.get_value("STORAGE_ACCOUNT_NAME")
 
 # Create BlobServiceClient using Managed Identity
-credential = DefaultAzureCredential()
+credential = config.credential
 blob_service_client = BlobServiceClient(
-    f"https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net", credential=credential
+    BLOB_ENDPOINT, credential=credential
 )
 
 delegation_key = blob_service_client.get_user_delegation_key(

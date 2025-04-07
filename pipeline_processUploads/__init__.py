@@ -14,12 +14,15 @@ from azure.identity import DefaultAzureCredential
 from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import AnalyzeResult, AnalyzeDocumentRequest
 
+from configuration import Configuration
+config = Configuration()
+
 # Variables used by Document Processing client code
-endpoint =os.getenv("AIMULTISERVICES_ENDPOINT") # Add the AI Services Endpoint value from Azure Function App settings
+endpoint = config.get_value("AIMULTISERVICES_ENDPOINT") # Add the AI Services Endpoint value from Azure Function App settings
 
 def extract_text_from_blob(blob_name):
     try:
-        credential = DefaultAzureCredential()                
+        credential = config.credential
         client = DocumentIntelligenceClient(
             endpoint=endpoint, credential=credential
         )
