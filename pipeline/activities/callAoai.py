@@ -27,10 +27,14 @@ def run(textResult: str):
       prompt_json = load_prompts()
       
       # Call the Azure OpenAI service
-      response = run_prompt(prompt_json['system_prompt'], textResult)
+      response_content = run_prompt(prompt_json['system_prompt'], textResult)
+      if response_content.startswith('```json') and response_content.endswith('```'):
+        response_content = response_content.strip('`')
+        response_content = response_content.replace('json', '', 1).strip()
       
+      json_str = json.dumps(response_content)
       # Return the response
-      return response
+      return json_str
   
     except Exception as e:
         logging.error(f"Error processing {textResult}: {e}")

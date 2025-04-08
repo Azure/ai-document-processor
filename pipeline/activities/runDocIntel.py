@@ -26,9 +26,10 @@ def extract_text_from_blob(blobObj: dict):
     )
     
 
-    poller = client.begin_analyze_document_from_url(
+    poller = client.begin_analyze_document(
         # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
-        "prebuilt-read", document_url=blobObj["url"])
+        "prebuilt-read", AnalyzeDocumentRequest(url_source=blobObj["url"])
+      )
     
     result: AnalyzeResult = poller.result()
     

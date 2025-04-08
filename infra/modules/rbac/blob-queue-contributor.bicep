@@ -1,4 +1,4 @@
-param principalId string
+param principalIds array
 param resourceName string
 
 resource resource 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
@@ -7,7 +7,7 @@ resource resource 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
 
 var queueContributorRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '974c5e8b-45b9-4653-ba55-5f855dd0fb88') // Storage Queue Data Contributor role
 
-resource queueRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource queueRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = [for principalId in principalIds: {
   name: guid(resourceGroup().id, principalId, queueContributorRoleId)
   scope: resource
   properties: {
@@ -15,4 +15,4 @@ resource queueRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01
     principalId: principalId
     principalType: 'ServicePrincipal'
   }
-}
+}]

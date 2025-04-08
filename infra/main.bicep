@@ -164,7 +164,7 @@ module blobStorageDataContributor './modules/rbac/blob-contributor.bicep' = {
   name: 'blobRoleAssignmentModule'
   scope: resourceGroup() // Role assignment applies to the storage account
   params: {
-    principalId: webBackendFunctionApp.outputs.identityPrincipalId
+    principalIds: [webBackendFunctionApp.outputs.identityPrincipalId, processingFunctionApp.outputs.identityPrincipalId]
     resourceName: webBackendFunctionApp.outputs.storageAccountName
   }
 }
@@ -174,7 +174,7 @@ module blobQueueContributor './modules/rbac/blob-queue-contributor.bicep' = {
   name: 'blobQueueAssignmentModule'
   scope: resourceGroup() // Role assignment applies to the storage account
   params: {
-    principalId: webBackendFunctionApp.outputs.identityPrincipalId
+    principalIds: [webBackendFunctionApp.outputs.identityPrincipalId, processingFunctionApp.outputs.identityPrincipalId]
     resourceName: webBackendFunctionApp.outputs.storageAccountName
   }
 }

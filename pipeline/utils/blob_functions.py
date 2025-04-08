@@ -21,6 +21,7 @@ def write_to_blob(container_name, blob_path, data):
 
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_path)
     blob_client.upload_blob(data, overwrite=True)
+    return True
 
 def get_blob_content(container_name, blob_path):
 
