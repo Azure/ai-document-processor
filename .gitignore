@@ -1,6 +1,6 @@
 *.bicepparam
-
-command_utilities
+local
+commandUtils
 *.ipynb
 # Byte-compiled / optimized / DLL files
 __pycache__/
