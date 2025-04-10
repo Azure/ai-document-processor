@@ -2,9 +2,9 @@ import azure.durable_functions as df
 
 import logging
 import os
-from utils.prompts import load_prompts
-from utils.blob_functions import get_blob_content, write_to_blob
-from utils.azure_openai import run_prompt
+from pipelineUtils.prompts import load_prompts
+from pipelineUtils.blob_functions import get_blob_content, write_to_blob
+from pipelineUtils.azure_openai import run_prompt
 import json
 
 name = "callAoai"

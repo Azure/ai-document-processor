@@ -7,12 +7,12 @@ infra:
     file: ./infra/main.bicep
     
 services:
-  processing-app:
+  processing:
     project: ./pipeline  # Path to processing app code
     language: python
     host: function
     
-  web-backend-app:
+  webbackend:
     project: ./web-backend  # Path to web backend app code
     language: python
     host: function
@@ -20,3 +20,4 @@ services:
 hooks:
   postprovision:
     - run: scripts/postprovision.sh
+    - run: scripts/updateFunctions.sh

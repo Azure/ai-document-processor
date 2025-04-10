@@ -1,4 +1,4 @@
-# utils/db.py
+# backendUtils/db.py
 import os
 import logging
 import json
@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Retrieve Cosmos DB settings from environment variables
 COSMOS_DB_URI = os.environ.get("COSMOS_DB_URI")
-COSMOS_DB_PROMPTS_DB = os.environ.get("COSMOS_DB_PROMPTS_DB")
+COSMOS_DB_DATABASE = os.environ.get("COSMOS_DB_PROMPTS_DB")
 COSMOS_DB_PROMPTS_CONTAINER = os.environ.get("COSMOS_DB_PROMPTS_CONTAINER")
 COSMOS_DB_CONFIG_CONTAINER = os.environ.get("COSMOS_DB_CONFIG_CONTAINER")
 
@@ -18,8 +18,7 @@ COSMOS_DB_CONFIG_CONTAINER = os.environ.get("COSMOS_DB_CONFIG_CONTAINER")
 # DefaultAzureCredential will use the managed identity assigned to your Function App.
 credential = DefaultAzureCredential()
 client = CosmosClient(COSMOS_DB_URI, credential=credential)
-
-database = client.get_database_client(COSMOS_DB_PROMPTS_DB)
+database = client.get_database_client(COSMOS_DB_DATABASE)
 prompts_container = database.get_container_client(COSMOS_DB_PROMPTS_CONTAINER)
 config_container = database.get_container_client(COSMOS_DB_CONFIG_CONTAINER)
 
@@ -38,21 +37,7 @@ def get_all_prompts():
     except exceptions.CosmosHttpResponseError as e:
         logging.error(f"Error retrieving prompts: {str(e)}")
         return []
-def get_prompt_by_id(prompt_id: str):
-    """
-    Retrieve a prompt document by its ID from the prompts container.
-    """
-    try:
-        item = prompts_container.read_item(
-            item=prompt_id,
-            partition_key=prompt_id
-        )
 
-        return item
-    
-    except exceptions.CosmosHttpResponseError as e:
-        logging.error(f"Error retrieving prompt {prompt_id}: {str(e)}")
-        return None
 
 def get_live_prompt_id():
     """

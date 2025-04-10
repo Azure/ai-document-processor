@@ -1,7 +1,7 @@
 import os
 import json
-from utils.blob_functions import get_blob_content
-from utils.db import get_prompt_by_id
+from pipelineUtils.blob_functions import get_blob_content
+from pipelineUtils.db import get_prompt_by_id
 import yaml
 import logging
 

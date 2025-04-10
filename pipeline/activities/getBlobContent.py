@@ -1,5 +1,5 @@
 import azure.durable_functions as df
-from utils.blob_functions import get_blob_content
+from pipelineUtils.blob_functions import get_blob_content
 import logging
 
 name = "getBlobContent"

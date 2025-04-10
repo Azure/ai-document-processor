@@ -34,6 +34,8 @@ param cosmosConfigContainerName string = 'config'
 @description('The endpoint for the AI Multi Services Account')
 param aiMultiServicesEndpoint string
 
+param allowedOrigins array = []
+
 var functionAppName = appName
 var hostingPlanName = appName
 var applicationInsightsName = appName
@@ -79,13 +81,12 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
     type: 'SystemAssigned'
   }
   tags: {
-    'azd-service-name': 'myfunctionapp'
-    'app-purpose': appPurpose
+    'azd-service-name': appPurpose
   }
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
-      cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com'] }
+      cors: {allowedOrigins: concat(['https://ms.portal.azure.com', 'https://portal.azure.com'], allowedOrigins) }
       alwaysOn: true
       appSettings: concat([
         {

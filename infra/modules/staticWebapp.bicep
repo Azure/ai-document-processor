@@ -59,3 +59,4 @@ resource dbConnection 'Microsoft.Web/staticSites/databaseConnections@2024-04-01'
 
 // Now that there's only one staticWebApp resource, you can output its name directly.
 output name string = staticWebApp.name
+output uri string = staticWebApp.properties.defaultHostname

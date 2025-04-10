@@ -23,7 +23,11 @@ resource aiMultiServices 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
       defaultAction: 'Allow'
     }    
   }
+  identity: {
+    type: 'SystemAssigned'
+  }
 }
 
 output aiMultiServicesName string = aiMultiServices.name
 output aiMultiServicesEndpoint string = aiMultiServices.properties.endpoint
+output identityPrincipalId string = aiMultiServices.identity.principalId

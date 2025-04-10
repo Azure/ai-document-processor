@@ -24,8 +24,8 @@ async def http_start(req: func.HttpRequest, client):
   # Validate the blobs array
   if not blobs or not isinstance(blobs, list):
       return func.HttpResponse(
-          "Invalid request: 'blobs' must be a non-empty array.",
-          status_code=400
+        "Invalid request: 'blobs' must be a non-empty array.",
+        status_code=400
       )
   
   function_name = req.route_params.get('functionName')

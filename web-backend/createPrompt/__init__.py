@@ -2,7 +2,7 @@
 import logging
 import json
 import azure.functions as func
-from utils.db import add_prompt_to_db
+from backendUtils.db import add_prompt_to_db
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info("Processing create_prompt request.")
