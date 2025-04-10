@@ -1,6 +1,6 @@
 import os
 import json
-from utils.blob_functions import get_blob_content
+from backendUtils.blob_functions import get_blob_content
 import yaml
 
 

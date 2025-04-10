@@ -1,6 +1,6 @@
 # delete_prompt/__init__.py
 import logging, azure.functions as func
-from utils.db import delete_prompt_from_db
+from backendUtils.db import delete_prompt_from_db
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Processing delete_prompt request.')

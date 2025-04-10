@@ -1,15 +1,16 @@
 import { Container, Typography, Button, Box, Grid } from '@mui/material';
-import BlobList, { SelectedBlob } from './components/BlobList';
+import BlobList, { BlobItem } from './components/BlobList';
 import PromptEditor from './components/PromptEditor';
 import { useState } from 'react';
 
 function App() {
-  const [selectedBlobs, setSelectedBlobs] = useState<SelectedBlob[]>([]);
+  const [selectedBlobs, setSelectedBlobs] = useState<BlobItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   // Azure Function URLs
   const azureFunctionUrls = {
-    processUploads: '/api/processUploads',
-    callAoai: '/api/callAoai'
+    startWorkflow: '/api/startWorkflow',
   };
 
   // Generic function to call Azure Functions
@@ -20,12 +21,13 @@ function App() {
       return;
     }
 
-    // Check: Ensure that no files outside the required container are selected
     if (selectedBlobs.some(blob => blob.container !== requiredContainer)) {
       alert(`Please select only files in the ${requiredContainer} container for this function to process`);
       return;
     }
     
+    setLoading(true);
+    setMessage('Launching job...');
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -35,32 +37,54 @@ function App() {
         body: JSON.stringify({ blobs: selectedBlobs })
       });
 
-      // const responseText = await response.text();
-      // const data = responseText ? JSON.parse(responseText) : {};
-
-      const contentType = response.headers.get("content-type");
-
-      let data;
-      if (contentType && contentType.includes("application/json")) {
-          data = await response.json(); // Parse only if JSON
-      } else {
-          const responseText = await response.text(); // Read as plain text
-          console.error("Unexpected response format:", responseText);
-          throw new Error(`Unexpected response format: ${responseText}`);
-      }
-      
-
+      const data = await response.json(); // Directly parse as JSON
 
       if (!response.ok) {
         console.error('Azure Function response:', data);
-        alert(`Error: ${data.errors?.join('\n') || 'Unknown error'}`);
+        setMessage(`Error: ${data.errors?.join('\n') || 'Unknown error'}`);
       } else {
         console.log('Azure Function response:', data);
-        alert(`Azure Function completed successfully! Processed files: ${data.processedFiles?.join(', ')}`);
+        setMessage('Azure started the job successfully!');
+
+        // Polling for job status
+        const statusUri = data.statusQueryGetUri;
+        let jobCompleted = false;
+
+        while (!jobCompleted) {
+          const statusResponse = await fetch(statusUri);
+          const statusData = await statusResponse.json();
+
+          if (statusResponse.ok) {
+            console.log('Job Status:', statusData);
+            setMessage(`Job Status: ${statusData.runtimeStatus}`);
+
+            if (statusData.runtimeStatus === 'Completed' || statusData.runtimeStatus === 'Failed' || statusData.runtimeStatus === 'Terminated') {
+              jobCompleted = true;
+
+              const results = statusData.output;
+              const failedTasks = results.filter((result: any) => !result.task_result.success);
+
+              if (failedTasks.length > 0) {
+                setMessage(`Job Failed. ${failedTasks.length} tasks failed.`);
+              } else {
+                setMessage(`Job Completed.`);
+              }
+            }
+          } else {
+            console.error('Error fetching job status:', statusData);
+            setMessage(`Error fetching job status: ${statusData.errors?.join('\n') || 'Unknown error'}`);
+            jobCompleted = true;
+          }
+
+          // Wait for a few seconds before polling again
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        }
       }
     } catch (error) {
       console.error('Error calling Azure Function:', error);
-      alert(`Error: ${error}`);
+      setMessage(`Error: ${error}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -85,19 +109,14 @@ function App() {
           <Button 
             variant="contained" 
             color="primary" 
-            onClick={() => callAzureFunction(azureFunctionUrls.processUploads, "bronze")}
+            onClick={() => callAzureFunction(azureFunctionUrls.startWorkflow, "bronze")}
+            disabled={loading}
           >
-            Extract Text
+            {loading ? 'Processing...' : 'Start Workflow'}
           </Button>
 
-          <Button 
-            variant="contained" 
-            color="secondary" 
-            onClick={() => callAzureFunction(azureFunctionUrls.callAoai, "silver")}
-          >
-            Call AOAI
-          </Button>
         </Box>
+        {message && <Typography variant="body1" color="secondary">{message}</Typography>}
       </Box>
 
       {/* Two-column layout */}

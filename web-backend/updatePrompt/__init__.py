@@ -1,6 +1,6 @@
 # update_prompt/__init__.py
 import logging, json, azure.functions as func
-from utils.db import update_prompt_in_db
+from backendUtils.db import update_prompt_in_db
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Processing update_prompt request.')

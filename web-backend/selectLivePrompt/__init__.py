@@ -1,6 +1,6 @@
 # select_live_prompt/__init__.py
 import logging, json, azure.functions as func
-from utils.db import set_live_prompt
+from backendUtils.db import set_live_prompt
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Processing select_live_prompt request.')

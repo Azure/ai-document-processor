@@ -1,7 +1,7 @@
 # list_prompts/__init__.py
 import logging
 import azure.functions as func
-from utils.db import get_all_prompts, get_live_prompt_id
+from backendUtils.db import get_all_prompts, get_live_prompt_id
 import json
 
 def main(req: func.HttpRequest) -> func.HttpResponse:

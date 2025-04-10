@@ -1,7 +1,7 @@
 import azure.durable_functions as df
 import logging
-from utils.blob_functions import list_blobs, get_blob_content, write_to_blob
-from utils import get_month_date
+from pipelineUtils.blob_functions import list_blobs, get_blob_content, write_to_blob
+from pipelineUtils import get_month_date
 # Libraries used in the future Document Processing client code
 from azure.identity import DefaultAzureCredential
 from azure.ai.documentintelligence import DocumentIntelligenceClient

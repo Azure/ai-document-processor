@@ -90,19 +90,7 @@ module cosmos './modules/cosmos.bicep' = {
   }
 }
 
-// File Processing Function App
-module processingFunctionApp './modules/functionApp.bicep' = {
-  name: 'processingFunctionAppModule'
-  params: {
-    appName: processingFunctionAppName
-    appPurpose: 'processing'
-    location: location
-    storageAccountName: storageAccountName
-    aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
-    cosmosName: cosmos.outputs.accountName
-    aiMultiServicesEndpoint: aiMultiServices.outputs.aiMultiServicesEndpoint
-  }
-}
+
 
 // Web Backend Function App
 module webBackendFunctionApp './modules/functionApp.bicep' = {
@@ -130,6 +118,22 @@ module staticWebApp './modules/staticWebapp.bicep' = if (deployStaticWebApp) {
   }
 }
 
+
+// File Processing Function App
+module processingFunctionApp './modules/functionApp.bicep' = {
+  name: 'processingFunctionAppModule'
+  params: {
+    appName: processingFunctionAppName
+    appPurpose: 'processing'
+    location: location
+    storageAccountName: storageAccountName
+    aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
+    cosmosName: cosmos.outputs.accountName
+    aiMultiServicesEndpoint: aiMultiServices.outputs.aiMultiServicesEndpoint
+    allowedOrigins: ['https://${staticWebApp.outputs.uri}']
+  }
+}
+
 // 6. Azure AI Multi Services
 module aiMultiServices './modules/aimultiservices.bicep' = {
   name: 'aiMultiServicesModule'
@@ -139,106 +143,76 @@ module aiMultiServices './modules/aimultiservices.bicep' = {
   }
 }
 
-// Invoke the role assignment module for Storage Queue Data Contributor
-module cosmosContributor './modules/rbac/cosmos-contributor.bicep' = {
-  name: 'cosmosContributorModule'
-  scope: resourceGroup() // Role assignment applies to the storage account
-  params: {
-    principalId: webBackendFunctionApp.outputs.identityPrincipalId
-    resourceName: cosmos.outputs.accountName
-  }
-}
+// // Invoke the role assignment module for Storage Queue Data Contributor
+// module cosmosContributor './modules/rbac/cosmos-contributor.bicep' = {
+//   name: 'cosmosContributorModule'
+//   scope: resourceGroup() // Role assignment applies to the storage account
+//   params: {
+//     principalIds: [webBackendFunctionApp.outputs.identityPrincipalId, processingFunctionApp.outputs.identityPrincipalId]
+//     resourceName: cosmos.outputs.accountName
+//   }
+// }
 
-// Invoke the role assignment module for Storage Queue Data Contributor
-module cosmosContributorUser './modules/rbac/cosmos-contributor.bicep' = {
-  name: 'cosmosContributorUserModule'
-  scope: resourceGroup() // Role assignment applies to the storage account
-  params: {
-    principalId: userPrincipalId
-    resourceName: cosmos.outputs.accountName
-  }
-}
+// // Invoke the role assignment module for Storage Queue Data Contributor
+// module cosmosContributorUser './modules/rbac/cosmos-contributor.bicep' = {
+//   name: 'cosmosContributorUserModule'
+//   scope: resourceGroup() // Role assignment applies to the storage account
+//   params: {
+//     principalIds: [userPrincipalId]
+//     resourceName: cosmos.outputs.accountName
+//   }
+// }
 
-// Invoke the role assignment module for Storage Blob Data Contributor
-module blobStorageDataContributor './modules/rbac/blob-contributor.bicep' = {
-  name: 'blobRoleAssignmentModule'
-  scope: resourceGroup() // Role assignment applies to the storage account
-  params: {
-    principalIds: [webBackendFunctionApp.outputs.identityPrincipalId, processingFunctionApp.outputs.identityPrincipalId]
-    resourceName: webBackendFunctionApp.outputs.storageAccountName
-  }
-}
+// // Invoke the role assignment module for Storage Blob Data Contributor
+// module blobStorageDataContributor './modules/rbac/blob-contributor.bicep' = {
+//   name: 'blobRoleAssignmentModule'
+//   scope: resourceGroup() // Role assignment applies to the storage account
+//   params: {
+//     principalIds: [webBackendFunctionApp.outputs.identityPrincipalId, processingFunctionApp.outputs.identityPrincipalId, aiMultiServices.outputs.identityPrincipalId]
+//     resourceName: webBackendFunctionApp.outputs.storageAccountName
+//   }
+// }
 
-// Invoke the role assignment module for Storage Queue Data Contributor
-module blobQueueContributor './modules/rbac/blob-queue-contributor.bicep' = {
-  name: 'blobQueueAssignmentModule'
-  scope: resourceGroup() // Role assignment applies to the storage account
-  params: {
-    principalIds: [webBackendFunctionApp.outputs.identityPrincipalId, processingFunctionApp.outputs.identityPrincipalId]
-    resourceName: webBackendFunctionApp.outputs.storageAccountName
-  }
-}
+// // Invoke the role assignment module for Storage Queue Data Contributor
+// module blobQueueContributor './modules/rbac/blob-queue-contributor.bicep' = {
+//   name: 'blobQueueAssignmentModule'
+//   scope: resourceGroup() // Role assignment applies to the storage account
+//   params: {
+//     principalIds: [webBackendFunctionApp.outputs.identityPrincipalId, processingFunctionApp.outputs.identityPrincipalId]
+//     resourceName: webBackendFunctionApp.outputs.storageAccountName
+//   }
+// }
 
-// Invoke the role assignment module for Storage Queue Data Contributor
-module aiServicesOpenAIUser './modules/rbac/cogservices-openai-user.bicep' = {
-  name: 'aiServicesOpenAIUserModule'
-  scope: resourceGroup() // Role assignment applies to the storage account
-  params: {
-    principalId: webBackendFunctionApp.outputs.identityPrincipalId
-    resourceName: aoai.outputs.name
-  }
-}
+// // Invoke the role assignment module for Storage Queue Data Contributor
+// module aiServicesOpenAIUser './modules/rbac/cogservices-openai-user.bicep' = {
+//   name: 'aiServicesOpenAIUserModule'
+//   scope: resourceGroup() // Role assignment applies to the storage account
+//   params: {
+//     principalIds: [webBackendFunctionApp.outputs.identityPrincipalId, processingFunctionApp.outputs.identityPrincipalId]
+//     resourceName: aoai.outputs.name
+//   }
+// }
 
-// Invoke the role assignment module for Azure AI Multi Services User
-module aiMultiServicesUser './modules/rbac/aiservices-user.bicep' = {
-  name: 'aiMultiServicesUserModule'
-  scope: resourceGroup() // Role assignment applies to the Azure Function App
-  params: {
-    principalId: webBackendFunctionApp.outputs.identityPrincipalId
-    resourceName: aiMultiServices.outputs.aiMultiServicesName
-  }
-}
+// // Invoke the role assignment module for Azure AI Multi Services User
+// module aiMultiServicesUser './modules/rbac/aiservices-user.bicep' = {
+//   name: 'aiMultiServicesUserModule'
+//   scope: resourceGroup() // Role assignment applies to the Azure Function App
+//   params: {
+//     principalIds: [webBackendFunctionApp.outputs.identityPrincipalId, processingFunctionApp.outputs.identityPrincipalId]
+//     resourceName: aiMultiServices.outputs.aiMultiServicesName
+//   }
+// }
 
-// Invoke the role assignment module for Storage Queue Data Contributor
-module blobContributor './modules/rbac/blob-contributor.bicep' = if (userPrincipalId != '') {
-  name: 'blobStorageUserAssignmentModule'
-  scope: resourceGroup() // Role assignment applies to the storage account
-  params: {
-    principalId: userPrincipalId
-    resourceName: webBackendFunctionApp.outputs.storageAccountName
-    principalType: 'User'
-  }
-}
-
-// Role assignments for both function apps
-// Processing Function App role assignments
-module processingCosmosContributor './modules/rbac/cosmos-contributor.bicep' = {
-  name: 'processingCosmosContributorModule'
-  scope: resourceGroup()
-  params: {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
-    resourceName: cosmos.outputs.accountName
-  }
-}
-
-module processingBlobStorageDataContributor './modules/rbac/blob-contributor.bicep' = {
-  name: 'processingBlobRoleAssignmentModule'
-  scope: resourceGroup()
-  params: {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
-    resourceName: processingFunctionApp.outputs.storageAccountName
-  }
-}
-
-// Web Backend Function App role assignments
-module webBackendCosmosContributor './modules/rbac/cosmos-contributor.bicep' = {
-  name: 'webBackendCosmosContributorModule'
-  scope: resourceGroup()
-  params: {
-    principalId: webBackendFunctionApp.outputs.identityPrincipalId
-    resourceName: cosmos.outputs.accountName
-  }
-}
+// // Invoke the role assignment module for Storage Queue Data Contributor
+// module blobContributor './modules/rbac/blob-contributor.bicep' = if (userPrincipalId != '') {
+//   name: 'blobStorageUserAssignmentModule'
+//   scope: resourceGroup() // Role assignment applies to the storage account
+//   params: {
+//     principalIds: [userPrincipalId]
+//     resourceName: webBackendFunctionApp.outputs.storageAccountName
+//     principalType: 'User'
+//   }
+// }
 
 output RESOURCE_GROUP string = resourceGroup().name
 output FUNCTION_APP_NAME string = webBackendFunctionApp.outputs.name
