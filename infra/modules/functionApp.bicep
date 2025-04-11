@@ -33,7 +33,7 @@ param cosmosConfigContainerName string = 'config'
 
 @description('The endpoint for the AI Multi Services Account')
 param aiMultiServicesEndpoint string
-
+param deployStaticWebApp bool
 param allowedOrigins array = []
 
 var functionAppName = appName
@@ -42,11 +42,103 @@ var applicationInsightsName = appName
 var functionWorkerRuntime = runtime
 
 var blobEndpoint = 'https://${storageAccountName}.blob.${environment().suffixes.storage}'
-var promptFile = 'prompts.yaml'
+var promptFile = deployStaticWebApp ? 'COSMOS' : 'prompts.yaml'
 
 var openaiApiVersion = '2024-05-01-preview'
 var openaiApiBase = aoaiEndpoint
 var openaiModel = 'gpt-4o'
+
+var commonEnvironmentVariables = [
+  {
+    name: 'AzureWebJobsStorage__accountName'
+    value: storageAccount.name
+  }
+  {
+    name: 'AzureWebJobsStorage__credential'
+    value: 'managedidentity'
+  }
+  {
+    name: 'FUNCTIONS_EXTENSION_VERSION'
+    value: '~4'
+  }
+  {
+    name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+    value: applicationInsights.properties.InstrumentationKey
+  }
+  {
+    name: 'FUNCTIONS_WORKER_RUNTIME'
+    value: functionWorkerRuntime
+  }
+  {
+    name: 'BLOB_ENDPOINT'
+    value: blobEndpoint
+  }  
+  {
+    name: 'PROMPT_FILE'
+    value: promptFile
+  }
+  {
+    name: 'ENABLE_ORYX_BUILD'
+    value: 'true'
+  }
+  {
+    name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+    value: 'true'
+  }
+  {
+    name: 'OPENAI_API_VERSION'
+    value: openaiApiVersion
+  }
+  {
+    name: 'OPENAI_API_BASE'
+    value: aoaiEndpoint
+  }
+  {
+    name: 'OPENAI_MODEL'
+    value: openaiModel
+  }        
+  {
+    name: 'AIMULTISERVICES_ENDPOINT'
+    value: aiMultiServicesEndpoint
+  }
+]
+
+var processingEnvironmentVariables = [
+  {
+    name: 'PROCESSING_APP'
+    value: 'true'
+  }
+  {
+    name: 'AzureWebJobsFeatureFlags'
+    value: 'EnableWorkerIndexing'
+  }
+]
+
+var webBackendEnvironmentVariables = [
+  {
+    name: 'COSMOS_DB_PROMPTS_CONTAINER'
+    value: cosmosContainerName
+  }
+  {
+    name: 'COSMOS_DB_PROMPTS_DB'
+    value: cosmosDatabaseName
+  }
+  {
+    name: 'COSMOS_DB_CONFIG_CONTAINER'
+    value: cosmosConfigContainerName
+  }
+  {
+    name: 'COSMOS_DB_URI'
+    value: 'https://${cosmosName}.documents.azure.com:443/'
+  }
+]
+
+var finalEnvVariables = concat(
+  commonEnvironmentVariables,
+  appPurpose == 'processing' ? processingEnvironmentVariables : [],
+  appPurpose == 'webbackend' ? webBackendEnvironmentVariables : []
+)
+
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
@@ -88,88 +180,7 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
     siteConfig: {
       cors: {allowedOrigins: concat(['https://ms.portal.azure.com', 'https://portal.azure.com'], allowedOrigins) }
       alwaysOn: true
-      appSettings: concat([
-        {
-          name: 'AzureWebJobsStorage__accountName'
-          value: storageAccount.name
-        }
-        {
-          name: 'AzureWebJobsStorage__credential'
-          value: 'managedidentity'
-        }
-        {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
-        }
-        {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: applicationInsights.properties.InstrumentationKey
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: functionWorkerRuntime
-        }
-        {
-          name: 'BLOB_ENDPOINT'
-          value: blobEndpoint
-        }
-        {
-          name: 'PROMPT_FILE'
-          value: promptFile
-        }
-        {
-          name: 'ENABLE_ORYX_BUILD'
-          value: 'true'
-        }
-        {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'true'
-        }
-        {
-          name: 'OPENAI_API_VERSION'
-          value: openaiApiVersion
-        }
-        {
-          name: 'OPENAI_API_BASE'
-          value: aoaiEndpoint
-        }
-        {
-          name: 'OPENAI_MODEL'
-          value: openaiModel
-        }
-        {
-          name: 'COSMOS_DB_PROMPTS_CONTAINER'
-          value: cosmosContainerName
-        }
-        {
-          name: 'COSMOS_DB_PROMPTS_DB'
-          value: cosmosDatabaseName
-        }
-        {
-          name: 'COSMOS_DB_CONFIG_CONTAINER'
-          value: cosmosConfigContainerName
-        }
-        {
-          name: 'COSMOS_DB_URI'
-          value: 'https://${cosmosName}.documents.azure.com:443/'
-        }
-        {
-          name: 'AIMULTISERVICES_ENDPOINT'
-          value: aiMultiServicesEndpoint
-        }
-      ], 
-      appPurpose == 'processing' ? [
-        {
-          name: 'PROCESSING_APP'
-          value: 'true'
-        }
-      ] : [],
-      appPurpose == 'webbackend' ? [
-        {
-          name: 'WEB_BACKEND_APP'
-          value: 'true'
-        }
-      ] : [])
+      appSettings: finalEnvVariables
       ftpsState: 'FtpsOnly'
       linuxFxVersion: 'Python|3.11'
       minTlsVersion: '1.2'
@@ -208,7 +219,7 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01'
 }
 
 // Storage Containers
-resource bronzeContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+resource bronzeContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = if (appPurpose == 'processing') {
   parent: blobService
   name: 'bronze'
   properties: {
@@ -216,7 +227,7 @@ resource bronzeContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   }
 }
 
-resource silverContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+resource silverContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = if (appPurpose == 'processing') {
   parent: blobService
   name: 'silver'
   properties: {
@@ -224,7 +235,7 @@ resource silverContainer 'Microsoft.Storage/storageAccounts/blobServices/contain
   }
 }
 
-resource goldContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+resource goldContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = if (appPurpose == 'processing') {
   parent: blobService
   name: 'gold'
   properties: {
@@ -232,7 +243,7 @@ resource goldContainer 'Microsoft.Storage/storageAccounts/blobServices/container
   }
 }
 
-resource promptContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+resource promptContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = if (appPurpose == 'processing') {
   parent: blobService
   name: 'prompts'
   properties: {

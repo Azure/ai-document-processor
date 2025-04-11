@@ -12,11 +12,6 @@ services:
     language: python
     host: function
     
-  webbackend:
-    project: ./web-backend  # Path to web backend app code
-    language: python
-    host: function
-  
 hooks:
   postprovision:
     - run: scripts/postprovision.sh

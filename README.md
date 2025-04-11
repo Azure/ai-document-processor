@@ -34,7 +34,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 - node 18.x.x
 - Python 3.11
   
-## Instructions
+## Deployment Instructions
 
 1. Fork repo to your GH account
 2. Clone your forked repo
@@ -45,8 +45,10 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
   - Enter your forked GH repo link `https://github.com/{your_user_name}/llm-doc-processing`
   - Enter your User Principal ID when prompted
   - To get your User principal ID run `az ad signed-in-user show --query id -o tsv`
+  - Select whether you would like to deploy a frontend UI. The UI is not necessary, but is helpful for quick testing of prompts and seeing pipeline progress.
+  - Select a format to manage your prompts. You can either use a YAML file to manage your prompts or Cosmos DB. If you are deploying the frontend UI we recommend Cosmos.
 
-### Deploy Static Web App from CLI
+### (Optional) Deploy front-end UI (Static Web App) from CLI
 1. Check SWA configuration `swa-cli.config.json`
    - Ensure SWA CLI is intalled `npm install -g @azure/static-web-apps-cli`
    - Ensure apiLocation = ""
@@ -71,7 +73,31 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 3. `swa build`
 4. `swa deploy --env Production -d {deployment_token}`
      - Retrieve deployment token from overview page of the static web app in Azure portal under "Manage Deployment Token"
-  
+
+### Run the Pipeline
+The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated either in Cosmos DB or in a prompts.yaml file depending on whether you deployed with or without a frontend UI.
+
+#### Without frontend UI
+- Verify Function App deployment. Navigate to the function app overview page and confirm functions are present
+- Update the `prompts.yaml` file in the prompts container of the storage account with your desired prompt instructions for the pipeline
+- Send a POST request to the http_start endpoint
+
+`curl -v -X POST "http://<FUNCTION_APP_NAME>/api/orchestrators/orchestrator?code=<AUTH_KEY>" \
+-H "Content-Type: application/json" \
+-d '{
+  "blobs": [
+    {
+      "name": "<BLOB_NAME>",
+      "url": "https://<STORAGE_ACCOUNT_NAME>.blob.core.windows.net/bronze?<SAS_TOKEN>",
+      "container": "bronze"
+    }
+  ]
+}'`
+- Pipeline should take ~30 sec to execute
+- Results written to gold container of the storage account
+- Monitor progress of pipeline using Log Stream
+- Check for exceptions using a query in App Insights
+
 ##  MIT License
 https://opensource.org/license/MIT 
 
