@@ -74,8 +74,23 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 4. `swa deploy --env Production -d {deployment_token}`
      - Retrieve deployment token from overview page of the static web app in Azure portal under "Manage Deployment Token"
 
+### How to Update the Pipeline for a customer's specific use case
+This repository is intended to set up the scaffolding for an Azure OpenAI pipeline. The developer is expected to update the code in the `pipeline/activities` and `pipeline/function_app.py` to meet the customer's needs.
+- `pipeline/function_app.py` - contains the standard logic for handling HTTP requests and invoking the pipeline leveraging [Azure Durable functions function chaining pattern](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-sequence?tabs=csharp). This file controls the high level orchestration logic for each step in the pipeline, while the logic for each step is contained within the `activities` directory
+- `pipeline/activities` - contains each of the steps in the pipeline
+  - runDocIntel.py - runs an OCR job on the blob, returns a text string with the content
+  - callAoai.py - retrieves prompt instructions and sends prompt instructions + text content from previous step to AzureOpenAI to generate a JSON output that extracts key content from the input blob
+  - writeToBlob.py - writes the resulting JSON to blob storage to be consumed by a frontend UI or downloaded as a report
+
+The intent is for this base use case to be updated by the developer to meet the specific customer's use case.
+
 ### Run the Pipeline
 The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated either in Cosmos DB or in a prompts.yaml file depending on whether you deployed with or without a frontend UI.
+
+
+#### With frontend UI
+- Open Static Web App URL (find link on Static Web App overview page)
+- Upload desired files
 
 #### Without frontend UI
 - Verify Function App deployment. Navigate to the function app overview page and confirm functions are present
