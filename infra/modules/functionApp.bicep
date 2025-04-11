@@ -1,6 +1,13 @@
 @description('The name of the function app that you wish to create.')
 param appName string
 
+@description('The purpose of this function app - either "processing" or "webbackend"')
+@allowed([
+  'processing'
+  'webbackend'
+])
+param appPurpose string
+
 @description('Storage Account type')
 @allowed([
   'Standard_LRS'
@@ -26,6 +33,8 @@ param cosmosConfigContainerName string = 'config'
 
 @description('The endpoint for the AI Multi Services Account')
 param aiMultiServicesEndpoint string
+
+param allowedOrigins array = []
 
 var functionAppName = appName
 var hostingPlanName = appName
@@ -72,14 +81,14 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
     type: 'SystemAssigned'
   }
   tags: {
-    'azd-service-name': 'myfunctionapp'
+    'azd-service-name': appPurpose
   }
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
-      cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com'] }
+      cors: {allowedOrigins: concat(['https://ms.portal.azure.com', 'https://portal.azure.com'], allowedOrigins) }
       alwaysOn: true
-      appSettings: [
+      appSettings: concat([
         {
           name: 'AzureWebJobsStorage__accountName'
           value: storageAccount.name
@@ -148,7 +157,19 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
           name: 'AIMULTISERVICES_ENDPOINT'
           value: aiMultiServicesEndpoint
         }
-      ]
+      ], 
+      appPurpose == 'processing' ? [
+        {
+          name: 'PROCESSING_APP'
+          value: 'true'
+        }
+      ] : [],
+      appPurpose == 'webbackend' ? [
+        {
+          name: 'WEB_BACKEND_APP'
+          value: 'true'
+        }
+      ] : [])
       ftpsState: 'FtpsOnly'
       linuxFxVersion: 'Python|3.11'
       minTlsVersion: '1.2'
