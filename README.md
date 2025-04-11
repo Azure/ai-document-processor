@@ -39,16 +39,17 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 1. Fork repo to your GH account
 2. Clone your forked repo
 3. To deploy bicep template run:
-  - azd auth login
   - az login
+  - azd auth login
   - azd up
   - Enter your forked GH repo link `https://github.com/{your_user_name}/llm-doc-processing`
   - Enter your User Principal ID when prompted
   - To get your User principal ID run `az ad signed-in-user show --query id -o tsv`
   - Select whether you would like to deploy a frontend UI. The UI is not necessary, but is helpful for quick testing of prompts and seeing pipeline progress.
-  - Select a format to manage your prompts. You can either use a YAML file to manage your prompts or Cosmos DB. If you are deploying the frontend UI we recommend Cosmos.
 
 ### (Optional) Deploy front-end UI (Static Web App) from CLI
+Read more at [Azure SWA CLI Documentation](https://azure.github.io/static-web-apps-cli/)
+
 1. Check SWA configuration `swa-cli.config.json`
    - Ensure SWA CLI is intalled `npm install -g @azure/static-web-apps-cli`
    - Ensure apiLocation = ""
@@ -74,7 +75,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 4. `swa deploy --env Production -d {deployment_token}`
      - Retrieve deployment token from overview page of the static web app in Azure portal under "Manage Deployment Token"
 
-### How to Update the Pipeline for a customer's specific use case
+### Update the Pipeline for a customer's specific use case
 This repository is intended to set up the scaffolding for an Azure OpenAI pipeline. The developer is expected to update the code in the `pipeline/activities` and `pipeline/function_app.py` to meet the customer's needs.
 - `pipeline/function_app.py` - contains the standard logic for handling HTTP requests and invoking the pipeline leveraging [Azure Durable functions function chaining pattern](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-sequence?tabs=csharp). This file controls the high level orchestration logic for each step in the pipeline, while the logic for each step is contained within the `activities` directory
 - `pipeline/activities` - contains each of the steps in the pipeline
@@ -86,11 +87,6 @@ The intent is for this base use case to be updated by the developer to meet the 
 
 ### Run the Pipeline
 The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated either in Cosmos DB or in a prompts.yaml file depending on whether you deployed with or without a frontend UI.
-
-
-#### With frontend UI
-- Open Static Web App URL (find link on Static Web App overview page)
-- Upload desired files
 
 #### Without frontend UI
 - Verify Function App deployment. Navigate to the function app overview page and confirm functions are present
@@ -111,7 +107,18 @@ The default pipeline processes PDFs from the azure storage account bronze contai
 - Pipeline should take ~30 sec to execute
 - Results written to gold container of the storage account
 - Monitor progress of pipeline using Log Stream
-- Check for exceptions using a query in App Insights
+
+#### With frontend UI
+- Open Static Web App URL (find link on Static Web App overview page)
+- Upload desired files
+- Update system prompts and user prompts in the Prompt Editor. This will update the backend Cosmos DB, which will be used in the pipeline.
+- Click "Start Workflow" to start the pipeline
+- Messages will populate to indicate the success or failure of the job
+
+### Troubleshooting
+- Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
+- Leverage Log Analytics Workspace to run queries and see exceptions that occurred in the app
+- For deployment issues, use the Development Tools SSH console to inspect the internal file system and get deployment logs
 
 ##  MIT License
 https://opensource.org/license/MIT 
