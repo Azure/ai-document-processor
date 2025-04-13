@@ -57,6 +57,11 @@ resource uaiAppConfig 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-
   tags: tags
 }
 
+//get existing storage account
+resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' existing = {
+  name: storageAccountName
+}
+
 resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   name: functionAppName
   location: location
@@ -90,6 +95,14 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         {
           name: 'AZURE_TENANT_ID'
           value: subscription().tenantId
+        }
+        {
+          name: 'AzureWebJobsStorage'
+          value: concat('DefaultEndpointsProtocol=https;AccountName=', storageAccountName, ';AccountKey=', storageAccount.listkeys('2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)
+        }
+        {
+          name: 'AzureWebJobsSecretStorageType'
+          value: 'files'
         }
         {
           name: 'AzureWebJobsStorage__accountName'

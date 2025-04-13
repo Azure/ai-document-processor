@@ -1,3 +1,6 @@
+import { modelDeploymentInfo, raiPolicyInfo } from './modules/ai_ml/ai-services.bicep'
+import { identityInfo } from './modules/security/managed-identity.bicep'
+
 targetScope = 'subscription'
 
 var tenantId = tenant().tenantId
@@ -22,6 +25,68 @@ param resourceGroupName string
 var _resourceGroupName = !empty(resourceGroupName) ? resourceGroupName : '${abbrs.managementGovernance.resourceGroup}-${environmentName}'
 
 var suffix = uniqueString('${location}${_resourceGroupName}${environmentName}')
+
+@description('Identities to assign roles to.')
+param identities identityInfo[] = union([], [{
+  principalId: principalId
+  principalType: 'User'
+}])
+
+resource contributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.general.contributor
+}
+
+resource appConfigDataOwnerRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.configuration.appConfigurationDataOwner
+}
+
+var appConfigDataOwnerIdentityAssignments = [
+  for identity in identities: {
+    principalId: identity.principalId
+    roleDefinitionId: appConfigDataOwnerRole.id
+    principalType: identity.principalType
+  }
+]
+
+var allConfigDataOwnerIdentityAssignments = concat(appConfigDataOwnerIdentityAssignments, [
+  {
+    principalId: aiMultiServiceManagedIdentity.outputs.principalId
+    roleDefinitionId: appConfigDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
+])
+
+var contributorIdentityAssignments = [
+  for identity in identities: {
+    principalId: identity.principalId
+    roleDefinitionId: contributorRole.id
+    principalType: identity.principalType
+  }
+]
+
+var resourceGroupRoleAssignmentName = '${resourceGroupName}-role'
+module resourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
+  name: resourceGroupRoleAssignmentName
+  scope: resourceGroup
+  params: {
+    roleAssignments: concat(contributorIdentityAssignments, [], allConfigDataOwnerIdentityAssignments)
+  }
+}
+
+resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.security.keyVaultSecretsUser
+}
+
+var keyVaultSecretsUserIdentityAssignments = [
+  for identity in identities: {
+    principalId: identity.principalId
+    roleDefinitionId: keyVaultSecretsUserRole.id
+    principalType: identity.principalType
+  }
+]
 
 @description('Location for the Static Web App and Azure Function App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
 @allowed([
@@ -396,6 +461,7 @@ module keyVault './modules/security/key-vault.bicep' = {
     existingKeyVaultResourceGroupName: resourceGroupName
     secureAppSettings: secureAppSettings
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+    roleAssignments: concat(keyVaultSecretsUserIdentityAssignments, [])
   }
 }
 
@@ -683,6 +749,15 @@ module staticWebAppConfigAccess './modules/rbac/appconfig-access.bicep' = {
   name: 'staticwebappappconfigroleassignment'
   params: {
     resourceName: appConfig.outputs.name
+    principalId: staticWebApp.outputs.identityPrincipalId
+  }
+}
+
+module storageAccountAccess './modules/rbac/blob-dataowner.bicep' = {
+  scope : resourceGroup
+  name: 'staticwebstorageroleassignment'
+  params: {
+    resourceName: storage.outputs.name
     principalId: staticWebApp.outputs.identityPrincipalId
   }
 }

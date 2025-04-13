@@ -28,8 +28,8 @@ param containerImageName string
 @description('Name of the Azure OpenAI completion model for the application. Default is gpt-4o.')
 param chatModelDeployment string = 'gpt-4o'
 
-var abbrs = loadJsonContent('../../abbreviations.json')
-var roles = loadJsonContent('../../roles.json')
+var abbrs = loadJsonContent('../../../abbreviations.json')
+var roles = loadJsonContent('../../../roles.json')
 //var resourceToken = toLower(uniqueString(subscription().id, workloadName, location))
 var resourceToken = toLower(uniqueString(subscription().id, workloadName, location))
 
@@ -248,6 +248,10 @@ module containerApp '../../containers/container-app.bicep' = {
       {
         name: 'AZURE_APPCONFIG_URL'
         value: concat('https://', appConfigurationName, '.azconfig.io')
+      }
+      {
+        name: 'AZURE_APPCONFIG_CONNECTION_STRING'
+        value: ''
       }
       {
         name: '${functionsWebJobStorageVariableName}__accountName'

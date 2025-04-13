@@ -32,19 +32,16 @@ class Configuration:
 
         try:
             app_config_uri = os.environ['APP_CONFIGURATION_URI']
+            self.config = load(endpoint=app_config_uri, credential=self.credential,key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential))
         except Exception as e:
-            raise e
-
-        connection_string = os.environ["AZURE_APPCONFIG_CONNECTION_STRING"]
-
-        try:
-        # Connect to Azure App Configuration using a connection string.
-            self.config = load(connection_string=connection_string, key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential))
-        except Exception as e:
-            print(e)
+            try:
+                connection_string = os.environ["AZURE_APPCONFIG_CONNECTION_STRING"]
+                # Connect to Azure App Configuration using a connection string.
+                self.config = load(connection_string=connection_string, key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential))
+            except Exception as e:
+                raise Exception("Unable to connect to Azure App Configuration. Please check your connection string or endpoint.")
 
     # Connect to Azure App Configuration.
-    #config = load(endpoint=app_config_uri, credential=credential,key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=credential))
 
     def get_value(self, key: str, default: str = None) -> str:
         
