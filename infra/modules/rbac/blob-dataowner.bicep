@@ -1,4 +1,4 @@
-param principalID string
+param principalId string
 param resourceName string
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
@@ -10,11 +10,11 @@ var storageBlobDataOwnerRoleId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' // Stora
 
 // Assign Storage Blob Data Owner role
 resource storageBlobDataOwnerAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid(storageAccount.id, principalID, storageBlobDataOwnerRoleId)
+  name: guid(storageAccount.id, principalId, storageBlobDataOwnerRoleId)
   scope: storageAccount
   properties: {
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataOwnerRoleId)
-    principalId: principalID
+    principalId: principalId
     principalType: 'ServicePrincipal'
   }
 }

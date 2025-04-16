@@ -1,6 +1,7 @@
 @description('That name is the name of our application. It has to be unique.Type a name followed by your resource group name. (<name>-<resourceGroupName>)')
 param aiServicesName string
 param name string
+param identityId string
 
 @description('Location for all resources.')
 param location string = resourceGroup().location
@@ -52,4 +53,6 @@ resource openAIDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023
 }
 
 output AOAI_ENDPOINT string = openAIAccount.properties.endpoint
+output AOAI_API_KEY string = openAIAccount.listKeys().key1
 output name string = openAIAccount.name
+output id string = openAIAccount.id
