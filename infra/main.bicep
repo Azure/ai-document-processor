@@ -324,8 +324,17 @@ param azureAiMultiServicesPe string = ''
 var _azureAiMultiServicesPe = !empty(azureAiMultiServicesPe) ? azureAiMultiServicesPe : '${abbrs.ai.aiMultiServices}${abbrs.networking.privateEndpoint}${suffix}'
 
 @description('The name of the Azure Storage Account Private Endpoint. If left empty, a random name will be generated.')
-param azureStorageAccountPe string = ''
-var _azureStorageAccountPe = !empty(azureStorageAccountPe) ? azureStorageAccountPe : '${abbrs.storage.storageAccount}${abbrs.networking.privateEndpoint}${suffix}'
+param azureBlobStorageAccountPe string = ''
+var _azureBlobStorageAccountPe = !empty(azureBlobStorageAccountPe) ? azureBlobStorageAccountPe : '${abbrs.storage.storageAccount}blob${abbrs.networking.privateEndpoint}${suffix}'
+
+param azureTableStorageAccountPe string = ''
+var _azureTableStorageAccountPe = !empty(azureTableStorageAccountPe) ? azureTableStorageAccountPe : '${abbrs.storage.storageAccount}table${abbrs.networking.privateEndpoint}${suffix}'
+
+param azureQueueStorageAccountPe string = ''
+var _azureQueueStorageAccountPe = !empty(azureQueueStorageAccountPe) ? azureQueueStorageAccountPe : '${abbrs.storage.storageAccount}queue${abbrs.networking.privateEndpoint}${suffix}'
+
+param azureFileStorageAccountPe string = ''
+var _azureFileStorageAccountPe = !empty(azureFileStorageAccountPe) ? azureFileStorageAccountPe : '${abbrs.storage.storageAccount}file${abbrs.networking.privateEndpoint}${suffix}'
 
 @description('The name of the Azure Storage Account Private Endpoint. If left empty, a random name will be generated.')
 param processingFuncAppPe string = ''
@@ -520,21 +529,6 @@ var appSettings = [
     name : 'USE_SAS_TOKEN'
     value: 'false'
   }
-  _networkIsolation ? {
-    name: 'WEBSITE_VNET_ROUTE_ALL'
-    value: '1'
-  } : {
-    name: 'WEBSITE_VNET_ROUTE_ALL'
-    value: '0'
-  }
-  _networkIsolation ? {
-    name: 'WEBSITE_DNS_SERVER'
-    value: '168.63.129.16'
-  } : null
-  {
-    name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
-    value: '7'
-  }
 ]
 
 module vaultDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
@@ -582,6 +576,24 @@ module keyVault './modules/security/key-vault.bicep' = {
     secureAppSettings: secureAppSettings
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     roleAssignments: concat(keyVaultSecretsUserIdentityAssignments, [])
+    subnets: [
+      {
+        name: 'aiSubId'
+        id: _networkIsolation?vnet.outputs.aiSubId:''
+      }
+      {
+        name: 'databaseSubId'
+        id: _networkIsolation?vnet.outputs.databaseSubId:''
+      }
+      {
+        name: 'appIntSubId'
+        id: _networkIsolation?vnet.outputs.appIntSubId:''
+      }
+      {
+        name: 'appServiceSubId'
+        id: _networkIsolation?vnet.outputs.appServicesSubId:''
+      }
+    ]
   }
 }
 
@@ -790,7 +802,37 @@ module blobDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIso
   scope : resourceGroup
   name: 'blob-dnzones'
   params: {
-    dnsZoneName: 'privatelink.blob.core.windows.net' 
+    dnsZoneName: 'privatelink.blob.${environment().suffixes.storage}' 
+    tags: tags
+    virtualNetworkName: _networkIsolation?vnet.outputs.name:''
+  }
+}
+
+module queueDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
+  scope : resourceGroup
+  name: 'queue-dnzones'
+  params: {
+    dnsZoneName: 'privatelink.queue.${environment().suffixes.storage}' 
+    tags: tags
+    virtualNetworkName: _networkIsolation?vnet.outputs.name:''
+  }
+}
+
+module tableDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
+  scope : resourceGroup
+  name: 'table-dnzones'
+  params: {
+    dnsZoneName: 'privatelink.table.${environment().suffixes.storage}' 
+    tags: tags
+    virtualNetworkName: _networkIsolation?vnet.outputs.name:''
+  }
+}
+
+module fileDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
+  scope : resourceGroup
+  name: 'file-dnzones'
+  params: {
+    dnsZoneName: 'privatelink.file.${environment().suffixes.storage}' 
     tags: tags
     virtualNetworkName: _networkIsolation?vnet.outputs.name:''
   }
@@ -820,17 +862,59 @@ module storage './modules/storage/storage-account.bicep' = {
   }  
 }
 
-module storagepe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+module storageblobpe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
   scope : resourceGroup
-  name: 'storagepe'
+  name: 'storage-blob-pe'
   params: {
     location: location
-    name: _azureStorageAccountPe
+    name: _azureBlobStorageAccountPe
     tags: tags
     subnetId: _networkIsolation?vnet.outputs.aiSubId:''
     serviceId: storage.outputs.id
     groupIds: ['blob']
     dnsZoneId: _networkIsolation?blobDnsZone.outputs.id:''
+  }
+}
+
+module storagetablepe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+  scope : resourceGroup
+  name: 'storage-table-pe'
+  params: {
+    location: location
+    name: _azureTableStorageAccountPe
+    tags: tags
+    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: storage.outputs.id
+    groupIds: ['table']
+    dnsZoneId: _networkIsolation?tableDnsZone.outputs.id:''
+  }
+}
+
+module storagequeuepe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+  scope : resourceGroup
+  name: 'storage-queue-pe'
+  params: {
+    location: location
+    name: _azureQueueStorageAccountPe
+    tags: tags
+    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: storage.outputs.id
+    groupIds: ['queue']
+    dnsZoneId: _networkIsolation?queueDnsZone.outputs.id:''
+  }
+}
+
+module storagefilepe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+  scope : resourceGroup
+  name: 'storage-file-pe'
+  params: {
+    location: location
+    name: _azureFileStorageAccountPe
+    tags: tags
+    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
+    serviceId: storage.outputs.id
+    groupIds: ['file']
+    dnsZoneId: _networkIsolation?fileDnsZone.outputs.id:''
   }
 }
 

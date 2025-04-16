@@ -16,6 +16,8 @@ param publicNetworkAccess string = 'Enabled'
 @description('Secret Keys to add to App Configuration')
 param secureAppSettings array = []
 
+param subnets array = []
+
 @description('Key Vault SKU name. Defaults to standard.')
 @allowed([
   'standard'
@@ -67,7 +69,9 @@ resource keyVault 'Microsoft.KeyVault/vaults@2024-04-01-preview' = if (!keyVault
       defaultAction: 'Allow'
       bypass: 'AzureServices'
       ipRules: []
-      virtualNetworkRules: []
+      virtualNetworkRules: [
+        
+      ]
     }
     accessPolicies: []
     enableSoftDelete: enableSoftDelete
