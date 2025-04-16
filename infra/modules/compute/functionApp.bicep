@@ -15,6 +15,7 @@ param location string
 @description('Tags.')
 param tags object
 
+param networkIsolation bool = false
 param staticWebAppUrl string
 
 @description('The language worker runtime to load in the function app.')
@@ -69,6 +70,18 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
     siteConfig: {
       cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com', '${staticWebAppUrl}'] }
       alwaysOn: true
+      ipSecurityRestrictionsDefaultAction : 'Deny'
+      ipSecurityRestrictions: [
+        {
+          ipAddress: 'AzureCloud'
+          tag: 'ServiceTag'
+          action: 'Allow'
+          priority: 100
+          name: 'AllowAzureCloud'
+          headers: {
+          }
+        }
+      ]
       connectionStrings: [
         /*
         {
@@ -141,6 +154,24 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         {
           name: 'APP_CONFIGURATION_URI'
           value: concat('https://', appConfigName, '.azconfig.io')
+        }
+        networkIsolation ? {
+          name: 'WEBSITE_VNET_ROUTE_ALL'
+          value: '1'
+        } : {
+          name: 'WEBSITE_VNET_ROUTE_ALL'
+          value: '0'
+        }
+        networkIsolation ? {
+          name: 'WEBSITE_DNS_SERVER'
+          value: '168.63.129.16'
+        } : {
+          name: 'WEBSITE_DNS_SERVER'
+          value: ''
+        }
+        {
+          name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
+          value: '7'
         }
       ]
       ftpsState: 'FtpsOnly'

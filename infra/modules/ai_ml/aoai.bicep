@@ -19,7 +19,7 @@ param deploymentName string = 'gpt-4o'
 @description('Azure OpenAI model name, e.g. "gpt-35-turbo".')
 param modelName string = 'gpt-4o'
 
-resource openAIAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+resource openAIAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: aiServicesName
   location: location
   identity: {
@@ -32,10 +32,15 @@ resource openAIAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   properties: {
     customSubDomainName: customSubDomainName
     publicNetworkAccess: publicNetworkAccess
+    networkAcls: {
+      defaultAction: 'Allow'
+      virtualNetworkRules: []
+      ipRules: []
+    }
   }
 }
 
-resource openAIDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+resource openAIDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   name: deploymentName
   parent: openAIAccount
   sku: {
