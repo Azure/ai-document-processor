@@ -28,6 +28,13 @@ param dnsEndpointType string = 'Standard'
 param kind string = 'StorageV2'
 param minimumTlsVersion string = 'TLS1_2'
 param containers array = []
+param networkAcls object = {
+  defaultAction: 'Allow'
+  bypass: 'AzureServices'
+  ipRules: []
+  virtualNetworkRules: []
+  resourceAccessRules: []
+}
 
 @export()
 @description('SKU information for Storage Account.')
@@ -96,12 +103,7 @@ resource newStorageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   }
   properties: {
     accessTier: startsWith(sku.name, 'Premium') ? 'Premium' : accessTier
-    networkAcls: {
-      defaultAction: 'Allow'
-      bypass: 'AzureServices'
-      ipRules: []
-      virtualNetworkRules: []
-    }
+    networkAcls: networkAcls
     publicNetworkAccess: publicNetworkAccess
     allowBlobPublicAccess: allowBlobPublicAccess
     allowCrossTenantReplication: allowCrossTenantReplication

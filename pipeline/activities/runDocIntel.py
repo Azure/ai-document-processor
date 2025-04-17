@@ -8,6 +8,7 @@ from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import AnalyzeResult, AnalyzeDocumentRequest
 import base64
 import os
+import requests
 
 from configuration import Configuration
 config = Configuration()
@@ -25,10 +26,14 @@ def extract_text_from_blob(blobObj: dict):
     client = DocumentIntelligenceClient(
         endpoint=endpoint, credential=config.credential
     )
+
+  #Doc Intelligence does not 
+    response = requests.get(url_source=blobObj["url"])
+    file = response.content
     
     poller = client.begin_analyze_document(
         # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
-        "prebuilt-read", AnalyzeDocumentRequest(url_source=blobObj["url"])
+        "prebuilt-read", AnalyzeDocumentRequest(bytes_source=file)
       )
     
     result: AnalyzeResult = poller.result()
