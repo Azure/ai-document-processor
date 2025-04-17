@@ -3,6 +3,9 @@ import logging, json, azure.functions as func
 import requests
 import os
 
+from configuration import Configuration
+config = Configuration()
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     """
     This function is a proxy for the client durable function.
@@ -30,9 +33,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=400
         )
     
-    PROCESSING_FUNCTION_APP_NAME = os.getenv('PROCESSING_FUNCTION_APP_NAME')
+    PROCESSING_FUNCTION_APP_NAME = config.get_value('PROCESSING_FUNCTION_APP_NAME')
+    PROCESSING_FUNCTION_APP_URL = config.get_value('PROCESSING_FUNCTION_APP_URL')
     # URL of the client durable function
-    durable_function_url = f"https://{PROCESSING_FUNCTION_APP_NAME}.azurewebsites.net/api/orchestrators/orchestrator"
+    durable_function_url = f"https://{PROCESSING_FUNCTION_APP_URL}/api/orchestrators/orchestrator"
+    #durable_function_url = f"http://localhost:9071/api/orchestrators/orchestrator"
 
     # Forward the request to the durable function
     try:

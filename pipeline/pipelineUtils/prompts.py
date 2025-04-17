@@ -5,6 +5,8 @@ from pipelineUtils.db import get_prompt_by_id
 import yaml
 import logging
 
+from configuration import Configuration
+config = Configuration()
 
 def load_prompts_from_cosmos():
     """Fetch prompts from Cosmos DB and return as a dictionary."""
@@ -21,7 +23,7 @@ def load_prompts_from_cosmos():
 
 def load_prompts():
     """Fetch prompts JSON from blob storage and return as a dictionary."""
-    prompt_file = os.getenv("PROMPT_FILE")
+    prompt_file = config.get_value("PROMPT_FILE")
     
     if not prompt_file:
         raise ValueError("Environment variable PROMPT_FILE is not set.")

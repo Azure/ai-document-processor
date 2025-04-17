@@ -1,19 +1,18 @@
-param permissions object = { secrets: [ 'get', 'list', 'set', 'delete' ] }
 param principalId string
+param roleDefinitionId string
+param principalType string
 param resourceName string
 
-resource resource 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: resourceName
 }
 
-resource keyVaultAccessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
-  parent: resource
-  name: 'add'
-  properties: {
-    accessPolicies: [ {
-        objectId: principalId
-        tenantId: subscription().tenantId
-        permissions: permissions
-      } ]
+resource assignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+    name: guid(keyVault.id, principalId, roleDefinitionId)
+    scope: keyVault
+    properties: {
+      principalId: principalId
+      roleDefinitionId: roleDefinitionId
+      principalType: principalType
+    }
   }
-}

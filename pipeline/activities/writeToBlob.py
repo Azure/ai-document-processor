@@ -3,6 +3,10 @@ import logging
 from pipelineUtils.blob_functions import list_blobs, get_blob_content, write_to_blob
 import os
 
+from configuration import Configuration
+config = Configuration()
+
+NEXT_STAGE = config.get_value("NEXT_STAGE")
 
 name = "writeToBlob"
 bp = df.Blueprint()
@@ -19,7 +23,7 @@ def extract_text_from_blob(args: dict):
       args['json_bytes'] = args['json_str'].encode('utf-8')
       
       sourcefile = os.path.splitext(os.path.basename(args['blob_name']))[0]
-      result = write_to_blob("gold", f"{sourcefile}-output.json", args['json_bytes'])
+      result = write_to_blob(NEXT_STAGE, f"{sourcefile}-output.json", args['json_bytes'])
       
       if result:
           logging.info(f"Successfully wrote output to blob {args['blob_name']}")
