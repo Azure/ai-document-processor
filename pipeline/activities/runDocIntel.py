@@ -28,7 +28,7 @@ def extract_text_from_blob(blobObj: dict):
     )
 
   #Doc Intelligence does not 
-    response = requests.get(url_source=blobObj["url"])
+    response = requests.get(url=blobObj["url"])
     file = response.content
     
     poller = client.begin_analyze_document(
