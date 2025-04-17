@@ -884,6 +884,20 @@ module storage './modules/storage/storage-account.bicep' = {
       enabled: true
       days: 7
     }
+    networkAcls : {
+      resourceAccessRules :[]
+      bypass: [
+        'AzureServices'
+      ]
+      defaultAction: 'Deny'
+      ipRules : []
+      virtualNetworkRules : [
+        {
+          id: vnet.outputs.aiSubId
+          action: 'Allow'
+        }
+      ]
+    }
   }  
 }
 
@@ -992,6 +1006,7 @@ module processingFunctionApp './modules/compute/functionApp.bicep' = {
     appConfigName: appConfigName
     staticWebAppUrl: '*' //staticWebApp.outputs.defaultHostname
     tags: union(tags , { 'azd-service-name' : 'processing' })
+    networkIsolation: _networkIsolation
   }
 }
 

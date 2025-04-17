@@ -67,9 +67,11 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   tags: tags
   properties: {
     serverFarmId: hostingPlan.id
+    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
     siteConfig: {
       cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com', '${staticWebAppUrl}'] }
       alwaysOn: true
+      publicNetworkAccess: networkIsolation ? null : 'Enabled'
       ipSecurityRestrictionsDefaultAction : 'Deny'
       ipSecurityRestrictions: [
         {

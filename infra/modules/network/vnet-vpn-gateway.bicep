@@ -5,14 +5,25 @@ param tags object = {}
 param gatewayName string = 'vnetGateway'
 param gatewayPublicIPName string = 'vnetGatewayPublicIP'
 
+param vnetAddressPrefix string = '10.0.0.0/23'
 param gatewaySubPrefix string = '10.0.2.0/26'
 
 @description('The SKU of the Gateway. This must be either Standard or HighPerformance to work with OpenVPN')
 @allowed([
   'Standard'
   'HighPerformance'
+  'VpnGw1AZ'
+  'VpnGw2AZ'
+  'VpnGw3AZ'
+  'VpnGw4AZ'
+  'VpnGw5AZ'
+  'VpnGw1'
+  'VpnGw2'
+  'VpnGw3'
+  'VpnGw4'
+  'VpnGw5'
 ])
-param gatewaySku string = 'Standard'
+param gatewaySku string = 'VpnGw1'
 
 @description('Route based (Dynamic Gateway) or Policy based (Static Gateway)')
 @allowed([
@@ -102,6 +113,11 @@ resource vpnGateway 'Microsoft.Network/virtualNetworkGateways@2021-02-01' = {
       aadTenant: tenant
       aadAudience: audience
       aadIssuer: issuer
+    }
+    customRoutes: {
+      addressPrefixes: [
+        vnetAddressPrefix
+      ]
     }
   }
 }
