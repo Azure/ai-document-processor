@@ -191,12 +191,12 @@ resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
 }
 
 // Virtual Network and Subnets
-resource existingVnet 'Microsoft.Network/virtualNetworks@2020-06-01' existing = if (vnetReuse) {
+resource existingVnet 'Microsoft.Network/virtualNetworks@2024-05-01' existing = if (vnetReuse) {
   scope: resourceGroup(existingVnetResourceGroupName)
   name: vnetName
 }
 
-resource newVnet 'Microsoft.Network/virtualNetworks@2020-11-01' = if (!vnetReuse) {
+resource newVnet 'Microsoft.Network/virtualNetworks@2024-05-01' = if (!vnetReuse) {
   name: vnetName
   location: location
   tags: tags

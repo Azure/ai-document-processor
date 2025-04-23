@@ -152,6 +152,11 @@ param vmUserInitialPassword string
 param deployVM bool = true
 var _deployVM = deployVM
 
+@description('Deploy VPN?')
+@allowed([true, false])
+param deployVPN bool = true
+var _deployVPN = deployVPN
+
 @description('Test vm gpt user name. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
 param vmUserName string = ''
 var _vmUserName = !empty(vmUserName) ? vmUserName : 'gptrag'
@@ -592,7 +597,7 @@ module keyVault './modules/security/key-vault.bicep' = {
     secureAppSettings: secureAppSettings
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     roleAssignments: concat(keyVaultSecretsUserIdentityAssignments, [])
-    subnets: [
+    subnets : (_networkIsolation && !_vnetReuse) ? [
       {
         name: 'aiSubId'
         id: _networkIsolation?vnet.outputs.aiSubId:''
@@ -609,7 +614,7 @@ module keyVault './modules/security/key-vault.bicep' = {
         name: 'appServiceSubId'
         id: _networkIsolation?vnet.outputs.appServicesSubId:''
       }
-    ]
+    ] : []
   }
 }
 
@@ -738,7 +743,7 @@ module cosmos './modules/db/cosmos.bicep' = {
   }
 }
 
-module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
+module vnet './modules/network/vnet.bicep' = if (!_vnetReuse) {
   scope : resourceGroup
   name: 'virtual-network'
   params: {
@@ -753,7 +758,7 @@ module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReus
   }
 }
 
-module vpnGateway './modules/network/vnet-vpn-gateway.bicep' = if (_networkIsolation && !_vnetReuse) {
+module vpnGateway './modules/network/vnet-vpn-gateway.bicep' = if (_networkIsolation && !_vnetReuse && _deployVPN) {
   scope : resourceGroup
   name: 'vpn-gateway'
   params: {
@@ -886,17 +891,15 @@ module storage './modules/storage/storage-account.bicep' = {
     }
     networkAcls : {
       resourceAccessRules :[]
-      bypass: [
-        'AzureServices'
-      ]
+      bypass: 'AzureServices'
       defaultAction: 'Deny'
       ipRules : []
-      virtualNetworkRules : [
+      virtualNetworkRules : (_networkIsolation && !_vnetReuse) ? [
         {
           id: vnet.outputs.aiSubId
           action: 'Allow'
         }
-      ]
+      ] : []
     }
   }  
 }
@@ -1342,15 +1345,15 @@ module blobContributor './modules/rbac/blob-contributor.bicep' = if (userPrincip
   }
 }
 
-module testvm './modules/vm/dsvm.bicep' = if (_networkIsolation && !_vnetReuse && _deployVM)  {
+module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse) || _deployVM)  {
   scope : resourceGroup
   name: 'testvm'
   params: {
     location: location
     name: _ztVmName
     tags: tags
-    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    bastionSubId: _networkIsolation?vnet.outputs.bastionSubId:''
+    subnetId: vnet.outputs.aiSubId
+    bastionSubId: vnet.outputs.bastionSubId
     vmUserPassword: vmUserInitialPassword
     vmUserName: _vmUserName
     keyVaultName: keyVault.outputs.name
