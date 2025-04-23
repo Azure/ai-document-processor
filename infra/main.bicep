@@ -16,11 +16,6 @@ var audience = audienceMap[cloud]
 var tenant = uri(environment().authentication.loginEndpoint, tenantId)
 var issuer = 'https://sts.windows.net/${tenantId}/'
 
-
-// Tag settings
-// default required tags for azd deployment
-var azdTags = { 'azd-env-name': environmentName }
-
 @description('Key-value pairs of tags to assign to all resources. The default azd tags are automatically added.')
 param deploymentTags object
 var tags = union(azdTags, deploymentTags)
@@ -28,6 +23,10 @@ var tags = union(azdTags, deploymentTags)
 // Environment name. This is automatically set by the 'azd' tool.
 @description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
 param environmentName string = ''
+
+// Tag settings
+// default required tags for azd deployment
+var azdTags = { 'azd-env-name': environmentName }
 
 var abbrs = loadJsonContent('./abbreviations.json')
 var roles = loadJsonContent('./roles.json')
@@ -1178,6 +1177,7 @@ module storageTableResourceGroupRoleAssignment './modules/security/resource-grou
   }
 }
 
+// Invoke the role assignment module for Storage Queue Data Contributor
 var allstorageAccountContributorIdentityAssignments = concat([], [
   {
     principalId: processingFunctionApp.outputs.identityPrincipalId
@@ -1191,11 +1191,78 @@ var allstorageAccountContributorIdentityAssignments = concat([], [
   }
 ])
 
+
 module storageAccountResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
   name: '${resourceGroupName}-role-4'
   scope: resourceGroup
   params: {
-    roleAssignments: concat(allstorageAccountContributorIdentityAssignments, [])
+    roleAssignments: (userPrincipalId != '') ? concat(allstorageAccountContributorIdentityAssignments, [{
+      principalId: userPrincipalId
+      roleDefinitionId: storageContributorRole.id
+      principalType: 'User'
+    }]) : allstorageAccountContributorIdentityAssignments
+  }
+}
+
+resource cogServicesUserRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.ai.cognitiveServicesUser
+}
+
+var allcogServicesUserIdentityAssignments = concat([], [
+  {
+    principalId: processingFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: cogServicesUserRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: backendFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: cogServicesUserRole.id
+    principalType: 'ServicePrincipal'
+  }
+])
+
+
+module cogServicesUserResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
+  name: '${resourceGroupName}-role-5'
+  scope: resourceGroup
+  params: {
+    roleAssignments: (userPrincipalId != '') ? concat(allcogServicesUserIdentityAssignments, [{
+      principalId: userPrincipalId
+      roleDefinitionId: cogServicesUserRole.id
+      principalType: 'User'
+    }]) : allcogServicesUserIdentityAssignments
+  }
+}
+
+resource cogServicesOpenAIUserRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.ai.cognitiveServicesOpenAIUser
+}
+
+var allcogServicesOpenAIUserIdentityAssignments = concat([], [
+  {
+    principalId: processingFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: cogServicesOpenAIUserRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: backendFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: cogServicesOpenAIUserRole.id
+    principalType: 'ServicePrincipal'
+  }
+])
+
+
+module cogServicesOpenAIUserResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
+  name: '${resourceGroupName}-role-6'
+  scope: resourceGroup
+  params: {
+    roleAssignments: (userPrincipalId != '') ? concat(allcogServicesOpenAIUserIdentityAssignments, [{
+      principalId: userPrincipalId
+      roleDefinitionId: cogServicesOpenAIUserRole.id
+      principalType: 'User'
+    }]) : allcogServicesOpenAIUserIdentityAssignments
   }
 }
 
