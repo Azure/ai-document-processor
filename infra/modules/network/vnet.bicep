@@ -204,6 +204,14 @@ var subnets = [
       networkSecurityGroup: {
         id: aiNsg.id
       }
+      serviceEndpoints: [
+        {
+          service: 'Microsoft.Storage'
+          locations: [
+            location
+          ]
+        }
+      ]
     }
   }
   {
