@@ -82,7 +82,7 @@ param disableLocalAuth bool = true
 @description('Role assignments to create for the Storage Account.')
 param roleAssignments roleAssignmentInfo[] = []
 
-resource existingStorage 'Microsoft.Storage/storageAccounts@2022-05-01' existing  = if (storageReuse && deployStorageAccount) {
+resource existingStorage 'Microsoft.Storage/storageAccounts@2024-01-01' existing  = if (storageReuse && deployStorageAccount) {
   scope: resourceGroup(existingStorageResourceGroupName)
   name: name
 }
