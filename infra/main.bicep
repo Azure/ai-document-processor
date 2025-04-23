@@ -749,6 +749,7 @@ module vnet './modules/network/vnet.bicep' = if (!_vnetReuse) {
     location: location
     vnetName: _vnetName
     vnetReuse: _vnetReuse
+    deployVPN: _deployVPN
     existingVnetResourceGroupName: _azureReuseConfig.existingVnetResourceGroupName
     tags: tags
     vnetAddress: _vnetAddress

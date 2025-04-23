@@ -2,9 +2,12 @@ param vnetName string
 param location string
 param aiSubnetName string = 'aiSubnet'
 param appIntSubnetName string = 'appIntSubnet'
+param gatewaySubnetName string = 'gatewaySubnet'
 param appServicesSubnetName string = 'appServicesSubnet'
 param databaseSubnetName string = 'databaseSubnet'
 param bastionSubnetName string = 'AzureBastionSubnet'
+
+param deployVPN bool = false
 
 param vnetAddress string = '10.0.0.0/23'
 param vnetAddress2 string = '10.0.2.0/23'
@@ -12,6 +15,7 @@ param aiSubnetPrefix string = '10.0.0.0/26'
 param appIntSubnetPrefix string = '10.0.0.128/26'
 param appServicesSubnetPrefix string = '10.0.0.192/26'
 param databaseSubnetPrefix string = '10.0.1.0/26'
+param gatewaySubnetPrefix string = '10.0.2.0/26'
 param bastionSubnetPrefix string = '10.0.0.64/26'
 
 param appServicePlanId string
@@ -28,7 +32,7 @@ param databaseNsgName string = 'database-nsg'
 param bastionNsgName string = 'bastion-nsg'
 
 // Network Security Groups
-resource aiNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+resource aiNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: aiNsgName
   location: location
   tags: tags
@@ -37,7 +41,7 @@ resource aiNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   }
 }
 
-resource appIntNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+resource appIntNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: appIntNsgName
   location: location
   tags: tags
@@ -46,7 +50,7 @@ resource appIntNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   }
 }
 
-resource appServicesNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+resource appServicesNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: appServicesNsgName
   location: location
   tags: tags
@@ -55,7 +59,7 @@ resource appServicesNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   }
 }
 
-resource databaseNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+resource databaseNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: databaseNsgName
   location: location
   tags: tags
@@ -64,7 +68,7 @@ resource databaseNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   }
 }
 
-resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
+resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2024-05-01' = {
   name: bastionNsgName
   location: location
   tags: tags
@@ -190,6 +194,84 @@ resource bastionNsg 'Microsoft.Network/networkSecurityGroups@2020-11-01' = {
   }
 }
 
+var subnets = [
+  {
+    name: aiSubnetName
+    properties: {
+      addressPrefix: aiSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: aiNsg.id
+      }
+    }
+  }
+  {
+    name: appServicesSubnetName
+    properties: {
+      addressPrefix: appServicesSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: appServicesNsg.id
+      }
+    }
+  }
+  {
+    name: databaseSubnetName
+    properties: {
+      addressPrefix: databaseSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: databaseNsg.id
+      }
+    }
+  }
+  {
+    name: bastionSubnetName 
+    properties: {
+      addressPrefix: bastionSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      networkSecurityGroup: {
+        id: bastionNsg.id
+      }
+    }
+  }
+  {
+    name: appIntSubnetName
+    properties: {
+      addressPrefix: appIntSubnetPrefix
+      privateEndpointNetworkPolicies: 'Enabled'
+      privateLinkServiceNetworkPolicies: 'Enabled'
+      delegations: [
+        {
+          id: appServicePlanId
+          name: appServicePlanName
+          properties: {
+            serviceName: 'Microsoft.Web/serverFarms'
+          }
+        }
+      ]
+      networkSecurityGroup: {
+        id: appIntNsg.id
+      }
+    }
+  }
+]
+
+var allSubnets = (deployVPN) ? concat(subnets, [{
+  name: gatewaySubnetName
+  properties: {
+    addressPrefix: gatewaySubnetPrefix
+    privateEndpointNetworkPolicies: 'Enabled'
+    privateLinkServiceNetworkPolicies: 'Enabled'
+    delegations: [
+    ]
+  }
+}]) : subnets
+
 // Virtual Network and Subnets
 resource existingVnet 'Microsoft.Network/virtualNetworks@2024-05-01' existing = if (vnetReuse) {
   scope: resourceGroup(existingVnetResourceGroupName)
@@ -207,72 +289,7 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2024-05-01' = if (!vnetReuse
         vnetAddress2
       ]
     }
-    subnets: [
-      {
-        name: aiSubnetName
-        properties: {
-          addressPrefix: aiSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: aiNsg.id
-          }
-        }
-      }
-      {
-        name: appServicesSubnetName
-        properties: {
-          addressPrefix: appServicesSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: appServicesNsg.id
-          }
-        }
-      }
-      {
-        name: databaseSubnetName
-        properties: {
-          addressPrefix: databaseSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: databaseNsg.id
-          }
-        }
-      }
-      {
-        name: bastionSubnetName 
-        properties: {
-          addressPrefix: bastionSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          networkSecurityGroup: {
-            id: bastionNsg.id
-          }
-        }
-      }
-      {
-        name: appIntSubnetName
-        properties: {
-          addressPrefix: appIntSubnetPrefix
-          privateEndpointNetworkPolicies: 'Enabled'
-          privateLinkServiceNetworkPolicies: 'Enabled'
-          delegations: [
-            {
-              id: appServicePlanId
-              name: appServicePlanName
-              properties: {
-                serviceName: 'Microsoft.Web/serverFarms'
-              }
-            }
-          ]
-          networkSecurityGroup: {
-            id: appIntNsg.id
-          }
-        }
-      }
-    ]
+    subnets: allSubnets
   }
 }
 
