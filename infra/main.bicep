@@ -43,71 +43,6 @@ param identities identityInfo[] = union([], [{
   principalType: 'User'
 }])
 
-resource contributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
-  scope: resourceGroup
-  name: roles.general.contributor
-}
-
-resource appConfigDataOwnerRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
-  scope: resourceGroup
-  name: roles.configuration.appConfigurationDataOwner
-}
-
-var appConfigDataOwnerIdentityAssignments = [
-  for identity in identities: {
-    principalId: identity.principalId
-    roleDefinitionId: appConfigDataOwnerRole.id
-    principalType: identity.principalType
-  }
-]
-
-var allConfigDataOwnerIdentityAssignments = concat(appConfigDataOwnerIdentityAssignments, [
-  {
-    principalId: aiMultiServiceManagedIdentity.outputs.principalId
-    roleDefinitionId: appConfigDataOwnerRole.id
-    principalType: 'ServicePrincipal'
-  }
-  {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: appConfigDataOwnerRole.id
-    principalType: 'ServicePrincipal'
-  }
-  {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: appConfigDataOwnerRole.id
-    principalType: 'ServicePrincipal'
-  }
-])
-
-var contributorIdentityAssignments = [
-  for identity in identities: {
-    principalId: identity.principalId
-    roleDefinitionId: contributorRole.id
-    principalType: identity.principalType
-  }
-]
-
-module resourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
-  name: '${resourceGroupName}-role-appconfig'
-  scope: resourceGroup
-  params: {
-    roleAssignments: concat(contributorIdentityAssignments, [], allConfigDataOwnerIdentityAssignments)
-  }
-}
-
-resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
-  scope: resourceGroup
-  name: roles.security.keyVaultSecretsUser
-}
-
-var keyVaultSecretsUserIdentityAssignments = [
-  for identity in identities: {
-    principalId: identity.principalId
-    roleDefinitionId: keyVaultSecretsUserRole.id
-    principalType: identity.principalType
-  }
-]
-
 @description('Location for the Static Web App and Azure Function App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
 @allowed([
   'centralus'
@@ -1152,7 +1087,7 @@ module storageDataOwnerResourceGroupRoleAssignment './modules/security/resource-
   params: {
     roleAssignments: (userPrincipalId != '') ? concat(allstorageDataOwnerIdentityAssignments, [{
       principalId: userPrincipalId
-      roleDefinitionId: storageContributorRole.id
+      roleDefinitionId: storageDataOwnerRole.id
       principalType: 'User'
     }]) : allstorageDataOwnerIdentityAssignments
   }
@@ -1175,7 +1110,11 @@ module storageQueueResourceGroupRoleAssignment './modules/security/resource-grou
   name: '${resourceGroupName}-role-storage-queue-data'
   scope: resourceGroup
   params: {
-    roleAssignments: concat(allstorageQueueDataIdentityAssignments, [])
+    roleAssignments: (userPrincipalId != '') ? concat(allstorageQueueDataIdentityAssignments, [{
+      principalId: userPrincipalId
+      roleDefinitionId: storageDataOwnerRole.id
+      principalType: 'User'
+    }]) : allstorageQueueDataIdentityAssignments
   }
 }
 
@@ -1196,7 +1135,11 @@ module storageTableResourceGroupRoleAssignment './modules/security/resource-grou
   name: '${resourceGroupName}-role-storage-table'
   scope: resourceGroup
   params: {
-    roleAssignments: concat(allstorageTableDataIdentityAssignments, [])
+    roleAssignments: (userPrincipalId != '') ? concat(allstorageTableDataIdentityAssignments, [{
+      principalId: userPrincipalId
+      roleDefinitionId: storageDataOwnerRole.id
+      principalType: 'User'
+    }]) : allstorageTableDataIdentityAssignments
   }
 }
 
@@ -1288,6 +1231,75 @@ module cogServicesOpenAIUserResourceGroupRoleAssignment './modules/security/reso
     }]) : allcogServicesOpenAIUserIdentityAssignments
   }
 }
+
+resource contributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.general.contributor
+}
+
+resource appConfigDataOwnerRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.configuration.appConfigurationDataOwner
+}
+
+var appConfigDataOwnerIdentityAssignments = [
+  for identity in identities: {
+    principalId: identity.principalId
+    roleDefinitionId: appConfigDataOwnerRole.id
+    principalType: identity.principalType
+  }
+]
+
+var allConfigDataOwnerIdentityAssignments = concat(appConfigDataOwnerIdentityAssignments, [
+  {
+    principalId: aiMultiServiceManagedIdentity.outputs.principalId
+    roleDefinitionId: appConfigDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: processingFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: appConfigDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: backendFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: appConfigDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
+])
+
+var contributorIdentityAssignments = [
+  for identity in identities: {
+    principalId: identity.principalId
+    roleDefinitionId: contributorRole.id
+    principalType: identity.principalType
+  }
+]
+
+module resourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
+  name: '${resourceGroupName}-role-appconfig'
+  scope: resourceGroup
+  params: {
+    roleAssignments: (userPrincipalId != '') ? concat(contributorIdentityAssignments, allConfigDataOwnerIdentityAssignments, [{
+      principalId: userPrincipalId
+      roleDefinitionId: cogServicesOpenAIUserRole.id
+      principalType: 'User'
+    }]) : concat(contributorIdentityAssignments, [], allConfigDataOwnerIdentityAssignments)
+  }
+}
+
+resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.security.keyVaultSecretsUser
+}
+
+var keyVaultSecretsUserIdentityAssignments = [
+  for identity in identities: {
+    principalId: identity.principalId
+    roleDefinitionId: keyVaultSecretsUserRole.id
+    principalType: identity.principalType
+  }
+]
 
 var aiMultiServiceManagedIdentityName = '${abbrs.security.managedIdentity}${abbrs.ai.aiMultiServices}${suffix}'
 module aiMultiServiceManagedIdentity './modules/security/managed-identity.bicep' = {
