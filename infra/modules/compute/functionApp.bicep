@@ -15,6 +15,8 @@ param location string
 @description('Tags.')
 param tags object
 
+param appSettings array = []
+
 param networkIsolation bool = false
 param staticWebAppUrl string
 
@@ -72,7 +74,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
       cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com', '${staticWebAppUrl}'] }
       alwaysOn: true
       publicNetworkAccess: networkIsolation ? null : 'Enabled'
-      ipSecurityRestrictionsDefaultAction : 'Deny'
+      ipSecurityRestrictionsDefaultAction : networkIsolation ? 'Deny' : 'Allow'
       ipSecurityRestrictions: [
         {
           ipAddress: 'AzureCloud'
@@ -93,7 +95,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         }
           */
       ]
-      appSettings: [
+      appSettings: concat(appSettings, [
         {
           name: 'AZURE_CLIENT_ID'
           value: uaiAppConfig.properties.clientId
@@ -175,7 +177,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
           value: '7'
         }
-      ]
+      ])
       ftpsState: 'FtpsOnly'
       linuxFxVersion: 'Python|3.11'
       minTlsVersion: '1.2'
