@@ -67,6 +67,16 @@ var allConfigDataOwnerIdentityAssignments = concat(appConfigDataOwnerIdentityAss
     roleDefinitionId: appConfigDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
+  {
+    principalId: processingFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: appConfigDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: backendFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: appConfigDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
 ])
 
 var contributorIdentityAssignments = [
@@ -78,7 +88,7 @@ var contributorIdentityAssignments = [
 ]
 
 module resourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
-  name: '${resourceGroupName}-role-1'
+  name: '${resourceGroupName}-role-appconfig'
   scope: resourceGroup
   params: {
     roleAssignments: concat(contributorIdentityAssignments, [], allConfigDataOwnerIdentityAssignments)
@@ -892,7 +902,7 @@ module storage './modules/storage/storage-account.bicep' = {
     networkAcls : {
       resourceAccessRules :[]
       bypass: 'AzureServices'
-      defaultAction: 'Deny'
+      defaultAction: _networkIsolation?'Deny':'Allow'
       ipRules : []
       virtualNetworkRules : (_networkIsolation && !_vnetReuse) ? [
         {
@@ -1010,15 +1020,9 @@ module processingFunctionApp './modules/compute/functionApp.bicep' = {
     staticWebAppUrl: '*' //staticWebApp.outputs.defaultHostname
     tags: union(tags , { 'azd-service-name' : 'processing' })
     networkIsolation: _networkIsolation
-  }
-}
-
-module processingFunctionAppConfigAccess './modules/rbac/appconfig-access.bicep' = {
-  scope : resourceGroup
-  name: 'procfunctionappconfigroleassignment'
-  params: {
-    resourceName: appConfig.outputs.name
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    appSettings: [
+      
+    ]
   }
 }
 
@@ -1050,15 +1054,16 @@ module backendFunctionApp './modules/compute/functionApp.bicep' = {
     appConfigName: appConfig.outputs.name
     staticWebAppUrl: '*' 
     tags: union(tags , { 'azd-service-name' : 'backend' })
-  }
-}
-
-module functionAppConfigAccess './modules/rbac/appconfig-access.bicep' = {
-  scope : resourceGroup
-  name: 'backendfunctionappconfigroleassignment'
-  params: {
-    resourceName: appConfig.outputs.name
-    principalId: backendFunctionApp.outputs.identityPrincipalId
+    appSettings: [
+     {
+      name: 'USE_SAS_TOKEN'
+      value: 'true'
+     } 
+     {
+      name: 'SAS_TOKEN_EXPIRY_HOURS'
+      value: '1'
+     } 
+    ]
   }
 }
 
@@ -1103,27 +1108,14 @@ module staticWebApp './modules/apps/staticWebapp.bicep' = if (deployStaticWebApp
   }
 }
 
-module staticWebAppConfigAccess './modules/rbac/appconfig-access.bicep' = {
-  scope : resourceGroup
-  name: 'staticwebappappconfigroleassignment'
-  params: {
-    resourceName: appConfig.outputs.name
-    principalId: staticWebApp.outputs.identityPrincipalId
-  }
-}
-
-module storageAccountAccess './modules/rbac/blob-dataowner.bicep' = {
-  scope : resourceGroup
-  name: 'staticwebstorageroleassignment'
-  params: {
-    resourceName: storage.outputs.name
-    principalId: staticWebApp.outputs.identityPrincipalId
-  }
-}
-
 resource storageContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   scope: resourceGroup
   name: roles.storage.storageAccountContributor
+}
+
+resource storageDataOwnerRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.storage.storageBlobDataOwner
 }
 
 resource storageQueueDataRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
@@ -1134,6 +1126,32 @@ resource storageQueueDataRole 'Microsoft.Authorization/roleDefinitions@2022-05-0
 resource storageTableDataRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   scope: resourceGroup
   name: roles.storage.storageTableDataContributor
+}
+
+var allstorageDataOwnerIdentityAssignments = concat([], [
+  {
+    principalId: processingFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: storageDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: backendFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: storageDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: staticWebApp.outputs.identityPrincipalId
+    roleDefinitionId: storageDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
+])
+
+module storageDataOwnerResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
+  name: '${resourceGroupName}-role-storage-data-owner'
+  scope: resourceGroup
+  params: {
+    roleAssignments: concat(allstorageDataOwnerIdentityAssignments, [])
+  }
 }
 
 var allstorageQueueDataIdentityAssignments = concat([], [
@@ -1150,7 +1168,7 @@ var allstorageQueueDataIdentityAssignments = concat([], [
 ])
 
 module storageQueueResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
-  name: '${resourceGroupName}-role-2'
+  name: '${resourceGroupName}-role-storage-queue-data'
   scope: resourceGroup
   params: {
     roleAssignments: concat(allstorageQueueDataIdentityAssignments, [])
@@ -1171,7 +1189,7 @@ var allstorageTableDataIdentityAssignments = concat([], [
 ])
 
 module storageTableResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
-  name: '${resourceGroupName}-role-5'
+  name: '${resourceGroupName}-role-storage-table'
   scope: resourceGroup
   params: {
     roleAssignments: concat(allstorageTableDataIdentityAssignments, [])
@@ -1194,7 +1212,7 @@ var allstorageAccountContributorIdentityAssignments = concat([], [
 
 
 module storageAccountResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
-  name: '${resourceGroupName}-role-4'
+  name: '${resourceGroupName}-role-storage-account-contributor'
   scope: resourceGroup
   params: {
     roleAssignments: (userPrincipalId != '') ? concat(allstorageAccountContributorIdentityAssignments, [{
@@ -1225,7 +1243,7 @@ var allcogServicesUserIdentityAssignments = concat([], [
 
 
 module cogServicesUserResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
-  name: '${resourceGroupName}-role-6'
+  name: '${resourceGroupName}-role-cog-services-user'
   scope: resourceGroup
   params: {
     roleAssignments: (userPrincipalId != '') ? concat(allcogServicesUserIdentityAssignments, [{
@@ -1256,7 +1274,7 @@ var allcogServicesOpenAIUserIdentityAssignments = concat([], [
 
 
 module cogServicesOpenAIUserResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
-  name: '${resourceGroupName}-role-7'
+  name: '${resourceGroupName}-role-cog-services-openai-user'
   scope: resourceGroup
   params: {
     roleAssignments: (userPrincipalId != '') ? concat(allcogServicesOpenAIUserIdentityAssignments, [{
@@ -1330,86 +1348,6 @@ module cosmosContributorUser './modules/rbac/cosmos-contributor.bicep' = {
   params: {
     principalId: userPrincipalId
     resourceName: cosmos.outputs.accountName
-  }
-}
-
-// Invoke the role assignment module for Storage Blob Data Contributor
-module procblobStorageDataContributor './modules/rbac/blob-contributor.bicep' = {
-  name: 'procblobRoleAssignmentModule'
-  scope: resourceGroup // Role assignment applies to the storage account
-  params: {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
-    resourceName: processingFunctionApp.outputs.storageAccountName
-  }
-}
-
-// Invoke the role assignment module for Storage Blob Data Contributor
-module blobStorageDataContributor './modules/rbac/blob-contributor.bicep' = {
-  name: 'blobRoleAssignmentModule'
-  scope: resourceGroup // Role assignment applies to the storage account
-  params: {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    resourceName: backendFunctionApp.outputs.storageAccountName
-  }
-}
-
-// Invoke the role assignment module for Storage Queue Data Contributor
-module blobQueueContributor './modules/rbac/blob-queue-contributor.bicep' = {
-  name: 'blobQueueAssignmentModule'
-  scope: resourceGroup // Role assignment applies to the storage account
-  params: {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    resourceName: backendFunctionApp.outputs.storageAccountName
-  }
-}
-
-// Invoke the role assignment module for Storage Queue Data Contributor
-module aiServicesOpenAIUser './modules/rbac/cogservices-openai-user.bicep' = {
-  name: 'aiServicesOpenAIUserModule'
-  scope: resourceGroup // Role assignment applies to the storage account
-  params: {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    resourceName: aoai.outputs.name
-  }
-}
-
-module aiServicesOpenAIUser2 './modules/rbac/cogservices-openai-user.bicep' = {
-  name: 'aiServicesOpenAIUserModule2'
-  scope: resourceGroup // Role assignment applies to the storage account
-  params: {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
-    resourceName: aoai.outputs.name
-  }
-}
-
-// Invoke the role assignment module for Azure AI Multi Services User
-module aiMultiServicesUser './modules/rbac/aiservices-user.bicep' = {
-  name: 'aiMultiServicesUserModule'
-  scope: resourceGroup // Role assignment applies to the Azure Function App
-  params: {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    resourceName: aiMultiServices.outputs.aiMultiServicesName
-  }
-}
-
-// Invoke the role assignment module for Azure AI Multi Services User
-module aiMultiServicesUser2 './modules/rbac/aiservices-user.bicep' = {
-  name: 'aiMultiServicesUserModule2'
-  scope: resourceGroup // Role assignment applies to the Azure Function App
-  params: {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
-    resourceName: aiMultiServices.outputs.aiMultiServicesName
-  }
-}
-
-// Invoke the role assignment module for Storage Queue Data Contributor
-module blobContributor './modules/rbac/blob-contributor.bicep' = if (userPrincipalId != '') {
-  name: 'blobStorageUserAssignmentModule'
-  scope: resourceGroup // Role assignment applies to the storage account
-  params: {
-    principalId: userPrincipalId
-    resourceName: backendFunctionApp.outputs.storageAccountName
-    principalType: 'User'
   }
 }
 

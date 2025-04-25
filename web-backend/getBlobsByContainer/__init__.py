@@ -9,8 +9,8 @@ from configuration import Configuration
 config = Configuration()
 
 STORAGE_ACCOUNT_NAME = config.get_value("STORAGE_ACCOUNT_NAME")
-USE_SAS_TOKEN = config.get_value("USE_SAS_TOKEN") == "true"
-HOURS = int(config.get_value("SAS_TOKEN_EXPIRY_HOURS"))
+USE_SAS_TOKEN = config.get_value("USE_SAS_TOKEN", "true") == "true"
+HOURS = int(config.get_value("SAS_TOKEN_EXPIRY_HOURS", "1"))
 
 # Create BlobServiceClient using Managed Identity
 blob_service_client = BlobServiceClient(
