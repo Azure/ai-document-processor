@@ -19,8 +19,11 @@ wsl --update
 mkdir C:\github
 cd C:\github
 git clone https://github.com/givenscj/ai-document-processor
-
 cd ai-document-processor
+
+$tenantId = "your_tenant_id"
+az login --use-device-code --tenant $tenantId
+azd auth login --tenant-id $tenantId
 
 npm install -g @azure/static-web-apps-cli
 npm install -g typescript
