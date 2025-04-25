@@ -148,12 +148,12 @@ param vmUserInitialPassword string
 
 @description('Deploy VM? If yes it will create the virtual machine to access the network isolated environment in the zero trust configuration.')
 @allowed([true, false])
-param deployVM bool = true
+param deployVM bool = false
 var _deployVM = deployVM
 
 @description('Deploy VPN?')
 @allowed([true, false])
-param deployVPN bool = true
+param deployVPN bool = false
 var _deployVPN = deployVPN
 
 @description('Test vm gpt user name. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
@@ -742,7 +742,7 @@ module cosmos './modules/db/cosmos.bicep' = {
   }
 }
 
-module vnet './modules/network/vnet.bicep' = if (!_vnetReuse) {
+module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
   scope : resourceGroup
   name: 'virtual-network'
   params: {
@@ -1225,7 +1225,7 @@ var allcogServicesUserIdentityAssignments = concat([], [
 
 
 module cogServicesUserResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
-  name: '${resourceGroupName}-role-5'
+  name: '${resourceGroupName}-role-6'
   scope: resourceGroup
   params: {
     roleAssignments: (userPrincipalId != '') ? concat(allcogServicesUserIdentityAssignments, [{
@@ -1256,7 +1256,7 @@ var allcogServicesOpenAIUserIdentityAssignments = concat([], [
 
 
 module cogServicesOpenAIUserResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
-  name: '${resourceGroupName}-role-6'
+  name: '${resourceGroupName}-role-7'
   scope: resourceGroup
   params: {
     roleAssignments: (userPrincipalId != '') ? concat(allcogServicesOpenAIUserIdentityAssignments, [{

@@ -19,7 +19,13 @@
       },
       "deploymentTags":{
         "value": {}
-      }    ,
+      },
+      "deployVM": {
+        "value": "${AZURE_DEPLOY_VM}"
+      },
+      "deployVPN": {
+        "value": "${AZURE_DEPLOY_VPN}"
+      },
       "azureReuseConfig":{
         "value": {
           "aoaiReuse": "${AOAI_REUSE}",
