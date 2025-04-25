@@ -976,7 +976,7 @@ module hostingPlan './modules/compute/hosting-plan.bicep' = {
   params: {
     name: hostingPlanName
     location: location
-    sku: 'S1'
+    sku: 'S3'
     tags: tags
   }
 }
@@ -1150,7 +1150,11 @@ module storageDataOwnerResourceGroupRoleAssignment './modules/security/resource-
   name: '${resourceGroupName}-role-storage-data-owner'
   scope: resourceGroup
   params: {
-    roleAssignments: concat(allstorageDataOwnerIdentityAssignments, [])
+    roleAssignments: (userPrincipalId != '') ? concat(allstorageDataOwnerIdentityAssignments, [{
+      principalId: userPrincipalId
+      roleDefinitionId: storageContributorRole.id
+      principalType: 'User'
+    }]) : allstorageDataOwnerIdentityAssignments
   }
 }
 
