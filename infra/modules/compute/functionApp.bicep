@@ -75,7 +75,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
       alwaysOn: true
       publicNetworkAccess: networkIsolation ? null : 'Enabled'
       ipSecurityRestrictionsDefaultAction : networkIsolation ? 'Deny' : 'Allow'
-      ipSecurityRestrictions: [
+      ipSecurityRestrictions: networkIsolation ? [
         {
           ipAddress: 'AzureCloud'
           tag: 'ServiceTag'
@@ -85,7 +85,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           headers: {
           }
         }
-      ]
+      ] : null
       connectionStrings: [
         /*
         {
