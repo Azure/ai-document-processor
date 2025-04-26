@@ -1,6 +1,6 @@
 @description('The name of the function app that you wish to create.')
 param appName string
-
+param appPurpose string
 @description('Storage Account type')
 @allowed([
   'Standard_LRS'
@@ -158,6 +158,11 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         {
           name: 'APP_CONFIGURATION_URI'
           value: concat('https://', appConfigName, '.azconfig.io')
+        }        
+        (appPurpose == 'processing') ? {
+          name: 'AzureWebJobsFeatureFlag'
+          value: 'EnableWorkerIndexing'
+        } : {
         }
         networkIsolation ? {
           name: 'WEBSITE_VNET_ROUTE_ALL'
