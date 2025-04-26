@@ -117,113 +117,7 @@ var _ztVmName = !empty(ztVmName) ? ztVmName : 'testvm-${suffix}'
 param vmKeyVaultSecName string = ''
 var _vmKeyVaultSecName = !empty(vmKeyVaultSecName) ? vmKeyVaultSecName : 'vmUserInitialPassword'
 
-@description('Settings to define reusable resources.')
-var _azureReuseConfigDefaults = {
-  aoaiReuse: false
-  existingAoaiResourceGroupName: ''
-  existingAoaiName: ''
-  appInsightsReuse: false
-  existingAppInsightsResourceGroupName: ''
-  existingAppInsightsName: ''
-  appConfigReuse: false
-  existingAppConfigResourceGroupName: ''
-  existingAppConfigName: ''
-  logAnalyticsWorkspaceReuse: false  
-  existingLogAnalyticsWorkspaceResourceId: ''
-  appServicePlanReuse: false
-  existingAppServicePlanResourceGroupName: ''
-  existingAppServicePlanName: ''
-  aiSearchReuse: false
-  existingAiSearchResourceGroupName: ''
-  existingAiSearchName: ''
-  aiServicesReuse: false
-  existingAiServicesResourceGroupName: ''
-  existingAiServicesName: ''
-  cosmosDbReuse: false
-  existingCosmosDbResourceGroupName: ''
-  existingCosmosDbAccountName: ''
-  existingCosmosDbDatabaseName : ''
-  keyVaultReuse: false
-  existingKeyVaultResourceGroupName: ''
-  existingKeyVaultName: ''
-  storageReuse: false
-  existingStorageResourceGroupName: ''
-  existingStorageName: ''
-  vnetReuse: false
-  existingVnetResourceGroupName: ''
-  existingVnetName: ''
-  orchestratorFunctionAppReuse: false
-  existingOrchestratorFunctionAppResourceGroupName: ''
-  existingOrchestratorFunctionAppName: ''  
-  dataIngestionFunctionAppReuse: false
-  existingDataIngestionFunctionAppResourceGroupName: ''
-  existingDataIngestionFunctionAppName: ''  
-  appServiceReuse: false
-  existingAppServiceName: ''
-  existingAppServiceNameResourceGroupName: ''
-  orchestratorFunctionAppStorageReuse: false
-  existingOrchestratorFunctionAppStorageName: ''
-  existingOrchestratorFunctionAppStorageResourceGroupName: ''
-  dataIngestionFunctionAppStorageReuse: false
-  existingDataIngestionFunctionAppStorageName: ''
-  existingDataIngestionFunctionAppStorageResourceGroupName: ''  
-}
 
-param azureReuseConfig object = {} 
-var _azureReuseConfig = union(_azureReuseConfigDefaults, {
-    aoaiReuse: (empty(azureReuseConfig.aoaiReuse) ? _azureReuseConfigDefaults.aoaiReuse : toLower(azureReuseConfig.aoaiReuse) == 'true')
-    existingAoaiResourceGroupName: (empty(azureReuseConfig.existingAoaiResourceGroupName) ? _azureReuseConfigDefaults.existingAoaiResourceGroupName : azureReuseConfig.existingAoaiResourceGroupName)
-    existingAoaiName: (empty(azureReuseConfig.existingAoaiName) ? _azureReuseConfigDefaults.existingAoaiName : azureReuseConfig.existingAoaiName)
-    aiServicesReuse: (empty(azureReuseConfig.aiServicesReuse) ? _azureReuseConfigDefaults.aiServicesReuse : toLower(azureReuseConfig.aiServicesReuse) == 'true')
-    existingAiServicesResourceGroupName: (empty(azureReuseConfig.existingAiServicesResourceGroupName) ? _azureReuseConfigDefaults.existingAiServicesResourceGroupName : azureReuseConfig.existingAiServicesResourceGroupName)
-    existingAiServicesName: (empty(azureReuseConfig.existingAiServicesName) ? _azureReuseConfigDefaults.existingAiServicesName : azureReuseConfig.existingAiServicesName)
-    //appConfigReuse: (empty(azureReuseConfig.appConfigReuse) ? _azureReuseConfigDefaults.appConfigReuse : toLower(azureReuseConfig.appConfigReuse) == 'true')
-    //existingAppConfigResourceGroupName: (empty(azureReuseConfig.existingAppConfigResourceGroupName) ? _azureReuseConfigDefaults.existingAppConfigResourceGroupName : azureReuseConfig.existingAppConfigResourceGroupName)
-    //existingAppConfigName: (empty(azureReuseConfig.existingAppConfigName) ? _azureReuseConfigDefaults.existingAppConfigName : azureReuseConfig.existingAppConfigName)
-    appConfigReuse: false
-    existingAppConfigResourceGroupName: ''
-    existingAppConfigName: ''
-    appInsightsReuse: (empty(azureReuseConfig.appInsightsReuse) ? _azureReuseConfigDefaults.appInsightsReuse : toLower(azureReuseConfig.appInsightsReuse) == 'true')
-    existingAppInsightsResourceGroupName: (empty(azureReuseConfig.existingAppInsightsResourceGroupName) ? _azureReuseConfigDefaults.existingAppInsightsResourceGroupName : azureReuseConfig.existingAppInsightsResourceGroupName)
-    existingAppInsightsName: (empty(azureReuseConfig.existingAppInsightsName) ? _azureReuseConfigDefaults.existingAppInsightsName : azureReuseConfig.existingAppInsightsName)
-    logAnalyticsWorkspaceReuse: (empty(azureReuseConfig.logAnalyticsWorkspaceReuse) ? _azureReuseConfigDefaults.logAnalyticsWorkspaceReuse : toLower(azureReuseConfig.logAnalyticsWorkspaceReuse) == 'true')
-    existingLogAnalyticsWorkspaceResourceId: (empty(azureReuseConfig.existingLogAnalyticsWorkspaceResourceId) ? _azureReuseConfigDefaults.existingLogAnalyticsWorkspaceResourceId : azureReuseConfig.existingLogAnalyticsWorkspaceResourceId)
-    appServicePlanReuse: (empty(azureReuseConfig.appServicePlanReuse) ? _azureReuseConfigDefaults.appServicePlanReuse : toLower(azureReuseConfig.appServicePlanReuse) == 'true')
-    existingAppServicePlanResourceGroupName: (empty(azureReuseConfig.existingAppServicePlanResourceGroupName) ? _azureReuseConfigDefaults.existingAppServicePlanResourceGroupName : azureReuseConfig.existingAppServicePlanResourceGroupName)
-    existingAppServicePlanName: (empty(azureReuseConfig.existingAppServicePlanName) ? _azureReuseConfigDefaults.existingAppServicePlanName : azureReuseConfig.existingAppServicePlanName)
-    aiSearchReuse: (empty(azureReuseConfig.aiSearchReuse) ? _azureReuseConfigDefaults.aiSearchReuse : toLower(azureReuseConfig.aiSearchReuse) == 'true')
-    existingAiSearchResourceGroupName: (empty(azureReuseConfig.existingAiSearchResourceGroupName) ? _azureReuseConfigDefaults.existingAiSearchResourceGroupName : azureReuseConfig.existingAiSearchResourceGroupName)
-    existingAiSearchName: (empty(azureReuseConfig.existingAiSearchName) ? _azureReuseConfigDefaults.existingAiSearchName : azureReuseConfig.existingAiSearchName)
-    cosmosDbReuse: (empty(azureReuseConfig.cosmosDbReuse) ? _azureReuseConfigDefaults.cosmosDbReuse : toLower(azureReuseConfig.cosmosDbReuse) == 'true')
-    existingCosmosDbResourceGroupName: (empty(azureReuseConfig.existingCosmosDbResourceGroupName) ? _azureReuseConfigDefaults.existingCosmosDbResourceGroupName : azureReuseConfig.existingCosmosDbResourceGroupName)
-    existingCosmosDbAccountName: (empty(azureReuseConfig.existingCosmosDbAccountName) ? _azureReuseConfigDefaults.existingCosmosDbAccountName : azureReuseConfig.existingCosmosDbAccountName)
-    existingCosmosDbDatabaseName: (empty(azureReuseConfig.existingCosmosDbDatabaseName) ? _azureReuseConfigDefaults.existingCosmosDbDatabaseName : azureReuseConfig.existingCosmosDbDatabaseName)
-    keyVaultReuse: (empty(azureReuseConfig.keyVaultReuse) ? _azureReuseConfigDefaults.keyVaultReuse : toLower(azureReuseConfig.keyVaultReuse) == 'true')
-    existingKeyVaultResourceGroupName: (empty(azureReuseConfig.existingKeyVaultResourceGroupName) ? _azureReuseConfigDefaults.existingKeyVaultResourceGroupName : azureReuseConfig.existingKeyVaultResourceGroupName)
-    existingKeyVaultName: (empty(azureReuseConfig.existingKeyVaultName) ? _azureReuseConfigDefaults.existingKeyVaultName : azureReuseConfig.existingKeyVaultName)
-    storageReuse: (empty(azureReuseConfig.storageReuse) ? _azureReuseConfigDefaults.storageReuse : toLower(azureReuseConfig.storageReuse) == 'true')
-    existingStorageResourceGroupName: (empty(azureReuseConfig.existingStorageResourceGroupName) ? _azureReuseConfigDefaults.existingStorageResourceGroupName : azureReuseConfig.existingStorageResourceGroupName)
-    existingStorageName: (empty(azureReuseConfig.existingStorageName) ? _azureReuseConfigDefaults.existingStorageName : azureReuseConfig.existingStorageName)
-    vnetReuse: (empty(azureReuseConfig.vnetReuse) ? _azureReuseConfigDefaults.vnetReuse : toLower(azureReuseConfig.vnetReuse) == 'true')
-    existingVnetResourceGroupName: (empty(azureReuseConfig.existingVnetResourceGroupName) ? _azureReuseConfigDefaults.existingVnetResourceGroupName : azureReuseConfig.existingVnetResourceGroupName)
-    existingVnetName: (empty(azureReuseConfig.existingVnetName) ? _azureReuseConfigDefaults.existingVnetName : azureReuseConfig.existingVnetName)
-    orchestratorFunctionAppReuse: (empty(azureReuseConfig.orchestratorFunctionAppReuse) ? _azureReuseConfigDefaults.orchestratorFunctionAppReuse: toLower(azureReuseConfig.orchestratorFunctionAppReuse) == 'true')
-    existingOrchestratorFunctionAppResourceGroupName: (empty(azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppResourceGroupName : azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName)
-    existingOrchestratorFunctionAppName: (empty(azureReuseConfig.existingOrchestratorFunctionAppName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppName : azureReuseConfig.existingOrchestratorFunctionAppName)
-    dataIngestionFunctionAppReuse: (empty(azureReuseConfig.dataIngestionFunctionAppReuse) ? _azureReuseConfigDefaults.dataIngestionFunctionAppReuse : toLower(azureReuseConfig.dataIngestionFunctionAppReuse) == 'true')
-    existingDataIngestionFunctionAppResourceGroupName: (empty(azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppResourceGroupName : azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName)
-    existingDataIngestionFunctionAppName: (empty(azureReuseConfig.existingDataIngestionFunctionAppName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppName : azureReuseConfig.existingDataIngestionFunctionAppName)
-    appServiceReuse: (empty(azureReuseConfig.appServiceReuse) ? _azureReuseConfigDefaults.appServiceReuse : toLower(azureReuseConfig.appServiceReuse) == 'true')
-    existingAppServiceName: (empty(azureReuseConfig.existingAppServiceName) ? _azureReuseConfigDefaults.existingAppServiceName : azureReuseConfig.existingAppServiceName)
-    existingAppServiceNameResourceGroupName: (empty(azureReuseConfig.existingAppServiceNameResourceGroupName) ? _azureReuseConfigDefaults.existingAppServiceNameResourceGroupName : azureReuseConfig.existingAppServiceNameResourceGroupName)
-    orchestratorFunctionAppStorageReuse: (empty(azureReuseConfig.orchestratorFunctionAppStorageReuse) ? _azureReuseConfigDefaults.orchestratorFunctionAppStorageReuse : toLower(azureReuseConfig.orchestratorFunctionAppStorageReuse) == 'true')
-    existingOrchestratorFunctionAppStorageName: (empty(azureReuseConfig.existingOrchestratorFunctionAppStorageName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppStorageName : azureReuseConfig.existingOrchestratorFunctionAppStorageName)
-    existingOrchestratorFunctionAppStorageResourceGroupName: (empty(azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppStorageResourceGroupName : azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName)
-    dataIngestionFunctionAppStorageReuse: (empty(azureReuseConfig.dataIngestionFunctionAppStorageReuse) ? _azureReuseConfigDefaults.dataIngestionFunctionAppStorageReuse : toLower(azureReuseConfig.dataIngestionFunctionAppStorageReuse) == 'true')
-    existingDataIngestionFunctionAppStorageName: (empty(azureReuseConfig.existingDataIngestionFunctionAppStorageName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppStorageName : azureReuseConfig.existingDataIngestionFunctionAppStorageName)
-    existingDataIngestionFunctionAppStorageResourceGroupName: (empty(azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppStorageResourceGroupName : azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName)
-  }
-)
 
 // flag that indicates if we're reusing a vnet
 var _vnetReuse = _azureReuseConfig.vnetReuse
@@ -592,7 +486,7 @@ module keyVaultAccessPolicies './modules/rbac/keyvault-access-policy.bicep' = {
       secrets: [ 'get', 'list', 'set', 'delete' ]
     }
     principalId: processingFunctionApp.outputs.identityPrincipalId
-    resourceName: keyVaultName
+    resourceName: keyVault.outputs.name
   }
 }
 
@@ -946,6 +840,7 @@ module processingFunctionApp './modules/compute/functionApp.bicep' = {
   name: processingFunctionAppName
   params: {
     appName: processingFunctionAppName
+    appPurpose: 'processing'
     location: location
     hostingPlanName : hostingPlanName
     applicationInsightsName: appInsights.outputs.name
@@ -981,6 +876,7 @@ module backendFunctionApp './modules/compute/functionApp.bicep' = {
   name: webBackEndFunctionAppName
   params: {
     appName: webBackEndFunctionAppName
+    appPurpose: 'backend'
     location: location
     storageAccountName: storageAccountName
     hostingPlanName : hostingPlanName
@@ -1407,3 +1303,112 @@ output PROCESSING_FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
 output PROCESSING_FUNCTION_URL string = processingFunctionApp.outputs.uri
 output WEB_BACKEND_FUNCTION_APP_NAME string = deployStaticWebApp ? backendFunctionApp.outputs.name : ''
 output WEB_BACKEND_FUNCTION_URL string = deployStaticWebApp ? backendFunctionApp.outputs.uri : ''
+
+// Resue details
+@description('Settings to define reusable resources.')
+var _azureReuseConfigDefaults = {
+  aoaiReuse: false
+  existingAoaiResourceGroupName: ''
+  existingAoaiName: ''
+  appInsightsReuse: false
+  existingAppInsightsResourceGroupName: ''
+  existingAppInsightsName: ''
+  appConfigReuse: false
+  existingAppConfigResourceGroupName: ''
+  existingAppConfigName: ''
+  logAnalyticsWorkspaceReuse: false  
+  existingLogAnalyticsWorkspaceResourceId: ''
+  appServicePlanReuse: false
+  existingAppServicePlanResourceGroupName: ''
+  existingAppServicePlanName: ''
+  aiSearchReuse: false
+  existingAiSearchResourceGroupName: ''
+  existingAiSearchName: ''
+  aiServicesReuse: false
+  existingAiServicesResourceGroupName: ''
+  existingAiServicesName: ''
+  cosmosDbReuse: false
+  existingCosmosDbResourceGroupName: ''
+  existingCosmosDbAccountName: ''
+  existingCosmosDbDatabaseName : ''
+  keyVaultReuse: false
+  existingKeyVaultResourceGroupName: ''
+  existingKeyVaultName: ''
+  storageReuse: false
+  existingStorageResourceGroupName: ''
+  existingStorageName: ''
+  vnetReuse: false
+  existingVnetResourceGroupName: ''
+  existingVnetName: ''
+  orchestratorFunctionAppReuse: false
+  existingOrchestratorFunctionAppResourceGroupName: ''
+  existingOrchestratorFunctionAppName: ''  
+  dataIngestionFunctionAppReuse: false
+  existingDataIngestionFunctionAppResourceGroupName: ''
+  existingDataIngestionFunctionAppName: ''  
+  appServiceReuse: false
+  existingAppServiceName: ''
+  existingAppServiceNameResourceGroupName: ''
+  orchestratorFunctionAppStorageReuse: false
+  existingOrchestratorFunctionAppStorageName: ''
+  existingOrchestratorFunctionAppStorageResourceGroupName: ''
+  dataIngestionFunctionAppStorageReuse: false
+  existingDataIngestionFunctionAppStorageName: ''
+  existingDataIngestionFunctionAppStorageResourceGroupName: ''  
+}
+
+param azureReuseConfig object = {} 
+var _azureReuseConfig = union(_azureReuseConfigDefaults, {
+    aoaiReuse: (empty(azureReuseConfig.aoaiReuse) ? _azureReuseConfigDefaults.aoaiReuse : toLower(azureReuseConfig.aoaiReuse) == 'true')
+    existingAoaiResourceGroupName: (empty(azureReuseConfig.existingAoaiResourceGroupName) ? _azureReuseConfigDefaults.existingAoaiResourceGroupName : azureReuseConfig.existingAoaiResourceGroupName)
+    existingAoaiName: (empty(azureReuseConfig.existingAoaiName) ? _azureReuseConfigDefaults.existingAoaiName : azureReuseConfig.existingAoaiName)
+    aiServicesReuse: (empty(azureReuseConfig.aiServicesReuse) ? _azureReuseConfigDefaults.aiServicesReuse : toLower(azureReuseConfig.aiServicesReuse) == 'true')
+    existingAiServicesResourceGroupName: (empty(azureReuseConfig.existingAiServicesResourceGroupName) ? _azureReuseConfigDefaults.existingAiServicesResourceGroupName : azureReuseConfig.existingAiServicesResourceGroupName)
+    existingAiServicesName: (empty(azureReuseConfig.existingAiServicesName) ? _azureReuseConfigDefaults.existingAiServicesName : azureReuseConfig.existingAiServicesName)
+    //appConfigReuse: (empty(azureReuseConfig.appConfigReuse) ? _azureReuseConfigDefaults.appConfigReuse : toLower(azureReuseConfig.appConfigReuse) == 'true')
+    //existingAppConfigResourceGroupName: (empty(azureReuseConfig.existingAppConfigResourceGroupName) ? _azureReuseConfigDefaults.existingAppConfigResourceGroupName : azureReuseConfig.existingAppConfigResourceGroupName)
+    //existingAppConfigName: (empty(azureReuseConfig.existingAppConfigName) ? _azureReuseConfigDefaults.existingAppConfigName : azureReuseConfig.existingAppConfigName)
+    appConfigReuse: false
+    existingAppConfigResourceGroupName: ''
+    existingAppConfigName: ''
+    appInsightsReuse: (empty(azureReuseConfig.appInsightsReuse) ? _azureReuseConfigDefaults.appInsightsReuse : toLower(azureReuseConfig.appInsightsReuse) == 'true')
+    existingAppInsightsResourceGroupName: (empty(azureReuseConfig.existingAppInsightsResourceGroupName) ? _azureReuseConfigDefaults.existingAppInsightsResourceGroupName : azureReuseConfig.existingAppInsightsResourceGroupName)
+    existingAppInsightsName: (empty(azureReuseConfig.existingAppInsightsName) ? _azureReuseConfigDefaults.existingAppInsightsName : azureReuseConfig.existingAppInsightsName)
+    logAnalyticsWorkspaceReuse: (empty(azureReuseConfig.logAnalyticsWorkspaceReuse) ? _azureReuseConfigDefaults.logAnalyticsWorkspaceReuse : toLower(azureReuseConfig.logAnalyticsWorkspaceReuse) == 'true')
+    existingLogAnalyticsWorkspaceResourceId: (empty(azureReuseConfig.existingLogAnalyticsWorkspaceResourceId) ? _azureReuseConfigDefaults.existingLogAnalyticsWorkspaceResourceId : azureReuseConfig.existingLogAnalyticsWorkspaceResourceId)
+    appServicePlanReuse: (empty(azureReuseConfig.appServicePlanReuse) ? _azureReuseConfigDefaults.appServicePlanReuse : toLower(azureReuseConfig.appServicePlanReuse) == 'true')
+    existingAppServicePlanResourceGroupName: (empty(azureReuseConfig.existingAppServicePlanResourceGroupName) ? _azureReuseConfigDefaults.existingAppServicePlanResourceGroupName : azureReuseConfig.existingAppServicePlanResourceGroupName)
+    existingAppServicePlanName: (empty(azureReuseConfig.existingAppServicePlanName) ? _azureReuseConfigDefaults.existingAppServicePlanName : azureReuseConfig.existingAppServicePlanName)
+    aiSearchReuse: (empty(azureReuseConfig.aiSearchReuse) ? _azureReuseConfigDefaults.aiSearchReuse : toLower(azureReuseConfig.aiSearchReuse) == 'true')
+    existingAiSearchResourceGroupName: (empty(azureReuseConfig.existingAiSearchResourceGroupName) ? _azureReuseConfigDefaults.existingAiSearchResourceGroupName : azureReuseConfig.existingAiSearchResourceGroupName)
+    existingAiSearchName: (empty(azureReuseConfig.existingAiSearchName) ? _azureReuseConfigDefaults.existingAiSearchName : azureReuseConfig.existingAiSearchName)
+    cosmosDbReuse: (empty(azureReuseConfig.cosmosDbReuse) ? _azureReuseConfigDefaults.cosmosDbReuse : toLower(azureReuseConfig.cosmosDbReuse) == 'true')
+    existingCosmosDbResourceGroupName: (empty(azureReuseConfig.existingCosmosDbResourceGroupName) ? _azureReuseConfigDefaults.existingCosmosDbResourceGroupName : azureReuseConfig.existingCosmosDbResourceGroupName)
+    existingCosmosDbAccountName: (empty(azureReuseConfig.existingCosmosDbAccountName) ? _azureReuseConfigDefaults.existingCosmosDbAccountName : azureReuseConfig.existingCosmosDbAccountName)
+    existingCosmosDbDatabaseName: (empty(azureReuseConfig.existingCosmosDbDatabaseName) ? _azureReuseConfigDefaults.existingCosmosDbDatabaseName : azureReuseConfig.existingCosmosDbDatabaseName)
+    keyVaultReuse: (empty(azureReuseConfig.keyVaultReuse) ? _azureReuseConfigDefaults.keyVaultReuse : toLower(azureReuseConfig.keyVaultReuse) == 'true')
+    existingKeyVaultResourceGroupName: (empty(azureReuseConfig.existingKeyVaultResourceGroupName) ? _azureReuseConfigDefaults.existingKeyVaultResourceGroupName : azureReuseConfig.existingKeyVaultResourceGroupName)
+    existingKeyVaultName: (empty(azureReuseConfig.existingKeyVaultName) ? _azureReuseConfigDefaults.existingKeyVaultName : azureReuseConfig.existingKeyVaultName)
+    storageReuse: (empty(azureReuseConfig.storageReuse) ? _azureReuseConfigDefaults.storageReuse : toLower(azureReuseConfig.storageReuse) == 'true')
+    existingStorageResourceGroupName: (empty(azureReuseConfig.existingStorageResourceGroupName) ? _azureReuseConfigDefaults.existingStorageResourceGroupName : azureReuseConfig.existingStorageResourceGroupName)
+    existingStorageName: (empty(azureReuseConfig.existingStorageName) ? _azureReuseConfigDefaults.existingStorageName : azureReuseConfig.existingStorageName)
+    vnetReuse: (empty(azureReuseConfig.vnetReuse) ? _azureReuseConfigDefaults.vnetReuse : toLower(azureReuseConfig.vnetReuse) == 'true')
+    existingVnetResourceGroupName: (empty(azureReuseConfig.existingVnetResourceGroupName) ? _azureReuseConfigDefaults.existingVnetResourceGroupName : azureReuseConfig.existingVnetResourceGroupName)
+    existingVnetName: (empty(azureReuseConfig.existingVnetName) ? _azureReuseConfigDefaults.existingVnetName : azureReuseConfig.existingVnetName)
+    orchestratorFunctionAppReuse: (empty(azureReuseConfig.orchestratorFunctionAppReuse) ? _azureReuseConfigDefaults.orchestratorFunctionAppReuse: toLower(azureReuseConfig.orchestratorFunctionAppReuse) == 'true')
+    existingOrchestratorFunctionAppResourceGroupName: (empty(azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppResourceGroupName : azureReuseConfig.existingOrchestratorFunctionAppResourceGroupName)
+    existingOrchestratorFunctionAppName: (empty(azureReuseConfig.existingOrchestratorFunctionAppName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppName : azureReuseConfig.existingOrchestratorFunctionAppName)
+    dataIngestionFunctionAppReuse: (empty(azureReuseConfig.dataIngestionFunctionAppReuse) ? _azureReuseConfigDefaults.dataIngestionFunctionAppReuse : toLower(azureReuseConfig.dataIngestionFunctionAppReuse) == 'true')
+    existingDataIngestionFunctionAppResourceGroupName: (empty(azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppResourceGroupName : azureReuseConfig.existingDataIngestionFunctionAppResourceGroupName)
+    existingDataIngestionFunctionAppName: (empty(azureReuseConfig.existingDataIngestionFunctionAppName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppName : azureReuseConfig.existingDataIngestionFunctionAppName)
+    appServiceReuse: (empty(azureReuseConfig.appServiceReuse) ? _azureReuseConfigDefaults.appServiceReuse : toLower(azureReuseConfig.appServiceReuse) == 'true')
+    existingAppServiceName: (empty(azureReuseConfig.existingAppServiceName) ? _azureReuseConfigDefaults.existingAppServiceName : azureReuseConfig.existingAppServiceName)
+    existingAppServiceNameResourceGroupName: (empty(azureReuseConfig.existingAppServiceNameResourceGroupName) ? _azureReuseConfigDefaults.existingAppServiceNameResourceGroupName : azureReuseConfig.existingAppServiceNameResourceGroupName)
+    orchestratorFunctionAppStorageReuse: (empty(azureReuseConfig.orchestratorFunctionAppStorageReuse) ? _azureReuseConfigDefaults.orchestratorFunctionAppStorageReuse : toLower(azureReuseConfig.orchestratorFunctionAppStorageReuse) == 'true')
+    existingOrchestratorFunctionAppStorageName: (empty(azureReuseConfig.existingOrchestratorFunctionAppStorageName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppStorageName : azureReuseConfig.existingOrchestratorFunctionAppStorageName)
+    existingOrchestratorFunctionAppStorageResourceGroupName: (empty(azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName) ? _azureReuseConfigDefaults.existingOrchestratorFunctionAppStorageResourceGroupName : azureReuseConfig.existingOrchestratorFunctionAppStorageResourceGroupName)
+    dataIngestionFunctionAppStorageReuse: (empty(azureReuseConfig.dataIngestionFunctionAppStorageReuse) ? _azureReuseConfigDefaults.dataIngestionFunctionAppStorageReuse : toLower(azureReuseConfig.dataIngestionFunctionAppStorageReuse) == 'true')
+    existingDataIngestionFunctionAppStorageName: (empty(azureReuseConfig.existingDataIngestionFunctionAppStorageName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppStorageName : azureReuseConfig.existingDataIngestionFunctionAppStorageName)
+    existingDataIngestionFunctionAppStorageResourceGroupName: (empty(azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName) ? _azureReuseConfigDefaults.existingDataIngestionFunctionAppStorageResourceGroupName : azureReuseConfig.existingDataIngestionFunctionAppStorageResourceGroupName)
+  }
+)

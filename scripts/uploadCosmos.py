@@ -7,21 +7,19 @@ import uuid
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
-from configuration import Configuration
-config = Configuration()
-
 # Retrieve Cosmos DB settings from environment variables
-COSMOS_DB_URI = config.get_value("COSMOS_DB_URI").strip('"')
-COSMOS_DB_DATABASE = config.get_value("COSMOS_DB_PROMPTS_DB").strip('"')
-COSMOS_DB_PROMPTS_CONTAINER = config.get_value("COSMOS_DB_PROMPTS_CONTAINER").strip('"')
-COSMOS_DB_CONFIG_CONTAINER = config.get_value("COSMOS_DB_CONFIG_CONTAINER").strip('"')
+COSMOS_DB_URI = os.environ.get("COSMOS_DB_URI").strip('"')
+COSMOS_DB_DATABASE = os.environ.get("COSMOS_DB_PROMPTS_DB").strip('"')
+COSMOS_DB_PROMPTS_CONTAINER = os.environ.get("COSMOS_DB_PROMPTS_CONTAINER").strip('"')
+COSMOS_DB_CONFIG_CONTAINER = os.environ.get("COSMOS_DB_CONFIG_CONTAINER").strip('"')
 
 print(COSMOS_DB_URI)
 print(COSMOS_DB_DATABASE)
 print(COSMOS_DB_CONFIG_CONTAINER)
 # Initialize Cosmos DB client using Managed Identity credentials
 # DefaultAzureCredential will use the managed identity assigned to your Function App.
-client = CosmosClient(COSMOS_DB_URI, credential=config.credential)
+credential = DefaultAzureCredential()
+client = CosmosClient(COSMOS_DB_URI, credential=credential)
 database = client.get_database_client(COSMOS_DB_DATABASE)
 prompts_container = database.get_container_client(COSMOS_DB_PROMPTS_CONTAINER)
 config_container = database.get_container_client(COSMOS_DB_CONFIG_CONTAINER)

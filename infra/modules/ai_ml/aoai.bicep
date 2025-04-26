@@ -48,6 +48,9 @@ resource openAIDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024
     capacity: 30
 
   }
+  dependsOn: [
+    openAIAccount
+  ]
   properties: {
     model: {
       format: 'OpenAI'
