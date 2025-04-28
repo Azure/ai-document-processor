@@ -1,0 +1,1269 @@
+2025/04/26 13:45:31 main.go:56: azd version: 1.14.0 (commit c928795c47f27d1e997c217147dc649054ac05c8)
+2025/04/26 13:45:31 main.go:214: using cached latest version: 1.14.0 (expires on: 2025-04-27T16:09:30Z)
+2025/04/26 13:45:31 project.go:151: Reading project from file '/home/markremmey/adp/azure.yaml'
+2025/04/26 13:45:31 middleware.go:111: running middleware 'debug'
+2025/04/26 13:45:31 middleware.go:111: running middleware 'ux'
+2025/04/26 13:45:31 middleware.go:111: running middleware 'telemetry'
+2025/04/26 13:45:31 telemetry.go:46: TraceID: a56deacc6ffd9a10ae324810a8096a0c
+2025/04/26 13:45:31 middleware.go:111: running middleware 'hooks'
+2025/04/26 13:45:31 project.go:151: Reading project from file '/home/markremmey/adp/azure.yaml'
+2025/04/26 13:45:31 hooks.go:151: service 'backend' does not require any command hooks.
+2025/04/26 13:45:31 hooks.go:151: service 'processing' does not require any command hooks.
+2025/04/26 13:45:31 hooks.go:151: service 'web' does not require any command hooks.
+2025/04/26 13:45:31 middleware.go:111: running middleware 'extensions'
+2025/04/26 13:45:31 service_manager.go:578: Using swa-cli for build and deploy because swa-cli.config.json was found in the service path
+
+Deploying services (azd deploy)
+
+Deploying service backend
+Deploying service backend (Copying deployment package)
+Deploying service backend (Compressing deployment artifacts)
+2025/04/26 13:45:31 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+2025/04/26 13:45:31 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.ResourceGroupsClient/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:45:31 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/171.615579ms, OpTime=171.816733ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.ResourceGroupsClient/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 274
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:45:31 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: 9b5c5843-26a8-49ce-a290-6bb41acbddd9
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+
+2025/04/26 13:45:31 main.go:50: Retry: response 200
+2025/04/26 13:45:31 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:45:31 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/resources?%24filter=REDACTED&api-version=2021-04-01
+2025/04/26 13:45:31 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/resources?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.Client/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:45:31 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/173.193573ms, OpTime=173.503788ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/resources?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.Client/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 702
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:45:32 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: bf0780f8-2ef8-482c-9b45-37cdf1b92605
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+
+2025/04/26 13:45:31 main.go:50: Retry: response 200
+2025/04/26 13:45:31 main.go:50: Retry: exit due to non-retriable status code
+Deploying service backend (Uploading deployment package)
+2025/04/26 13:45:31 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-webbackend-fwzpbniiu3sma?api-version=2023-01-01
+2025/04/26 13:45:31 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-webbackend-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:45:32 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/227.998312ms, OpTime=228.163492ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-webbackend-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 8001
+   Content-Type: application/json
+   Date: Sat, 26 Apr 2025 17:45:32 GMT
+   Etag: "1DBB6D0EFD925C0"
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Aspnet-Version: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: 4e1fde2e-331f-4336-acd8-b0f2f57ab6b7
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+   X-Powered-By: REDACTED
+
+2025/04/26 13:45:32 main.go:50: Retry: response 200
+2025/04/26 13:45:32 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:45:32 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/serverfarms/asp-fwzpbniiu3sma?api-version=2023-01-01
+2025/04/26 13:45:32 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/serverfarms/asp-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:45:32 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/217.946369ms, OpTime=218.108454ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/serverfarms/asp-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 1616
+   Content-Type: application/json
+   Date: Sat, 26 Apr 2025 17:45:32 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Aspnet-Version: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: 8fdd2e89-d739-4c13-b561-0ab70d435df4
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+   X-Powered-By: REDACTED
+
+2025/04/26 13:45:32 main.go:50: Retry: response 200
+2025/04/26 13:45:32 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:45:32 main.go:50: Retry: =====> Try=1 for POST https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net/api/zipdeploy?isAsync=REDACTED
+2025/04/26 13:45:32 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   POST https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net/api/zipdeploy?isAsync=REDACTED
+   Accept: application/json
+   Authorization: REDACTED
+   Content-Length: 16064
+   Content-Type: application/octet-stream
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:45:33 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/932.750137ms, OpTime=932.821931ms) -- RESPONSE RECEIVED
+   POST https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net/api/zipdeploy?isAsync=REDACTED
+   Accept: application/json
+   Authorization: REDACTED
+   Content-Length: 16064
+   Content-Type: application/octet-stream
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Length: 0
+   Date: Sat, 26 Apr 2025 17:45:33 GMT
+   Location: REDACTED
+   Retryafter: REDACTED
+   Scm-Deployment-Id: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+
+2025/04/26 13:45:33 main.go:50: Retry: response 202
+2025/04/26 13:45:33 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:45:33 main.go:50: LongRunningOperation: BEGIN PollUntilDone() for *azsdk.deployPollingHandler
+2025/04/26 13:45:33 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:45:33 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:45:33 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/177.831446ms, OpTime=177.846257ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:45:33 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:45:33 main.go:50: Retry: response 202
+2025/04/26 13:45:33 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:45:33 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:45:43 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:45:43 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:45:43 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/228.792746ms, OpTime=228.832404ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:45:44 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:45:43 main.go:50: Retry: response 202
+2025/04/26 13:45:43 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:45:43 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:45:53 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:45:53 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:45:54 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/184.355536ms, OpTime=184.389826ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:45:54 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:45:54 main.go:50: Retry: response 202
+2025/04/26 13:45:54 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:45:54 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:46:04 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:46:04 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:46:04 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/185.116493ms, OpTime=185.149113ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:46:04 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:46:04 main.go:50: Retry: response 202
+2025/04/26 13:46:04 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:46:04 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:46:14 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:46:14 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:46:14 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/304.865268ms, OpTime=304.907195ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:46:14 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:46:14 main.go:50: Retry: response 202
+2025/04/26 13:46:14 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:46:14 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:46:24 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:46:24 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:46:25 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/599.35352ms, OpTime=599.406439ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:46:25 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:46:25 main.go:50: Retry: response 202
+2025/04/26 13:46:25 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:46:25 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:46:35 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:46:35 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:46:35 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/186.806244ms, OpTime=186.855383ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:46:35 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:46:35 main.go:50: Retry: response 202
+2025/04/26 13:46:35 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:46:35 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:46:45 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:46:45 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:46:45 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/170.007199ms, OpTime=170.043536ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:46:45 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:46:45 main.go:50: Retry: response 202
+2025/04/26 13:46:45 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:46:45 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:46:55 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:46:55 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:46:55 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/187.309226ms, OpTime=187.364905ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:46:55 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:46:55 main.go:50: Retry: response 202
+2025/04/26 13:46:55 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:46:55 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:47:05 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:47:05 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:05 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/278.063117ms, OpTime=278.089814ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:47:06 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:47:05 main.go:50: Retry: response 202
+2025/04/26 13:47:05 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:05 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:47:15 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:47:15 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:16 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/271.952691ms, OpTime=271.992065ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:47:16 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:47:16 main.go:50: Retry: response 202
+2025/04/26 13:47:16 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:16 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:47:26 main.go:50: Retry: =====> Try=1 for GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:47:26 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:26 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/363.178277ms, OpTime=363.233962ms) -- RESPONSE RECEIVED
+   GET https://func-webbackend-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:47:26 GMT
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:47:26 main.go:50: Retry: response 200
+2025/04/26 13:47:26 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:26 main.go:50: LongRunningOperation: END PollUntilDone() for *azsdk.deployPollingHandler: succeeded, total time: 1m53.177163657s
+Deploying service backend (Fetching endpoints for function app)
+2025/04/26 13:47:26 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-webbackend-fwzpbniiu3sma?api-version=2023-01-01
+2025/04/26 13:47:26 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-webbackend-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:27 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/382.056906ms, OpTime=382.23718ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-webbackend-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 8001
+   Content-Type: application/json
+   Date: Sat, 26 Apr 2025 17:47:26 GMT
+   Etag: "1DBB6D0EFD925C0"
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Aspnet-Version: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: 61886b20-1b75-44b8-86eb-472880eefb32
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+   X-Powered-By: REDACTED
+
+2025/04/26 13:47:27 main.go:50: Retry: response 200
+2025/04/26 13:47:27 main.go:50: Retry: exit due to non-retriable status code
+  (✓) Done: Deploying service backend
+  - Endpoint: https://func-webbackend-fwzpbniiu3sma.azurewebsites.net/
+
+Deploying service processing
+Deploying service processing (Copying deployment package)
+Deploying service processing (Compressing deployment artifacts)
+2025/04/26 13:47:27 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+2025/04/26 13:47:27 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.ResourceGroupsClient/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:27 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/46.486876ms, OpTime=46.568116ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.ResourceGroupsClient/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 274
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:47:26 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: 2c2e93d0-62f0-400f-86af-d3b870a9abe7
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+
+2025/04/26 13:47:27 main.go:50: Retry: response 200
+2025/04/26 13:47:27 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:27 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/resources?%24filter=REDACTED&api-version=2021-04-01
+2025/04/26 13:47:27 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/resources?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.Client/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:27 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/314.583937ms, OpTime=314.762341ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/resources?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.Client/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 1262
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:47:27 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: 282a1717-3ca0-4639-85ee-5e86b272bd34
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+
+2025/04/26 13:47:27 main.go:50: Retry: response 200
+2025/04/26 13:47:27 main.go:50: Retry: exit due to non-retriable status code
+Deploying service processing (Uploading deployment package)
+2025/04/26 13:47:27 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-processing-fwzpbniiu3sma?api-version=2023-01-01
+2025/04/26 13:47:27 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-processing-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:27 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/258.239694ms, OpTime=258.433722ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-processing-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 9127
+   Content-Type: application/json
+   Date: Sat, 26 Apr 2025 17:47:27 GMT
+   Etag: "1DBB6D233EDBA0B"
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Aspnet-Version: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: cc3b8eec-9176-4b6e-b069-e1a14675d3f3
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+   X-Powered-By: REDACTED
+
+2025/04/26 13:47:27 main.go:50: Retry: response 200
+2025/04/26 13:47:27 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:27 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/serverfarms/asp-fwzpbniiu3sma?api-version=2023-01-01
+2025/04/26 13:47:27 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/serverfarms/asp-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:28 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/256.230286ms, OpTime=256.878705ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/serverfarms/asp-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 1616
+   Content-Type: application/json
+   Date: Sat, 26 Apr 2025 17:47:27 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Aspnet-Version: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: c9910378-e65b-4bc9-b3cc-291d75ff6360
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+   X-Powered-By: REDACTED
+
+2025/04/26 13:47:28 main.go:50: Retry: response 200
+2025/04/26 13:47:28 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:28 main.go:50: Retry: =====> Try=1 for POST https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net/api/zipdeploy?isAsync=REDACTED
+2025/04/26 13:47:28 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   POST https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net/api/zipdeploy?isAsync=REDACTED
+   Accept: application/json
+   Authorization: REDACTED
+   Content-Length: 12304
+   Content-Type: application/octet-stream
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:29 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/1.456395805s, OpTime=1.456518843s) -- RESPONSE RECEIVED
+   POST https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net/api/zipdeploy?isAsync=REDACTED
+   Accept: application/json
+   Authorization: REDACTED
+   Content-Length: 12304
+   Content-Type: application/octet-stream
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Length: 0
+   Date: Sat, 26 Apr 2025 17:47:29 GMT
+   Location: REDACTED
+   Retryafter: REDACTED
+   Scm-Deployment-Id: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+
+2025/04/26 13:47:29 main.go:50: Retry: response 202
+2025/04/26 13:47:29 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:29 main.go:50: LongRunningOperation: BEGIN PollUntilDone() for *azsdk.deployPollingHandler
+2025/04/26 13:47:29 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:47:29 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:29 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/284.649226ms, OpTime=284.674397ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:47:29 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:47:29 main.go:50: Retry: response 202
+2025/04/26 13:47:29 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:29 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:47:39 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:47:39 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:40 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/257.974868ms, OpTime=258.001635ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:47:39 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:47:40 main.go:50: Retry: response 202
+2025/04/26 13:47:40 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:40 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:47:50 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:47:50 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:47:50 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/335.032661ms, OpTime=335.061874ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:47:50 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:47:50 main.go:50: Retry: response 202
+2025/04/26 13:47:50 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:47:50 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:48:00 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:48:00 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:48:00 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/193.749195ms, OpTime=193.786944ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:48:00 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:48:00 main.go:50: Retry: response 202
+2025/04/26 13:48:00 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:48:00 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:48:10 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:48:10 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:48:10 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/204.83729ms, OpTime=204.874243ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:48:10 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:48:10 main.go:50: Retry: response 202
+2025/04/26 13:48:10 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:48:10 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:48:20 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:48:20 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:48:21 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/378.89718ms, OpTime=378.940207ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:48:20 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:48:21 main.go:50: Retry: response 202
+2025/04/26 13:48:21 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:48:21 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:48:31 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:48:31 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:48:31 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/174.434922ms, OpTime=174.471611ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:48:31 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:48:31 main.go:50: Retry: response 202
+2025/04/26 13:48:31 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:48:31 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:48:41 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:48:41 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:48:41 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/307.212311ms, OpTime=307.233396ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:48:41 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:48:41 main.go:50: Retry: response 202
+2025/04/26 13:48:41 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:48:41 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:48:51 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:48:51 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:48:52 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/386.269829ms, OpTime=386.328382ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 202 Accepted
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:48:51 GMT
+   Location: REDACTED
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:48:52 main.go:50: Retry: response 202
+2025/04/26 13:48:52 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:48:52 main.go:50: LongRunningOperation: delay for 10s
+2025/04/26 13:49:02 main.go:50: Retry: =====> Try=1 for GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+2025/04/26 13:49:02 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:49:02 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/185.934066ms, OpTime=185.98781ms) -- RESPONSE RECEIVED
+   GET https://func-processing-fwzpbniiu3sma.scm.azurewebsites.net:443/api/deployments/latest?deployer=REDACTED&time=REDACTED
+   Authorization: REDACTED
+   User-Agent: azsdk-go-zip-deploy/1.0.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:49:02 GMT
+   Server: Kestrel
+   Set-Cookie: REDACTED
+   Vary: REDACTED
+
+2025/04/26 13:49:02 main.go:50: Retry: response 200
+2025/04/26 13:49:02 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:49:02 main.go:50: LongRunningOperation: END PollUntilDone() for *azsdk.deployPollingHandler: succeeded, total time: 1m32.730376245s
+Deploying service processing (Fetching endpoints for function app)
+2025/04/26 13:49:02 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-processing-fwzpbniiu3sma?api-version=2023-01-01
+2025/04/26 13:49:02 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-processing-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:49:04 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/2.265703756s, OpTime=2.265845926s) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/sites/func-processing-fwzpbniiu3sma?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 9127
+   Content-Type: application/json
+   Date: Sat, 26 Apr 2025 17:49:04 GMT
+   Etag: "1DBB6D233EDBA0B"
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Aspnet-Version: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: b2dc0e0c-dba0-46ee-a518-322399847da1
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+   X-Powered-By: REDACTED
+
+2025/04/26 13:49:04 main.go:50: Retry: response 200
+2025/04/26 13:49:04 main.go:50: Retry: exit due to non-retriable status code
+  (✓) Done: Deploying service processing
+  - Endpoint: https://func-processing-fwzpbniiu3sma.azurewebsites.net/
+
+2025/04/26 13:49:04 service_manager.go:578: Using swa-cli for build and deploy because swa-cli.config.json was found in the service path
+2025/04/26 13:49:04 service_manager.go:578: Using swa-cli for build and deploy because swa-cli.config.json was found in the service path
+2025/04/26 13:49:16 command_runner.go:310: Run exec: 'npx -y @azure/static-web-apps-cli@2.0.1 build -V' , exit code: 0
+-------------------------------------stdout-------------------------------------------
+
+Welcome to Azure Static Web Apps CLI (2.0.1)
+
+Using configuration "ai-document-processor" from file:
+  /home/markremmey/adp/frontend/swa-cli.config.json
+
+Build configuration:
+- App location: .
+- API location: 
+- Output location: dist
+- App build command: npm run build
+- API build command: 
+Building app with npm run build in . ...
+
+> my-azure-storage-ui@0.0.0 build
+> tsc -b && vite build
+
+vite v6.0.6 building for production...
+transforming...
+✓ 931 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.47 kB │ gzip:   0.30 kB
+dist/assets/index-BairVh1e.css    0.89 kB │ gzip:   0.48 kB
+dist/assets/index-BccVOWHK.js   380.63 kB │ gzip: 118.07 kB
+✓ built in 3.87s
+Deploying service web
+2025/04/26 13:49:16 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+2025/04/26 13:49:16 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.ResourceGroupsClient/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:49:16 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/42.434945ms, OpTime=42.535173ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.ResourceGroupsClient/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 274
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:49:16 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: 68e094cb-5ce8-41a3-b364-27b3584829c6
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+
+2025/04/26 13:49:16 main.go:50: Retry: response 200
+2025/04/26 13:49:16 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:49:16 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/resources?%24filter=REDACTED&api-version=2021-04-01
+2025/04/26 13:49:16 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/resources?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.Client/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:49:16 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/133.056593ms, OpTime=133.184117ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/resources?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.Client/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 617
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:49:16 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: 1d5db3be-9540-4bf6-b16a-adccf6ea47bc
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+
+2025/04/26 13:49:16 main.go:50: Retry: response 200
+2025/04/26 13:49:16 main.go:50: Retry: exit due to non-retriable status code
+Deploying service web (Retrieving deployment token)
+2025/04/26 13:49:16 main.go:50: Retry: =====> Try=1 for POST https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/staticSites/stapp-fwzpbniiu3sma/listSecrets?api-version=2023-01-01
+2025/04/26 13:49:16 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   POST https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/staticSites/stapp-fwzpbniiu3sma/listSecrets?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:49:16 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/173.58747ms, OpTime=173.703797ms) -- RESPONSE RECEIVED
+   POST https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/staticSites/stapp-fwzpbniiu3sma/listSecrets?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 381
+   Content-Type: application/json
+   Date: Sat, 26 Apr 2025 17:49:17 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Aspnet-Version: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Operation-Identifier: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Writes: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Writes: REDACTED
+   X-Ms-Request-Id: 6825e1c7-a042-4e05-b9c4-876a50051f60
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+   X-Powered-By: REDACTED
+
+2025/04/26 13:49:16 main.go:50: Retry: response 200
+2025/04/26 13:49:16 main.go:50: Retry: exit due to non-retriable status code
+2025/04/26 13:49:16 swa.go:72: SWA Deploy: TenantId: 16b3c013-d300-468d-ac64-7eda0820b6d3, SubscriptionId: 253f778b-553f-4871-b143-123f314c45c1, ResourceGroup: rg-cjg-test, ResourceName: stapp-fwzpbniiu3sma, Environment: default
+Deploying service web (swa cli deploy)
+2025/04/26 13:49:38 command_runner.go:310: Run exec: 'npx -y @azure/static-web-apps-cli@2.0.1 deploy --tenant-id 16b3c013-d300-468d-ac64-7eda0820b6d3 --subscription-id 253f778b-553f-4871-b143-123f314c45c1 --resource-group rg-cjg-test --app-name stapp-fwzpbniiu3sma --env default --no-use-keychain --deployment-token <redacted>' , exit code: 0
+-------------------------------------stdout-------------------------------------------
+
+Welcome to Azure Static Web Apps CLI (2.0.1)
+
+Using configuration "ai-document-processor" from file:
+  /home/markremmey/adp/frontend/swa-cli.config.json
+
+Deploying front-end files from folder:
+  /home/markremmey/adp/frontend/dist
+
+
+Deploying to environment: default
+
+Deploying project to Azure Static Web Apps...
+
+-------------------------------------stderr-------------------------------------------
+- Preparing deployment. Please wait...
+✔ Project deployed to https://green-moss-009f7ea10.6.azurestaticapps.net[0m 🚀
+2025/04/26 13:49:38 service_target_staticwebapp.go:134: 
+Welcome to Azure Static Web Apps CLI (2.0.1)
+
+Using configuration "ai-document-processor" from file:
+  /home/markremmey/adp/frontend/swa-cli.config.json
+
+Deploying front-end files from folder:
+  /home/markremmey/adp/frontend/dist
+
+
+Deploying to environment: default
+
+Deploying project to Azure Static Web Apps...
+
+- Preparing deployment. Please wait...
+✔ Project deployed to https://green-moss-009f7ea10.6.azurestaticapps.net[0m 🚀
+
+Deploying service web (Verifying deployment)
+2025/04/26 13:49:38 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/staticSites/stapp-fwzpbniiu3sma/builds/default?api-version=2023-01-01
+2025/04/26 13:49:38 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/staticSites/stapp-fwzpbniiu3sma/builds/default?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:49:38 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/268.304844ms, OpTime=268.386572ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/staticSites/stapp-fwzpbniiu3sma/builds/default?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 1409
+   Content-Type: application/json
+   Date: Sat, 26 Apr 2025 17:49:39 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Aspnet-Version: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Operation-Identifier: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: 436e6489-4630-4fa8-8788-84033754c9ac
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+   X-Powered-By: REDACTED
+
+2025/04/26 13:49:38 main.go:50: Retry: response 200
+2025/04/26 13:49:38 main.go:50: Retry: exit due to non-retriable status code
+Deploying service web (Fetching endpoints for static web app)
+2025/04/26 13:49:38 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/staticSites/stapp-fwzpbniiu3sma/builds/default?api-version=2023-01-01
+2025/04/26 13:49:38 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/staticSites/stapp-fwzpbniiu3sma/builds/default?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:49:39 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/247.200504ms, OpTime=247.578858ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/providers/Microsoft.Web/staticSites/stapp-fwzpbniiu3sma/builds/default?api-version=2023-01-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armappservice/v2.3.0 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 1409
+   Content-Type: application/json
+   Date: Sat, 26 Apr 2025 17:49:39 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Aspnet-Version: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Operation-Identifier: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: abeb63fd-8965-4307-a6e3-7f0d30a5b27c
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+   X-Powered-By: REDACTED
+
+2025/04/26 13:49:39 main.go:50: Retry: response 200
+2025/04/26 13:49:39 main.go:50: Retry: exit due to non-retriable status code
+  (✓) Done: Deploying service web
+  - Endpoint: https://green-moss-009f7ea10.6.azurestaticapps.net/
+
+2025/04/26 13:49:39 main.go:50: Retry: =====> Try=1 for GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+2025/04/26 13:49:39 main.go:50: Request: ==> OUTGOING REQUEST (Try=1)
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.ResourceGroupsClient/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+
+2025/04/26 13:49:39 main.go:50: Response: ==> REQUEST/RESPONSE (Try=1/75.34014ms, OpTime=75.552469ms) -- RESPONSE RECEIVED
+   GET https://management.azure.com/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourcegroups?%24filter=REDACTED&api-version=2021-04-01
+   Accept: application/json
+   Authorization: REDACTED
+   User-Agent: azsdk-go-armresources.ResourceGroupsClient/v1.1.1 (go1.24.0 X:loopvar; linux),azdev/1.14.0 (Go go1.24.0 X:loopvar; linux/amd64)
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   --------------------------------------------------------------------------------
+   RESPONSE Status: 200 OK
+   Cache-Control: no-cache
+   Content-Length: 274
+   Content-Type: application/json; charset=utf-8
+   Date: Sat, 26 Apr 2025 17:49:39 GMT
+   Expires: -1
+   Pragma: no-cache
+   Strict-Transport-Security: REDACTED
+   X-Cache: REDACTED
+   X-Content-Type-Options: REDACTED
+   X-Ms-Correlation-Request-Id: a56deacc6ffd9a10ae324810a8096a0c
+   X-Ms-Ratelimit-Remaining-Subscription-Global-Reads: REDACTED
+   X-Ms-Ratelimit-Remaining-Subscription-Reads: REDACTED
+   X-Ms-Request-Id: a581047f-2c4e-4cf7-a2c9-4c226bb6a42a
+   X-Ms-Routing-Request-Id: REDACTED
+   X-Msedge-Ref: REDACTED
+
+2025/04/26 13:49:39 main.go:50: Retry: response 200
+2025/04/26 13:49:39 main.go:50: Retry: exit due to non-retriable status code
+
+SUCCESS: Your application was deployed to Azure in 4 minutes 7 seconds.
+You can view the resources created under the resource group rg-cjg-test in Azure Portal:
+https://portal.azure.com/#@/resource/subscriptions/253f778b-553f-4871-b143-123f314c45c1/resourceGroups/rg-cjg-test/overview
