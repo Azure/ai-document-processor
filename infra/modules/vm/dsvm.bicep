@@ -91,7 +91,7 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
       }
     }
     osProfile: {
-      computerName: 'gptragvm'
+      computerName: 'adp-vm'
       adminUsername: vmUserName
       adminPassword: vmUserPassword
       linuxConfiguration: ((authenticationType == 'password') ? json('null') : linuxConfiguration)

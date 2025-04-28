@@ -158,11 +158,6 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         {
           name: 'APP_CONFIGURATION_URI'
           value: concat('https://', appConfigName, '.azconfig.io')
-        }        
-        (appPurpose == 'processing') ? {
-          name: 'AzureWebJobsFeatureFlag'
-          value: 'EnableWorkerIndexing'
-        } : {
         }
         networkIsolation ? {
           name: 'WEBSITE_VNET_ROUTE_ALL'
@@ -182,7 +177,12 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'WEBSITE_HTTPLOGGING_RETENTION_DAYS'
           value: '7'
         }
-      ])
+      ], appPurpose == 'processing' ? [
+        {
+          name: 'AzureWebJobsFeatureFlag'
+          value: 'EnableWorkerIndexing'
+        }
+      ] : [])
       ftpsState: 'FtpsOnly'
       linuxFxVersion: 'Python|3.11'
       minTlsVersion: '1.2'

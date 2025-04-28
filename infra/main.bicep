@@ -103,7 +103,7 @@ var _deployVPN = deployVPN
 
 @description('Test vm gpt user name. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
 param vmUserName string = ''
-var _vmUserName = !empty(vmUserName) ? vmUserName : 'gptrag'
+var _vmUserName = !empty(vmUserName) ? vmUserName : 'adp-user'
 
 // PricipalId that will have access to KeyVault secrets, this is automatically set by the 'azd' tool to the principal runing azd
 @description('Id of the user or app to assign application roles')
@@ -143,8 +143,7 @@ var webBackEndFunctionAppName = '${abbrs.compute.functionApp}webbackend-${suffix
 var staticWebAppName = '${abbrs.compute.staticWebApp}${suffix}'
 var storageAccountName = '${abbrs.storage.storageAccount}${suffix}'
 var keyVaultName = '${abbrs.security.keyVault}${suffix}'
-var aoaiName = '${abbrs.ai.openAIService}${suffix}'
-var aiServicesName = '${abbrs.ai.aiServices}${suffix}'
+var aoaiName = '${abbrs.ai.openAIService}-${suffix}'
 var cosmosAccountName = '${abbrs.databases.cosmosDBDatabase}${suffix}'
 var aiMultiServicesName = '${abbrs.ai.aiMultiServices}${suffix}'
 var appInsightsName = '${abbrs.managementGovernance.applicationInsights}${suffix}'
@@ -311,7 +310,7 @@ module appInsights './modules/management_governance/application-insights.bicep' 
 var secureAppSettings = [
   {
     name: 'OPENAI_API_KEY'
-    value: aoai.outputs.AOAI_API_KEY
+    value: aoaiAccountModule.outputs.AOAI_API_KEY
   }
 ]
 
@@ -338,7 +337,7 @@ var appSettings = [
   }
   {
     name: 'OPENAI_API_BASE'
-    value: aoai.outputs.AOAI_ENDPOINT
+    value: aoaiAccountModule.outputs.AOAI_ENDPOINT
   }
   {
     name: 'OPENAI_API_EMBEDDING_MODEL'
@@ -518,23 +517,38 @@ module aiServicesPe './modules/network/private-endpoint.bicep' = if (_networkIso
     name: _azureAiServicesPe
     tags: tags
     subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: aoai.outputs.id
+    serviceId: aoaiAccountModule.outputs.id
     groupIds: ['account']
     dnsZoneId: _networkIsolation?openaiDnsZone.outputs.id:''
   }
+  dependsOn: [
+    aoaiAccountModule
+  ]
 }
 
 // 2. OpenAI
-module aoai './modules/ai_ml/aoai.bicep' = {
+module aoaiAccountModule './modules/ai_ml/aoai-account.bicep' = {
   scope : resourceGroup
-  name: 'aoaiModule'
+  name: 'aoaiAccountModuleDeployment'
   params: {
     location: aoaiLocation
-    name: aoaiName
-    aiServicesName: aiServicesName
-    identityId : ''
+    aoaiName: aoaiName
+    customSubDomainName: aoaiName
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
   }
+}
+
+module aoaiModelDeploymentModule './modules/ai_ml/modelDeployment.bicep' = {
+  name: 'aoaiModelDeployment'
+  scope: resourceGroup
+  params: {
+    aiServicesName: aoaiAccountModule.outputs.name
+    deploymentName: 'gpt-4o'
+    modelName: 'gpt-4o'
+  }
+  dependsOn: [
+    aoaiAccountModule
+  ]
 }
 
 module documentsDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
@@ -845,7 +859,7 @@ module processingFunctionApp './modules/compute/functionApp.bicep' = {
     hostingPlanName : hostingPlanName
     applicationInsightsName: appInsights.outputs.name
     storageAccountName: storageAccountName
-    aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
+    aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
     appConfigName: appConfigName
     staticWebAppUrl: '*' //staticWebApp.outputs.defaultHostname
     tags: union(tags , { 'azd-service-name' : 'processing' })
@@ -881,7 +895,7 @@ module backendFunctionApp './modules/compute/functionApp.bicep' = {
     storageAccountName: storageAccountName
     hostingPlanName : hostingPlanName
     applicationInsightsName: appInsights.outputs.name
-    aoaiEndpoint: aoai.outputs.AOAI_ENDPOINT
+    aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
     appConfigName: appConfig.outputs.name
     staticWebAppUrl: '*' 
     tags: union(tags , { 'azd-service-name' : 'backend' })
