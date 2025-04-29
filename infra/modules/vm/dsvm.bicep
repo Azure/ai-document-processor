@@ -38,7 +38,7 @@ var linuxConfiguration = {
   }
 }
 
-resource bastionPublicIp 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
+resource bastionPublicIp 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
   name: publicIpName
   location: location
   sku: {
@@ -49,7 +49,7 @@ resource bastionPublicIp 'Microsoft.Network/publicIPAddresses@2020-05-01' = {
   }
 }
 
-resource nic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
+resource nic 'Microsoft.Network/networkInterfaces@2024-05-01' = {
   name: nicName
   location: location
   properties: {
@@ -68,7 +68,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2020-06-01' = {
   }
 }
 
-resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
+resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-11-01' = {
   name: name
   location: location
   tags: tags
@@ -133,12 +133,17 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
 
 output vmPrincipalId string = virtualMachine.identity.principalId
 
-resource cy 'Microsoft.Network/bastionHosts@2023-04-01' = {
+resource cy 'Microsoft.Network/bastionHosts@2024-05-01' = {
   name: bastionName
   location: location
   sku: {
     name: 'Standard'
   }
+  zones : [
+    '1'
+    '2'
+    '3'
+  ]
   properties: {
     ipConfigurations: [
       {
@@ -170,7 +175,7 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 // Using key vault to store the password.
 // Not using the application key vault as it is set with no public network access for zero trust, but Bastion need the public network access
 // to pul the secret from the key vault.
-resource keyVault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
+resource keyVault 'Microsoft.KeyVault/vaults@2024-11-01' = {
   name: keyVaultName
   location: location
   tags: tags
@@ -186,7 +191,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2021-06-01-preview' = {
   }
 }
 
-resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource vmUserPasswordSecret 'Microsoft.KeyVault/vaults/secrets@2024-11-01' = {
   parent: keyVault
   name: vmUserPasswordKey
   properties: {
