@@ -20,16 +20,16 @@ Start-Transcript -Path C:\WindowsAzure\Logs\CMFAI_CustomScriptExtension.txt -App
 
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-choco upgrade vscode -y
-choco upgrade azure-cli -y
-choco upgrade git -y
-choco upgrade nodejs -y
+choco upgrade vscode -y --ignoredetectedreboot --force
+choco upgrade azure-cli -y --ignoredetectedreboot --force
+choco upgrade git -y --ignoredetectedreboot --force
+choco upgrade nodejs -y --ignoredetectedreboot --force
 
-choco install python311 -y
-#choco install visualstudio2022enterprise -y
-choco install azd -y
-choco install powershell-core -y
-choco install github-desktop -y
+choco install python311 -y --ignoredetectedreboot --force
+#choco install visualstudio2022enterprise -y --ignoredetectedreboot --force
+choco install azd -y --ignoredetectedreboot --force
+choco install powershell-core -y --ignoredetectedreboot --force
+choco install github-desktop -y --ignoredetectedreboot --force
 
 #install extenstions
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-azuretools.vscode-bicep","--force" -wait
