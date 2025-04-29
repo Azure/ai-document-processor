@@ -223,6 +223,18 @@ var subnets = [
       networkSecurityGroup: {
         id: appServicesNsg.id
       }
+      delegations: [
+        {
+          name : appServicePlanName
+          properties: {
+            serviceName: 'Microsoft.Web/serverFarms'
+            actions: [
+              'Microsoft.Network/virtualNetworks/subnets/action'
+            ]
+          }
+          type: 'Microsoft.Network/virtualNetworks/subnets/delegations'
+        }
+      ]
     }
   }
   {

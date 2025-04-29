@@ -27,6 +27,7 @@ param storageAccountName string
 param appConfigName string
 param hostingPlanName string
 param applicationInsightsName string
+param virtualNetworkSubnetId string
 
 var functionAppName = appName
 var functionWorkerRuntime = runtime
@@ -70,6 +71,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   properties: {
     serverFarmId: hostingPlan.id
     publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    virtualNetworkSubnetId: networkIsolation ? virtualNetworkSubnetId : null
     siteConfig: {
       cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com', '${staticWebAppUrl}'] }
       alwaysOn: true
