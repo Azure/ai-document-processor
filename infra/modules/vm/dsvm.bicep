@@ -106,6 +106,30 @@ resource virtualMachine 'Microsoft.Compute/virtualMachines@2021-03-01' = {
   }
 }
 
+var fileUris = [
+  'https://raw.githubusercontent.com/givenscj/ai-document-processor/refs/heads/cjg-zta-durable/infra/install.ps1'
+]
+
+resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
+  parent: virtualMachine
+  name: 'cse'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Compute'
+    type: 'CustomScriptExtension'
+    typeHandlerVersion: '1.10'
+    autoUpgradeMinorVersion: true
+    forceUpdateTag: 'alwaysRun'
+    settings: {
+      fileUris: fileUris
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -AzureTenantId ${subscription().tenantId} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environment().name}'
+    }
+    protectedSettings: {
+      
+    }
+  }
+}
+
 output vmPrincipalId string = virtualMachine.identity.principalId
 
 resource cy 'Microsoft.Network/bastionHosts@2023-04-01' = {

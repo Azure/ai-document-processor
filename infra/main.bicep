@@ -229,7 +229,7 @@ module azureMonitorPrivateLinkScope './modules/security/private-link-scope.bicep
     privateLinkScopeName: '${abbrs.networking.privateLink}${suffix}'
     privateLinkScopedResources: [
       logAnalyticsWorkspace.outputs.id
-      //applicationInsights.outputs.id
+      appInsights.outputs.id
     ]
   }
 }
@@ -433,7 +433,7 @@ module keyVault './modules/security/key-vault.bicep' = {
     existingKeyVaultResourceGroupName: resourceGroupName
     secureAppSettings: secureAppSettings
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
-    roleAssignments: concat(keyVaultSecretsUserIdentityAssignments, [])
+    roleAssignments: concat(keyVaultSecretsUserIdentityAssignmentsAll, [])
     subnets : (_networkIsolation && !_vnetReuse) ? [
       {
         name: 'aiSubId'
@@ -594,7 +594,6 @@ module cosmos './modules/db/cosmos.bicep' = {
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
   }
 }
-
 module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
   scope : resourceGroup
   name: 'virtual-network'
@@ -606,8 +605,8 @@ module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReus
     existingVnetResourceGroupName: _azureReuseConfig.existingVnetResourceGroupName
     tags: tags
     vnetAddress: _vnetAddress
-    appServicePlanId: processingFunctionApp.outputs.hostingPlanId
-    appServicePlanName: processingFunctionApp.outputs.hostingPlanName
+    appServicePlanId: hostingPlan.outputs.id
+    appServicePlanName: hostingPlan.outputs.name
   }
 }
 
@@ -841,7 +840,7 @@ module processingFunctionAppPe './modules/network/private-endpoint.bicep' = if (
     location: location
     name: _processingfunctionAppPe
     tags: tags
-    subnetId: _networkIsolation?vnet.outputs.appServicesSubId:''
+    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
     serviceId: processingFunctionApp.outputs.id
     groupIds: ['sites']
     dnsZoneId: _networkIsolation?websitesDnsZone.outputs.id:''
@@ -864,6 +863,7 @@ module processingFunctionApp './modules/compute/functionApp.bicep' = {
     staticWebAppUrl: '*' //staticWebApp.outputs.defaultHostname
     tags: union(tags , { 'azd-service-name' : 'processing' })
     networkIsolation: _networkIsolation
+    virtualNetworkSubnetId : _networkIsolation?vnet.outputs.appServicesSubId:''
     appSettings: [
       
     ]
@@ -877,7 +877,7 @@ module backendFunctionAppPe './modules/network/private-endpoint.bicep' = if (_ne
     location: location
     name: _backendFunctionAppPe
     tags: tags
-    subnetId: _networkIsolation?vnet.outputs.appServicesSubId:''
+    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
     serviceId: backendFunctionApp.outputs.id
     groupIds: ['sites']
     dnsZoneId: _networkIsolation?websitesDnsZone.outputs.id:''
@@ -897,6 +897,8 @@ module backendFunctionApp './modules/compute/functionApp.bicep' = {
     applicationInsightsName: appInsights.outputs.name
     aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
     appConfigName: appConfig.outputs.name
+    networkIsolation: _networkIsolation
+    virtualNetworkSubnetId : _networkIsolation?vnet.outputs.appServicesSubId:''
     staticWebAppUrl: '*' 
     tags: union(tags , { 'azd-service-name' : 'backend' })
     appSettings: [
