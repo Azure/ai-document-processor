@@ -1294,6 +1294,7 @@ module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse)
     // this is the named of the secret to store the vm password in keyvault. It matches what is used on main.parameters.json
     vmUserPasswordKey: _vmKeyVaultSecName
     principalId: principalId
+    azdEnvironmentName: environmentName
   }
 }
 

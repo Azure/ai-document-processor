@@ -42,6 +42,9 @@ git clone https://github.com/givenscj/ai-document-processor
 #git checkout cjg-zta
 cd ai-document-processor
 
+#add azd to path
+$env:Path += ";C:\Program Files\Azure Dev CLI"
+
 az login --tenant $azureTenantID
 azd auth login --tenant-id $azureTenantID
 
@@ -51,6 +54,6 @@ npm install -g typescript
 azd init $AzdEnvName
 
 #restart the VM
-shutdown -r
+shutdown /r
 
 Stop-Transcript

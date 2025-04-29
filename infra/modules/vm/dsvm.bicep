@@ -11,6 +11,7 @@ param authenticationType string = 'password' //'sshPublicKey'
 param vmUserPasswordKey string
 param keyVaultName string
 param principalId string
+param azdEnvironmentName string
 
 var vmSize = {
   'CPU-4GB': 'Standard_B2s'
@@ -122,7 +123,7 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = {
     forceUpdateTag: 'alwaysRun'
     settings: {
       fileUris: fileUris
-      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -AzureTenantId ${subscription().tenantId} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${environment().name}'
+      commandToExecute: 'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -AzureTenantId ${subscription().tenantId} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup().name} -AzdEnvName ${azdEnvironmentName}'
     }
     protectedSettings: {
       
