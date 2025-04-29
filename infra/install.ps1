@@ -45,8 +45,8 @@ cd ai-document-processor
 #add azd to path
 $env:Path += ";C:\Program Files\Azure Dev CLI"
 
-az login --tenant $azureTenantID
-azd auth login --tenant-id $azureTenantID
+az login --identity --tenant $azureTenantID
+azd auth login --managed-identity --tenant-id $azureTenantID
 
 npm install -g @azure/static-web-apps-cli
 npm install -g typescript
