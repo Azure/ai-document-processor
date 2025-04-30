@@ -14,7 +14,7 @@ echo "Uploading Blob"
 
 {
   az storage blob upload \
-    --account-name $PROCESSING_AZURE_STORAGE_ACCOUNT \
+    --account-name $AZURE_STORAGE_ACCOUNT \
     --container-name "prompts" \
     --name prompts.yaml \
     --file ./data/prompts.yaml \
@@ -27,7 +27,7 @@ echo "Uploading Blob"
 
 {
   az storage blob upload \
-    --account-name $PROCESSING_AZURE_STORAGE_ACCOUNT \
+    --account-name $AZURE_STORAGE_ACCOUNT \
     --container-name "bronze" \
     --name role_library-3.pdf \
     --file ./data/role_library-3.pdf \
