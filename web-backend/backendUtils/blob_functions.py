@@ -4,15 +4,17 @@ from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 import base64
 import json
-ACCOUNT_NAME = os.getenv("AzureWebJobsStorage__accountName")
+
+from configuration import Configuration
+config = Configuration()
+
+ACCOUNT_NAME = config.get_value("STORAGE_ACCOUNT_NAME")
 BLOB_ENDPOINT=f"https://{ACCOUNT_NAME}.blob.core.windows.net"
 
-# if os.getenv("IS_LOCAL"):
-#     BLOB_ENDPOINT = os.getenv("BLOB_ENDPOINT")
+# if config.get_value("IS_LOCAL"):
+#     BLOB_ENDPOINT = config.get_value("BLOB_ENDPOINT")
 
-
-
-blob_credential = DefaultAzureCredential()  # Uses managed identity or local login
+blob_credential = config.credential  # Uses managed identity or local login
 
 token = blob_credential.get_token("https://storage.azure.com/.default")
 
@@ -36,8 +38,6 @@ print(json.dumps(header, indent=4))
 
 print("\n=== Token Payload ===")
 print(json.dumps(payload, indent=4))
-
-
 
 blob_service_client = BlobServiceClient(account_url=BLOB_ENDPOINT, credential=blob_credential)
 

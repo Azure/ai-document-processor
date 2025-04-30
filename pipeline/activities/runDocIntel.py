@@ -8,10 +8,13 @@ from azure.ai.documentintelligence import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import AnalyzeResult, AnalyzeDocumentRequest
 import base64
 import os
+import requests
 
+from configuration import Configuration
+config = Configuration()
 
 # Variables used by Document Processing client code
-endpoint =os.getenv("AIMULTISERVICES_ENDPOINT") # Add the AI Services Endpoint value from Azure Function App settings
+endpoint = config.get_value("AIMULTISERVICES_ENDPOINT") # Add the AI Services Endpoint value from Azure Function App settings
 
 name = "runDocIntel"
 bp = df.Blueprint()
@@ -20,15 +23,17 @@ bp = df.Blueprint()
 @bp.activity_trigger(input_name="blobObj")
 def extract_text_from_blob(blobObj: dict):
   try:
-    credential = DefaultAzureCredential()                
     client = DocumentIntelligenceClient(
-        endpoint=endpoint, credential=credential
+        endpoint=endpoint, credential=config.credential
     )
-    
 
+  #Doc Intelligence does not 
+    response = requests.get(url=blobObj["url"])
+    file = response.content
+    
     poller = client.begin_analyze_document(
         # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
-        "prebuilt-read", AnalyzeDocumentRequest(url_source=blobObj["url"])
+        "prebuilt-read", AnalyzeDocumentRequest(bytes_source=file)
       )
     
     result: AnalyzeResult = poller.result()

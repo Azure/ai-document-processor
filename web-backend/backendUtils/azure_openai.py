@@ -3,22 +3,22 @@ import os
 import logging
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-OPENAI_API_BASE = os.getenv("OPENAI_API_BASE")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL")
-OPENAI_API_VERSION = os.getenv("OPENAI_API_VERSION")
-OPENAI_API_EMBEDDING_MODEL = os.getenv("OPENAI_API_EMBEDDING_MODEL")
+from configuration import Configuration
+config = Configuration()
 
-
+OPENAI_API_KEY = config.get_value("OPENAI_API_KEY")
+OPENAI_API_BASE = config.get_value("OPENAI_API_BASE")
+OPENAI_MODEL = config.get_value("OPENAI_MODEL")
+OPENAI_API_VERSION = config.get_value("OPENAI_API_VERSION")
+OPENAI_API_EMBEDDING_MODEL = config.get_value("OPENAI_API_EMBEDDING_MODEL")
 
 def get_embeddings(text):
-    credential = DefaultAzureCredential()
     token_provider = get_bearer_token_provider(  
-        DefaultAzureCredential(),  
+        config.credential,  
         "https://cognitiveservices.azure.com/.default"  
     )  
 
-    token = credential.get_token("https://cognitiveservices.azure.com/.default").token
+    token = config.credential.get_token("https://cognitiveservices.azure.com/.default").token
     openai_client = AzureOpenAI(
             azure_ad_token=token,
             api_version = OPENAI_API_VERSION,
@@ -34,13 +34,12 @@ def get_embeddings(text):
 
 
 def run_prompt(prompt,system_prompt):
-    credential = DefaultAzureCredential()
     token_provider = get_bearer_token_provider(  
-        DefaultAzureCredential(),  
+        config.credential,  
         "https://cognitiveservices.azure.com/.default"  
     )  
 
-    token = credential.get_token("https://cognitiveservices.azure.com/.default").token
+    token = config.credential.get_token("https://cognitiveservices.azure.com/.default").token
     
     openai_client = AzureOpenAI(
         azure_ad_token=token,
