@@ -82,7 +82,7 @@ param aoaiLocation string
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool = false
+param networkIsolation bool = true
 var _networkIsolation = networkIsolation
 
 @minLength(6)
