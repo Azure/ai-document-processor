@@ -26,6 +26,13 @@ var nicName = '${name}Nic'
 var diskName = '${name}Disk'
 var bastionName = '${name}Bastion'
 
+var bastionZones = [
+  '1'
+  '2'
+  '3'
+]
+
+
 var linuxConfiguration = {
   disablePasswordAuthentication: true
   ssh: {
@@ -44,6 +51,7 @@ resource bastionPublicIp 'Microsoft.Network/publicIPAddresses@2024-05-01' = {
   sku: {
     name: 'Standard'
   }
+  zones: bastionZones
   properties: {
     publicIPAllocationMethod: 'Static'
   }
@@ -139,11 +147,7 @@ resource cy 'Microsoft.Network/bastionHosts@2024-05-01' = {
   sku: {
     name: 'Standard'
   }
-  zones : [
-    '1'
-    '2'
-    '3'
-  ]
+  zones : bastionZones
   properties: {
     ipConfigurations: [
       {
