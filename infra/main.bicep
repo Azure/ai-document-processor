@@ -117,8 +117,6 @@ var _ztVmName = !empty(ztVmName) ? ztVmName : 'testvm-${suffix}'
 param vmKeyVaultSecName string = ''
 var _vmKeyVaultSecName = !empty(vmKeyVaultSecName) ? vmKeyVaultSecName : 'vmUserInitialPassword'
 
-
-
 // flag that indicates if we're reusing a vnet
 var _vnetReuse = _azureReuseConfig.vnetReuse
 
