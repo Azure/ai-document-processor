@@ -17,12 +17,12 @@ blob_service_client = BlobServiceClient(
     f"https://{STORAGE_ACCOUNT_NAME}.blob.core.windows.net", credential=config.credential
 )
 
-delegation_key = blob_service_client.get_user_delegation_key(
-    key_start_time=datetime.datetime.utcnow(),
-    key_expiry_time=datetime.datetime.utcnow() + datetime.timedelta(hours=HOURS)
-)
-
 def generate_sas_token(container_name, blob_name):
+    delegation_key = blob_service_client.get_user_delegation_key(
+        key_start_time=datetime.datetime.utcnow(),
+        key_expiry_time=datetime.datetime.utcnow() + datetime.timedelta(hours=HOURS)
+    )
+    
     """Generate a SAS token with read & write access for a blob."""
     sas_token = generate_blob_sas(
         account_name=STORAGE_ACCOUNT_NAME,

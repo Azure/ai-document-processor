@@ -860,7 +860,7 @@ module processingFunctionApp './modules/compute/functionApp.bicep' = {
     storageAccountName: storageAccountName
     aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
     appConfigName: appConfigName
-    staticWebAppUrl: '*' //staticWebApp.outputs.defaultHostname
+    staticWebAppUrl: 'staticWebApp.outputs.defaultHostname' //
     tags: union(tags , { 'azd-service-name' : 'processing' })
     networkIsolation: _networkIsolation
     virtualNetworkSubnetId : _networkIsolation?vnet.outputs.appServicesSubId:''

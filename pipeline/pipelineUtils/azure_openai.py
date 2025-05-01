@@ -33,7 +33,7 @@ def get_embeddings(text):
     return embedding
 
 
-def run_prompt(prompt,system_prompt):
+def run_prompt(system_prompt, user_prompt):
     token_provider = get_bearer_token_provider(  
         config.credential,  
         "https://cognitiveservices.azure.com/.default"  
@@ -47,14 +47,14 @@ def run_prompt(prompt,system_prompt):
         azure_endpoint =OPENAI_API_BASE
     )
 
-    logging.info(f"Prompt: {prompt}")
+    logging.info(f"User Prompt: {user_prompt}")
     logging.info(f"System Prompt: {system_prompt}")
     
     try:
         response = openai_client.chat.completions.create(
             model=OPENAI_MODEL,
             messages=[{ "role": "system", "content": system_prompt},
-                {"role":"user","content":prompt}])
+                {"role":"user","content":user_prompt}])
     except Exception as e:
         logging.error(f"Error calling OpenAI API: {e}")
         return None
