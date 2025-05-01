@@ -48,34 +48,6 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
   - To get your User principal ID run `az ad signed-in-user show --query id -o tsv`
   - Select whether you would like to deploy a frontend UI. The UI is not necessary, but is helpful for quick testing of prompts and seeing pipeline progress.
 
-### (Optional) Deploy front-end UI (Static Web App) from CLI
-Read more at [Azure SWA CLI Documentation](https://azure.github.io/static-web-apps-cli/)
-
-1. Check SWA configuration `swa-cli.config.json`
-   - Ensure SWA CLI is intalled `npm install -g @azure/static-web-apps-cli`
-   - Ensure apiLocation = ""
-   - Resulting swa-cli.config should look like:
-   - `{
-        "$schema": "https://aka.ms/azure/static-web-apps-cli/schema",
-        "configurations": {
-          "ai-document-processor-v1": {
-            "appLocation": "frontend",
-            "apiLocation": "",
-            "outputLocation": "dist",
-            "dataApiLocation": "frontend/swa-db-connections",
-            "apiLanguage": "python",
-            "apiVersion": "3.8",
-            "appBuildCommand": "npm run build",
-            "run": "npm run dev",
-            "appDevserverUrl": "http://localhost:5173"
-          }
-        }
-      }`
-    - If changes are desired `swa init` may be run
-3. `swa build`
-4. `swa deploy --env Production -d {deployment_token}`
-     - Retrieve deployment token from overview page of the static web app in Azure portal under "Manage Deployment Token"
-
 ### Update the Pipeline for a customer's specific use case
 This repository is intended to set up the scaffolding for an Azure OpenAI pipeline. The developer is expected to update the code in the `pipeline/activities` and `pipeline/function_app.py` to meet the customer's needs.
 - `pipeline/function_app.py` - contains the standard logic for handling HTTP requests and invoking the pipeline leveraging [Azure Durable functions function chaining pattern](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-sequence?tabs=csharp). This file controls the high level orchestration logic for each step in the pipeline, while the logic for each step is contained within the `activities` directory

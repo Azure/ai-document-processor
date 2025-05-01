@@ -11,7 +11,7 @@ const CONTAINER_NAMES = ['bronze', 'silver', 'gold'];
 // const baseFunctionUrl = process.env.REACT_APP_FUNCTION_URL;
 // console.log("baseFunctionUrl", baseFunctionUrl)
 
-const functionUrl = `/api/getBlobsByContainer`;
+const getBlobsUrl = `/api/getBlobsByContainer`;
 const deleteBlobsUrl = `/api/deleteBlobs`;
 
 export interface BlobItem {
@@ -41,7 +41,7 @@ const BlobList: React.FC<BlobListProps> = ({ onSelectionChange }) => {
     setError(null);
 
     try {
-      const response = await fetch(functionUrl);
+      const response = await fetch(getBlobsUrl);
       console.log("response", response)
 
       if (!response.ok) {
