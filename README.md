@@ -48,7 +48,6 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
   - az login
   - azd auth login
   - azd up
-  - Enter your forked GH repo link `https://github.com/{your_user_name}/llm-doc-processing`
   - Enter your User Principal ID when prompted
   - To get your User principal ID run `az ad signed-in-user show --query id -o tsv`
   - Select whether you would like to deploy a frontend UI. The UI is not necessary, but is helpful for quick testing of prompts and seeing pipeline progress.
