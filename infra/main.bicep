@@ -1,4 +1,3 @@
-import { modelDeploymentInfo, raiPolicyInfo } from './modules/ai_ml/ai-services.bicep'
 import { identityInfo } from './modules/security/managed-identity.bicep'
 
 targetScope = 'subscription'
