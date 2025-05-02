@@ -21,10 +21,15 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 - Cosmos DB
 
 ## Architecture
+
+### Main Components
 ![image](https://github.com/user-attachments/assets/47a64ff8-1185-48ec-904f-2cebefc26687)
 
-
+### Data Flow
 ![image](https://github.com/user-attachments/assets/5721a5be-2f93-44a5-a259-928bfd1b5e83)
+
+### ZTA Network Architecture
+![image](https://github.com/user-attachments/assets/a761cb68-8603-44c2-acd6-b20a9055c57d)
 
 
 
