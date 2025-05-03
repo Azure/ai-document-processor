@@ -121,7 +121,7 @@ var _vnetReuse = _azureReuseConfig.vnetReuse
 
 @description('Virtual network name, you can leave as it is to generate a random name.')
 param vnetName string = ''
-var _vnetName = _azureReuseConfig.vnetReuse ? _azureReuseConfig.existingVnetName : !empty(vnetName) ? vnetName : 'aivnet-${suffix}'
+var _vnetName = _azureReuseConfig.vnetReuse ? _azureReuseConfig.existingVnetName : !empty(vnetName) ? vnetName : '${abbrs.networking.virtualNetwork}ai-${suffix}'
 
 @description('Address space for the virtual network')
 param vnetAddress string = ''
@@ -140,7 +140,7 @@ var webBackEndFunctionAppName = '${abbrs.compute.functionApp}webbackend-${suffix
 var staticWebAppName = '${abbrs.compute.staticWebApp}${suffix}'
 var storageAccountName = '${abbrs.storage.storageAccount}${suffix}'
 var keyVaultName = '${abbrs.security.keyVault}${suffix}'
-var aoaiName = '${abbrs.ai.openAIService}-${suffix}'
+var aoaiName = '${abbrs.ai.openAIService}${suffix}'
 var cosmosAccountName = '${abbrs.databases.cosmosDBDatabase}${suffix}'
 var aiMultiServicesName = '${abbrs.ai.aiMultiServices}${suffix}'
 var appInsightsName = '${abbrs.managementGovernance.applicationInsights}${suffix}'
@@ -410,13 +410,27 @@ module keyvaultpe './modules/network/private-endpoint.bicep' = if (_networkIsola
   }
 }
 
-var keyVaultSecretsUserIdentityAssignmentsAll = [
+var keyVaultSecretsUserIdentityAssignments = [
   for identity in identities: {
     principalId: identity.principalId
     roleDefinitionId: keyVaultSecretsUserRole.id
     principalType: identity.principalType
   }
 ]
+
+var keyVaultSecretsUserIdentityAssignmentsAll = concat(keyVaultSecretsUserIdentityAssignments,
+[
+  {
+    principalId: uaiFrontendMsi.outputs.principalId
+    roleDefinitionId: keyVaultSecretsUserRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: uaiBackendMsi.outputs.principalId
+    roleDefinitionId: keyVaultSecretsUserRole.id
+    principalType: 'ServicePrincipal'
+  }
+])
 
 // 1. Key Vault
 module keyVault './modules/security/key-vault.bicep' = {
@@ -717,6 +731,20 @@ module fileDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIso
   }
 }
 
+module storagePe './modules/storage/storage-private-endpoints.bicep' = if (_networkIsolation && !_vnetReuse){
+  scope : resourceGroup
+  name: 'storage-pe'
+  dependsOn: [
+    vnet
+  ]
+  params: {
+    location: location
+    name: storageAccountName
+    tags: tags
+    vnetName: _vnetName
+  }
+}
+
 module storage './modules/storage/storage-account.bicep' = {
   scope : resourceGroup
   name: 'storage'
@@ -753,60 +781,92 @@ module storage './modules/storage/storage-account.bicep' = {
   }  
 }
 
-module storageblobpe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+module procStoragePe './modules/storage/storage-private-endpoints.bicep' = if (_networkIsolation && !_vnetReuse){
   scope : resourceGroup
-  name: 'storage-blob-pe'
+  name: 'proc-storage-pe'
+  dependsOn: [
+    vnet
+  ]
   params: {
     location: location
-    name: _azureBlobStorageAccountPe
+    name: '${abbrs.storage.storageAccount}${suffix}fnproc'
     tags: tags
-    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: storage.outputs.id
-    groupIds: ['blob']
-    dnsZoneId: _networkIsolation?blobDnsZone.outputs.id:''
+    vnetName: _vnetName
   }
 }
 
-module storagetablepe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+module procFuncStorage './modules/storage/storage-account.bicep' = {
   scope : resourceGroup
-  name: 'storage-table-pe'
+  name: 'procfuncstorage'
+  params: {
+    name: '${abbrs.storage.storageAccount}${suffix}fnproc'
+    location: location
+    storageReuse: _azureReuseConfig.storageReuse
+    existingStorageResourceGroupName: _azureReuseConfig.existingStorageResourceGroupName
+    tags: tags
+    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+    allowBlobPublicAccess: false // Disable anonymous access
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
+    networkAcls : {
+      resourceAccessRules :[]
+      bypass: 'AzureServices'
+      defaultAction: _networkIsolation?'Deny':'Allow'
+      ipRules : []
+      virtualNetworkRules : (_networkIsolation && !_vnetReuse) ? [
+        {
+          id: vnet.outputs.aiSubId
+          action: 'Allow'
+        }
+      ] : []
+    }
+  }  
+}
+
+module backendStoragePe './modules/storage/storage-private-endpoints.bicep' = if (_networkIsolation && !_vnetReuse){
+  scope : resourceGroup
+  name: 'backend-storage-pe'
+  dependsOn: [
+    vnet
+  ]
   params: {
     location: location
-    name: _azureTableStorageAccountPe
+    name: '${abbrs.storage.storageAccount}${suffix}fnbackend'
     tags: tags
-    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: storage.outputs.id
-    groupIds: ['table']
-    dnsZoneId: _networkIsolation?tableDnsZone.outputs.id:''
+    vnetName: _vnetName
   }
 }
 
-module storagequeuepe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+module backendFuncStorage './modules/storage/storage-account.bicep' = {
   scope : resourceGroup
-  name: 'storage-queue-pe'
+  name: 'backendfuncstorage'
   params: {
+    name: '${abbrs.storage.storageAccount}${suffix}fnbackend'
     location: location
-    name: _azureQueueStorageAccountPe
+    storageReuse: _azureReuseConfig.storageReuse
+    existingStorageResourceGroupName: _azureReuseConfig.existingStorageResourceGroupName
     tags: tags
-    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: storage.outputs.id
-    groupIds: ['queue']
-    dnsZoneId: _networkIsolation?queueDnsZone.outputs.id:''
-  }
-}
-
-module storagefilepe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
-  scope : resourceGroup
-  name: 'storage-file-pe'
-  params: {
-    location: location
-    name: _azureFileStorageAccountPe
-    tags: tags
-    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: storage.outputs.id
-    groupIds: ['file']
-    dnsZoneId: _networkIsolation?fileDnsZone.outputs.id:''
-  }
+    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+    allowBlobPublicAccess: false // Disable anonymous access
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
+    networkAcls : {
+      resourceAccessRules :[]
+      bypass: 'AzureServices'
+      defaultAction: _networkIsolation?'Deny':'Allow'
+      ipRules : []
+      virtualNetworkRules : (_networkIsolation && !_vnetReuse) ? [
+        {
+          id: vnet.outputs.aiSubId
+          action: 'Allow'
+        }
+      ] : []
+    }
+  }  
 }
 
 module hostingPlan './modules/compute/hosting-plan.bicep' = {
@@ -844,17 +904,30 @@ module processingFunctionAppPe './modules/network/private-endpoint.bicep' = if (
   }
 }
 
+module uaiFrontendMsi './modules/security/managed-identity.bicep' = {
+  scope: resourceGroup
+  name: '${abbrs.security.managedIdentity}${processingFunctionAppName}'
+  params: {
+    name: 'uai-${processingFunctionAppName}'
+    location: location
+    tags: union(tags, {})
+  }
+}
+
 // 3. FunctionApp
 module processingFunctionApp './modules/compute/functionApp.bicep' = {
   scope : resourceGroup
   name: processingFunctionAppName
   params: {
+    identityId: uaiFrontendMsi.outputs.id
+    principalId: uaiFrontendMsi.outputs.principalId
+    clientId : uaiFrontendMsi.outputs.clientId
     appName: processingFunctionAppName
     appPurpose: 'processing'
     location: location
     hostingPlanName : hostingPlanName
     applicationInsightsName: appInsights.outputs.name
-    storageAccountName: storageAccountName
+    storageAccountName: procFuncStorage.outputs.name
     aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
     appConfigName: appConfigName
     staticWebAppUrl: 'staticWebApp.outputs.defaultHostname' //
@@ -881,19 +954,32 @@ module backendFunctionAppPe './modules/network/private-endpoint.bicep' = if (_ne
   }
 }
 
+module uaiBackendMsi './modules/security/managed-identity.bicep' = {
+  scope: resourceGroup
+  name: 'uai-${webBackEndFunctionAppName}'
+  params: {
+    name: 'uai-${webBackEndFunctionAppName}'
+    location: location
+    tags: union(tags, {})
+  }
+}
+
 // 3. FunctionApp
 module backendFunctionApp './modules/compute/functionApp.bicep' = {
   scope : resourceGroup
   name: webBackEndFunctionAppName
   params: {
+    identityId: uaiBackendMsi.outputs.id
+    principalId: uaiBackendMsi.outputs.principalId
+    clientId : uaiBackendMsi.outputs.clientId
     appName: webBackEndFunctionAppName
     appPurpose: 'backend'
     location: location
-    storageAccountName: storageAccountName
+    storageAccountName: backendFuncStorage.outputs.name
     hostingPlanName : hostingPlanName
     applicationInsightsName: appInsights.outputs.name
     aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
-    appConfigName: appConfig.outputs.name
+    appConfigName: appConfigName
     networkIsolation: _networkIsolation
     virtualNetworkSubnetId : _networkIsolation?vnet.outputs.appServicesSubId:''
     staticWebAppUrl: '*' 
@@ -970,6 +1056,11 @@ resource storageQueueDataRole 'Microsoft.Authorization/roleDefinitions@2022-05-0
 resource storageTableDataRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
   scope: resourceGroup
   name: roles.storage.storageTableDataContributor
+}
+
+resource storageFileContributorRole 'Microsoft.Authorization/roleDefinitions@2022-05-01-preview' existing = {
+  scope: resourceGroup
+  name: roles.storage.storageFileDataPrivilegedContributor
 }
 
 var allstorageDataOwnerIdentityAssignments = concat([], [
@@ -1076,6 +1167,36 @@ module storageAccountResourceGroupRoleAssignment './modules/security/resource-gr
       roleDefinitionId: storageContributorRole.id
       principalType: 'User'
     }]) : allstorageAccountContributorIdentityAssignments
+  }
+}
+
+var allstorageFileContribIdentityAssignments = concat([], [
+  {
+    principalId: processingFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: storageFileContributorRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: backendFunctionApp.outputs.identityPrincipalId
+    roleDefinitionId: storageFileContributorRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: staticWebApp.outputs.identityPrincipalId
+    roleDefinitionId: storageFileContributorRole.id
+    principalType: 'ServicePrincipal'
+  }
+])
+
+module storageFileContribResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
+  name: '${resourceGroupName}-role-storage-file-contributor'
+  scope: resourceGroup
+  params: {
+    roleAssignments: (userPrincipalId != '') ? concat(allstorageFileContribIdentityAssignments, [{
+      principalId: userPrincipalId
+      roleDefinitionId: storageFileContributorRole.id
+      principalType: 'User'
+    }]) : allstorageFileContribIdentityAssignments
   }
 }
 
@@ -1201,14 +1322,6 @@ resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleDefinitions@2022-0
   scope: resourceGroup
   name: roles.security.keyVaultSecretsUser
 }
-
-var keyVaultSecretsUserIdentityAssignments = [
-  for identity in identities: {
-    principalId: identity.principalId
-    roleDefinitionId: keyVaultSecretsUserRole.id
-    principalType: identity.principalType
-  }
-]
 
 var aiMultiServiceManagedIdentityName = '${abbrs.security.managedIdentity}${abbrs.ai.aiMultiServices}${suffix}'
 module aiMultiServiceManagedIdentity './modules/security/managed-identity.bicep' = {

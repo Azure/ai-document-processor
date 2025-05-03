@@ -12,6 +12,10 @@ eval "$(azd env get-values)"
 eval "$(azd env get-values | sed 's/^/export /')"
 echo "Uploading Blob"
 
+cd frontend
+eval "npm install"
+cd ..
+
 {
   az storage blob upload \
     --account-name $AZURE_STORAGE_ACCOUNT \
