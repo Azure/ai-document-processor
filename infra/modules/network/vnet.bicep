@@ -315,6 +315,7 @@ resource newVnet 'Microsoft.Network/virtualNetworks@2024-05-01' = if (!vnetReuse
 
 output name string = vnetReuse ? existingVnet.name : newVnet.name
 output id string = vnetReuse ? existingVnet.id : newVnet.id
+output subnets array = vnetReuse ? existingVnet.properties.subnets : newVnet.properties.subnets
 output aiSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, aiSubnetName) : newVnet.properties.subnets[0].id
 output appServicesSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, appServicesSubnetName) : newVnet.properties.subnets[1].id
 output databaseSubId string = vnetReuse ? resourceId(existingVnetResourceGroupName, 'Microsoft.Network/virtualNetworks/subnets', vnetName, databaseSubnetName) : newVnet.properties.subnets[2].id
