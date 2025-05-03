@@ -432,6 +432,17 @@ var keyVaultSecretsUserIdentityAssignmentsAll = concat(keyVaultSecretsUserIdenti
   }
 ])
 
+var subnets = reduce(
+  map(vnet.outputs.subnets, subnet => {
+      '${subnet.name}': {
+        id: subnet.id
+        addressPrefix: subnet.properties.addressPrefix
+      }
+    }),
+  {},
+  (cur, acc) => union(cur, acc)
+)
+
 // 1. Key Vault
 module keyVault './modules/security/key-vault.bicep' = {
   scope : resourceGroup
@@ -675,8 +686,8 @@ module appConfig './modules/app_config/appconfig.bicep' = {
     //administratorObjectId: principalId
     //administratorPrincipalType: 'User'
     //actionGroupId: ''
-    appSettings: _networkIsolation?[]:appSettings
-    secureAppSettings: _networkIsolation?[]:keyVault.outputs.secrets
+    appSettings: appSettings
+    secureAppSettings: keyVault.outputs.secrets
     location: location
     tags: tags
     identityId: applicationManagedIdentity.outputs.id
@@ -736,6 +747,7 @@ module storagePe './modules/storage/storage-private-endpoints.bicep' = if (_netw
   name: 'storage-pe'
   dependsOn: [
     vnet
+    storage
   ]
   params: {
     location: location
@@ -786,6 +798,7 @@ module procStoragePe './modules/storage/storage-private-endpoints.bicep' = if (_
   name: 'proc-storage-pe'
   dependsOn: [
     vnet
+    procFuncStorage
   ]
   params: {
     location: location
@@ -830,6 +843,7 @@ module backendStoragePe './modules/storage/storage-private-endpoints.bicep' = if
   name: 'backend-storage-pe'
   dependsOn: [
     vnet
+    backendFuncStorage
   ]
   params: {
     location: location
@@ -1396,8 +1410,8 @@ module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse)
     location: location
     name: _ztVmName
     tags: tags
-    subnetId: vnet.outputs.aiSubId
-    bastionSubId: vnet.outputs.bastionSubId
+    subnetId: subnets['aiSubnet'].id
+    bastionSubId: subnets['AzureBastionSubnet'].id
     vmUserPassword: vmUserInitialPassword
     vmUserName: _vmUserName
     keyVaultName: keyVault.outputs.name
