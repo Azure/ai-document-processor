@@ -13,15 +13,17 @@ services:
     project: ./frontend
     language: js
   processing:
-    project: ./pipeline  # Path to processing app code
+    project: ./pipeline
     language: python
     host: function
   backend:
-    project: ./web-backend  # Path to processing app code
+    project: ./web-backend
     language: python
     host: function
-    
+
 hooks:
   postprovision:
-    - run: scripts/postprovision.sh
-    - run: scripts/updateFunctions.sh
+    posix:
+      run: scripts/postprovision.sh
+    windows:
+      run: scripts/postprovision.ps1
