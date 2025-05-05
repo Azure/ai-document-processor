@@ -22,7 +22,7 @@ exceptiongroup==1.2.2
 grpcio==1.69.0
 grpcio-tools==1.69.0
 h11==0.16.0
-httpcore==1.0.5
+httpcore==1.0.9
 httpx==0.27.2
 idna==3.10
 isodate==0.6.1

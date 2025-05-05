@@ -36,10 +36,16 @@ write-host "Installing Python311";
 choco install python311 -y --ignoredetectedreboot --force
 #choco install visualstudio2022enterprise -y --ignoredetectedreboot --force
 write-host "Installing AZD";
-choco install azd -y --ignoredetectedreboot --force
+choco install azd -y --ignoredetectedreboot --force --version 1.14.100
 
 write-host "Installing Powershell Core";
 choco install powershell-core -y --ignoredetectedreboot --force
+
+write-host "Installing Chrome";
+#choco install googlechrome -y --ignoredetectedreboot --force
+
+write-host "Installing Notepad++";
+choco install notepadplusplus -y --ignoredetectedreboot --force
 
 write-host "Installing Github Desktop";
 choco install github-desktop -y --ignoredetectedreboot --force
@@ -50,14 +56,16 @@ Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "-
 Start-Process "C:\Program Files\Microsoft VS Code\bin\code.cmd" -ArgumentList "--install-extension","ms-python.python","--force" -wait
 
 write-host "Updating WSL";
-wsl --update
+wsl.exe --update
 
 write-host "Downloading repository";
 mkdir C:\github -ea SilentlyContinue
 cd C:\github
-git clone https://github.com/givenscj/ai-document-processor
+git clone https://github.com/azure/ai-document-processor
 #git checkout cjg-zta
 cd ai-document-processor
+
+git config --global --add safe.directory C:/github/ai-document-processor
 
 #add azd to path
 $env:Path += ";C:\Program Files\Azure Dev CLI"

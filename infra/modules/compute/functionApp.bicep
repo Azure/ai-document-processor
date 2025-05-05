@@ -15,10 +15,15 @@ param location string
 @description('Tags.')
 param tags object
 
+param linuxFxVersion string = 'Python|3.12'
+
 param appSettings array = []
 
 param networkIsolation bool = false
 param staticWebAppUrl string
+param identityId string
+param principalId string
+param clientId string
 
 @description('The language worker runtime to load in the function app.')
 param runtime string = 'python'
@@ -38,11 +43,6 @@ var promptFile = 'prompts.yaml'
 var openaiApiVersion = '2024-05-01-preview'
 var openaiApiBase = aoaiEndpoint
 var openaiModel = 'gpt-4o'
-
-resource uaiAppConfig 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
-  location: location
-  name: 'uai-${functionAppName}'
-}
 
 resource hostingPlan 'Microsoft.Web/serverfarms@2024-04-01' existing = {
   name: hostingPlanName
@@ -64,13 +64,13 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
-      '${uaiAppConfig.id}': {}
+      '${identityId}': {}
     }
   }
   tags: tags
   properties: {
     serverFarmId: hostingPlan.id
-    publicNetworkAccess: networkIsolation ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: 'Enabled'  //this stays enabled even if network isolation is set to true
     virtualNetworkSubnetId: networkIsolation ? virtualNetworkSubnetId : null
     siteConfig: {
       cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com', '${staticWebAppUrl}'] }
@@ -100,7 +100,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
       appSettings: concat(appSettings, [
         {
           name: 'AZURE_CLIENT_ID'
-          value: uaiAppConfig.properties.clientId
+          value: clientId
         }
         {
           name: 'AZURE_TENANT_ID'
@@ -126,7 +126,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         }
         {
           name: 'AzureWebJobsStorage__clientId'
-          value: uaiAppConfig.properties.clientId
+          value: clientId
         }
         {
           name: 'AzureWebJobsStorage__accountName'
@@ -186,7 +186,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         }
       ] : [])
       ftpsState: 'FtpsOnly'
-      linuxFxVersion: 'Python|3.11'
+      linuxFxVersion: linuxFxVersion
       minTlsVersion: '1.2'
     }  
     httpsOnly: true
@@ -209,8 +209,7 @@ resource authConfig 'Microsoft.Web/sites/config@2024-04-01' = {
 output id string = functionApp.id
 output name string = functionApp.name
 output uri string = 'https://${functionApp.properties.defaultHostName}'
-//output identityPrincipalId string = functionApp.identity.principalId
-output identityPrincipalId string = uaiAppConfig.properties.principalId
+output identityPrincipalId string = principalId
 output location string = functionApp.location
 output storageAccountName string = storageAccountName
 output blobEndpoint string = blobEndpoint
