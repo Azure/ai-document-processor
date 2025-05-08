@@ -11,8 +11,8 @@ name = "callAoai"
 bp = df.Blueprint()
 
 @bp.function_name(name)
-@bp.activity_trigger(input_name="textResult")
-def run(textResult: str):
+@bp.activity_trigger(input_name="inputData")
+def run(inputData: dict):
     """
     Calls the Azure OpenAI service with the provided text result.
     
@@ -24,10 +24,14 @@ def run(textResult: str):
     """
     try:
       # Load the prompt
+      text_result = inputData.get('text_result')
+      instance_id = inputData.get('instance_id')
+      
       prompt_json = load_prompts()
       
+      full_user_prompt = prompt_json['system_prompt'] + "\n\n" + text_result
       # Call the Azure OpenAI service
-      response_content = run_prompt(textResult, prompt_json['system_prompt'])
+      response_content = run_prompt(instance_id, prompt_json['system_prompt'], full_user_prompt)
       if response_content.startswith('```json') and response_content.endswith('```'):
         response_content = response_content.strip('`')
         response_content = response_content.replace('json', '', 1).strip()
@@ -37,5 +41,5 @@ def run(textResult: str):
       return json_str
   
     except Exception as e:
-        logging.error(f"Error processing {textResult}: {e}")
+        logging.error(f"Error processing Sub Orchestration (callAoai): {instance_id}: {e}")
         return None

@@ -65,7 +65,15 @@ def process_blob(context):
   logging.info(f"Process Blob sub Orchestration - Processing blob: {blob} with sub orchestration id: {sub_orchestration_id}")
   # Waits for the result of an activity function that retrieves the blob content
   text_result = yield context.call_activity("runDocIntel", blob)
-  json_str = yield context.call_activity("callAoai", text_result)
+
+  # Package the data into a dictionary
+  call_aoai_input = {
+      "text_result": text_result,
+      "instance_id": sub_orchestration_id 
+  }
+
+  json_str = yield context.call_activity("callAoai", call_aoai_input)
+  
   task_result = yield context.call_activity(
       "writeToBlob", 
       {
