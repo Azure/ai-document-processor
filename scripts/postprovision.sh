@@ -12,6 +12,10 @@ eval "$(azd env get-values)"
 eval "$(azd env get-values | sed 's/^/export /')"
 echo "Uploading Blob"
 
+cd frontend
+eval "npm install"
+cd ..
+
 {
   az storage blob upload \
     --account-name $AZURE_STORAGE_ACCOUNT \
@@ -19,7 +23,7 @@ echo "Uploading Blob"
     --name prompts.yaml \
     --file ./data/prompts.yaml \
     --auth-mode login
-  echo "Upload completed successfully."
+  echo "Upload of prompts.yaml completed successfully to $AZURE_STORAGE_ACCOUNT."
 } || {
   echo "file prompts.yaml may already exist. Skipping upload"
 }
@@ -32,7 +36,7 @@ echo "Uploading Blob"
     --name role_library-3.pdf \
     --file ./data/role_library-3.pdf \
     --auth-mode login
-  echo "Upload completed successfully."
+  echo "Upload of role_library-3.pdf completed successfully to $AZURE_STORAGE_ACCOUNT."
 } || {
   echo "file role_library-3.pdf may already exist. Skipping upload"
 }

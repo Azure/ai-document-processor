@@ -21,10 +21,15 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 - Cosmos DB
 
 ## Architecture
+
+### Main Components
 ![image](https://github.com/user-attachments/assets/47a64ff8-1185-48ec-904f-2cebefc26687)
 
-
+### Data Flow
 ![image](https://github.com/user-attachments/assets/5721a5be-2f93-44a5-a259-928bfd1b5e83)
+
+### ZTA Network Architecture
+![image](https://github.com/user-attachments/assets/a761cb68-8603-44c2-acd6-b20a9055c57d)
 
 
 
@@ -43,7 +48,6 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
   - az login
   - azd auth login
   - azd up
-  - Enter your forked GH repo link `https://github.com/{your_user_name}/llm-doc-processing`
   - Enter your User Principal ID when prompted
   - To get your User principal ID run `az ad signed-in-user show --query id -o tsv`
   - Select whether you would like to deploy a frontend UI. The UI is not necessary, but is helpful for quick testing of prompts and seeing pipeline progress.
