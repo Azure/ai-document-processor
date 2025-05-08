@@ -38,7 +38,7 @@ var functionAppName = appName
 var functionWorkerRuntime = runtime
 
 var blobEndpoint = 'https://${storageAccountName}.blob.${environment().suffixes.storage}'
-var promptFile = 'prompts.yaml'
+var promptFile = 'COSMOS'
 
 var openaiApiVersion = '2024-05-01-preview'
 var openaiApiBase = aoaiEndpoint
