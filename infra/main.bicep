@@ -1424,7 +1424,7 @@ module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse)
 
 output RESOURCE_GROUP string = resourceGroup.name
 output FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
-output AZURE_STORAGE_ACCOUNT string = processingFunctionApp.outputs.storageAccountName
+output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
 output FUNCTION_URL string = processingFunctionApp.outputs.uri
 output BLOB_ENDPOINT string = processingFunctionApp.outputs.blobEndpoint
 output PROMPT_FILE string = processingFunctionApp.outputs.promptFile
