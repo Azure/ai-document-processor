@@ -327,7 +327,7 @@ var appSettings = [
   }
   {
     name: 'PROMPT_FILE'
-    value: 'prompts.yaml'
+    value: 'COSMOS'
   }
   {
     name: 'OPENAI_API_VERSION'
