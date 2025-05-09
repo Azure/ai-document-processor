@@ -33,11 +33,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=400
         )
     
-    PROCESSING_FUNCTION_APP_NAME = config.get_value('PROCESSING_FUNCTION_APP_NAME')
     PROCESSING_FUNCTION_APP_URL = config.get_value('PROCESSING_FUNCTION_APP_URL')
     # URL of the client durable function
-    durable_function_url = f"https://{PROCESSING_FUNCTION_APP_URL}/api/orchestrators/orchestrator"
-    #durable_function_url = f"http://localhost:9071/api/orchestrators/orchestrator"
+    durable_function_url = f"https://{PROCESSING_FUNCTION_APP_URL}/api/client/orchestrator"
 
     # Forward the request to the durable function
     try:

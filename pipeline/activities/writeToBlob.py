@@ -26,7 +26,7 @@ def extract_text_from_blob(args: dict):
       result = write_to_blob(NEXT_STAGE, f"{sourcefile}-output.json", args['json_bytes'])
       
       if result:
-          logging.info(f"Successfully wrote output to blob {args['blob_name']}")
+          logging.info(f"writeToBlob.py: Successfully wrote output to blob {args['blob_name']}")
           return {
               "success": True,
               "blob_name": args['blob_name'],

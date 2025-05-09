@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { 
   Button, Card, CardContent, Typography, Box, List, ListItem, 
-  ListItemText, Link, Checkbox
+  ListItemText, Link, Checkbox, Container
 } from '@mui/material';
 import BlobUploader from './BlobUploader';
 import DeleteButton from './DeleteButton';
@@ -127,7 +127,8 @@ const BlobList: React.FC<BlobListProps> = ({ onSelectionChange }) => {
   };
 
   return (
-    <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
+    // <div style={{ padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
+    <Container maxWidth="md" sx={{ mt: 4, p: 2, border: '1px solid #ddd', borderRadius: '4px' }}>
       <Typography variant="h5" gutterBottom>
         Blob Viewer
       </Typography>
@@ -189,7 +190,7 @@ const BlobList: React.FC<BlobListProps> = ({ onSelectionChange }) => {
           </Card>
         );
       })}
-    </div>
+    </Container>
   );
 };
 

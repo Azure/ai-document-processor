@@ -7,6 +7,14 @@ from azure.appconfiguration.provider import (
 )
 
 from tenacity import retry, wait_random_exponential, stop_after_attempt, RetryError
+logger = logging.getLogger('azure.identity')
+logger.setLevel(logging.DEBUG)
+
+# Add a console handler if you want it to print to stdout
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+
 
 class Configuration:
 
@@ -19,6 +27,7 @@ class Configuration:
         except Exception as e:
             raise e
         
+
         self.credential = DefaultAzureCredential(
             additionally_allowed_tenants=self.tenant_id,
             exclude_environment_credential=True, 
@@ -28,7 +37,7 @@ class Configuration:
             exclude_shared_token_cache_credential=True,
             exclude_developer_cli_credential=True,
             exclude_interactive_browser_credential=True
-            )
+        )
 
         try:
             app_config_uri = os.environ['APP_CONFIGURATION_URI']
