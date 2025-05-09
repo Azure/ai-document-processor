@@ -65,7 +65,7 @@ function App() {
               const failedTasks = results.filter((result: any) => !result.task_result.success);
 
               if (failedTasks.length > 0) {
-                setMessage(`Job Failed. ${failedTasks.length} tasks failed.`);
+                setMessage(`Job Failed. ${failedTasks.length} tasks failed. ${JSON.stringify(failedTasks)}`);
               } else {
                 setMessage(`Job Completed.`);
               }

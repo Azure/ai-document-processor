@@ -1,6 +1,3 @@
-# Get local settings from the remote environment
-
-
 eval $(azd env get-values)
 
 cd web-backend

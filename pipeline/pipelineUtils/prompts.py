@@ -1,7 +1,7 @@
 import os
 import json
 from pipelineUtils.blob_functions import get_blob_content
-from pipelineUtils.db import get_prompt_by_id
+from pipelineUtils.db import get_prompt_by_id, get_live_prompt_id
 import yaml
 import logging
 
@@ -10,16 +10,29 @@ config = Configuration()
 
 def load_prompts_from_cosmos():
     """Fetch prompts from Cosmos DB and return as a dictionary."""
-    # Placeholder for Cosmos DB fetching logic
-    # Replace with actual implementation
 
     logging.info("Fetching prompts from Cosmos DB")
-    prompts = get_prompt_by_id("prompts")  # Example ID, replace with actual logic
+    live_prompt_id = get_live_prompt_id()
+    logging.info(f"Live prompt id: {live_prompt_id}")
+    prompts = get_prompt_by_id(live_prompt_id)
+    logging.info(f"Prompts: {prompts}")
     if not prompts:
-        raise ValueError("No prompts found in Cosmos DB.")
-    prompts_json = json.dumps(prompts, indent=4)
+        raise ValueError("No prompts found in Cosmos DB for prompt id: {live_prompt_id}")
+    # prompts_json = json.dumps(prompts, indent=4)
 
-    return prompts_json
+    return prompts
+
+def load_prompts_from_blob(prompt_file):
+    """Load the prompt from YAML file in blob storage and return as a dictionary."""
+    try:
+        prompt_yaml = get_blob_content("prompts", prompt_file).decode('utf-8')
+        prompts = yaml.safe_load(prompt_yaml)
+        prompts_json = json.dumps(prompts, indent=4)
+        prompts = json.loads(prompts_json) 
+        return prompts
+    except Exception as e:
+        raise RuntimeError(f"Failed to load prompts file: {prompt_file} from blob storage. Prompt File should be a valid Blob path stored in the prompts container. Error: {e}")
+    
 
 def load_prompts_from_blob(prompt_file):
     """Load the prompt from YAML file in blob storage and return as a dictionary."""
