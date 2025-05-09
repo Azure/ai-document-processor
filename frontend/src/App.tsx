@@ -120,9 +120,9 @@ function App() {
       </Box>
 
       {/* Two-column layout */}
-      <Grid container spacing={2}>
+      <Grid container spacing={2} alignItems="stretch">
         {/* Left column: Blob viewer */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={6} sx= {{ display: 'flex' }}>
           <BlobList onSelectionChange={setSelectedBlobs} />
         </Grid>
 

@@ -4,7 +4,7 @@ from activities import getBlobContent, runDocIntel, callAoai, writeToBlob
 app = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 import logging
 # An HTTP-triggered function with a Durable Functions client binding
-@app.route(route="orchestrators/{functionName}")
+@app.route(route="client/{functionName}")
 @app.durable_client_input(client_name="client")
 async def http_start(req: func.HttpRequest, client):
   """
