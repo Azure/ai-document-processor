@@ -34,7 +34,7 @@ var roles = loadJsonContent('./roles.json')
 param resourceGroupName string
 var _resourceGroupName = !empty(resourceGroupName) ? resourceGroupName : '${abbrs.managementGovernance.resourceGroup}-${environmentName}'
 
-var suffix = uniqueString('${location}${_resourceGroupName}${environmentName}')
+var suffix = toLower(uniqueString(subscription().id, environmentName, location))
 
 @description('Identities to assign roles to.')
 param identities identityInfo[] = union([], [{
@@ -152,7 +152,7 @@ var configContainerName = 'config'
 var cosmosDatabaseName = 'openaiPromptsDB'
 
 @description('Deploy a Static Web App front end? Set to true to deploy, false to skip.')
-param deployStaticWebApp bool
+param deployStaticWebApp bool = true
 
 @description('The name of the Azure Configuration Private Endpoint. If left empty, a random name will be generated.')
 param azureAppConfigPe string = ''
@@ -346,11 +346,11 @@ var appSettings = [
   }
   {
     name: 'COSMOS_DB_PROMPTS_CONTAINER'
-    value: 'promptscontainer'
+    value: 'prompts'
   }
   {
     name: 'COSMOS_DB_PROMPTS_DB'
-    value: 'openaiPromptsDB'
+    value: '${abbrs.databases.cosmosDBDatabase}db${suffix}'
   }
   {
     name: 'COSMOS_DB_CONFIG_CONTAINER'
