@@ -26,6 +26,9 @@
       "deployVPN": {
         "value": "${AZURE_DEPLOY_VPN}"
       },
+      "deployStaticWebApp": {
+        "value": "${AZURE_DEPLOY_STATIC_WEB_APP}"
+      },
       "azureReuseConfig":{
         "value": {
           "aoaiReuse": "${AOAI_REUSE}",

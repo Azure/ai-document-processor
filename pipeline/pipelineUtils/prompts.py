@@ -9,17 +9,16 @@ from configuration import Configuration
 config = Configuration()
 
 def load_prompts_from_cosmos():
-    """Fetch prompts from Cosmos DB and return as a dictionary."""
+    """Fetch prompt from Cosmos DB and return as a dictionary."""
     # Placeholder for Cosmos DB fetching logic
     # Replace with actual implementation
 
-    logging.info("Fetching prompts from Cosmos DB")
-    prompts = get_prompt_by_id("prompts")  # Example ID, replace with actual logic
-    if not prompts:
+    logging.info("Fetching prompt from Cosmos DB")
+    prompt = get_prompt_by_id("doc_ai_prompt")  # Example ID, replace with actual logic
+    if not prompt:
         raise ValueError("No prompts found in Cosmos DB.")
-    prompts_json = json.dumps(prompts, indent=4)
-
-    return prompts_json
+    
+    return prompt
 
 def load_prompts():
     """Fetch prompts JSON from blob storage and return as a dictionary."""
