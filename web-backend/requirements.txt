@@ -34,7 +34,7 @@ msrest==0.7.1
 oauthlib==3.2.2
 openai==1.50.2
 portalocker==2.10.1
-protobuf==5.29.3
+protobuf==5.29.5
 pycparser==2.22
 pydantic==2.9.2
 pydantic_core==2.23.4
