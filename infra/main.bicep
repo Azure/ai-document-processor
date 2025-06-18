@@ -149,6 +149,7 @@ var appConfigName = '${abbrs.configuration.appConfiguration}${suffix}'
 
 var promptsContainer = 'promptscontainer'
 var configContainerName = 'config'
+var conversationHistoryContainerName = 'conversationhistory'
 var cosmosDatabaseName = 'openaiPromptsDB'
 
 @description('Deploy a Static Web App front end? Set to true to deploy, false to skip.')
@@ -326,7 +327,7 @@ var appSettings = [
   }
   {
     name: 'PROMPT_FILE'
-    value: 'prompts.yaml'
+    value: 'COSMOS'
   }
   {
     name: 'OPENAI_API_VERSION'
@@ -346,7 +347,11 @@ var appSettings = [
   }
   {
     name: 'COSMOS_DB_PROMPTS_CONTAINER'
-    value: 'prompts'
+    value: promptsContainer
+  }
+  {
+    name: 'COSMOS_DB_CONVERSATION_HISTORY_CONTAINER'
+    value: conversationHistoryContainerName
   }
   {
     name: 'COSMOS_DB_PROMPTS_DB'
@@ -354,7 +359,7 @@ var appSettings = [
   }
   {
     name: 'COSMOS_DB_CONFIG_CONTAINER'
-    value: 'config'
+    value: configContainerName
   }
   {
     name: 'COSMOS_DB_URI'
@@ -366,11 +371,11 @@ var appSettings = [
   }
   {
     name: 'PROCESSING_FUNCTION_APP_NAME'
-    value: processingFunctionApp.name
+    value: processingFunctionAppName
   }
   {
     name: 'PROCESSING_FUNCTION_APP_URL'
-    value: '${processingFunctionApp.name}.azurewebsites.net'
+    value: '${processingFunctionAppName}.azurewebsites.net'
   }
   {
     name: 'SAS_TOKEN_EXPIRY_HOURS'
@@ -607,7 +612,7 @@ module cosmos './modules/db/cosmos.bicep' = {
     databaseName: cosmosDatabaseName
     containerName: promptsContainer
     configContainerName: configContainerName
-    conversationContainerName: promptsContainer
+    conversationContainerName: conversationHistoryContainerName
     cosmosDbReuse: _azureReuseConfig.cosmosDbReuse
     datasourcesContainerName: configContainerName
     existingCosmosDbAccountName: _azureReuseConfig.existingCosmosDbAccountName
@@ -944,7 +949,7 @@ module processingFunctionApp './modules/compute/functionApp.bicep' = {
     storageAccountName: procFuncStorage.outputs.name
     aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
     appConfigName: appConfigName
-    staticWebAppUrl: 'staticWebApp.outputs.defaultHostname' //
+    staticWebAppUrl: deployStaticWebApp?'https://${staticWebApp.outputs.defaultHostName}':'*'
     tags: union(tags , { 'azd-service-name' : 'processing' })
     networkIsolation: _networkIsolation
     virtualNetworkSubnetId : _networkIsolation?vnet.outputs.appServicesSubId:''
@@ -1011,7 +1016,7 @@ module backendFunctionApp './modules/compute/functionApp.bicep' = {
   }
 }
 
-module staticWebDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
+module staticWebDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse && deployStaticWebApp) {
   scope : resourceGroup
   name: 'staticweb-dnzones'
   params: {
@@ -1021,7 +1026,7 @@ module staticWebDnsZone './modules/network/private-dns-zones.bicep' = if (_netwo
   }
 }
 
-module staticWebAppPE './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+module staticWebAppPE './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && deployStaticWebApp) {
   name: _staticWebAppPe
   scope: resourceGroup
   params: {
@@ -1088,11 +1093,11 @@ var allstorageDataOwnerIdentityAssignments = concat([], [
     roleDefinitionId: storageDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
-  {
+  deployStaticWebApp ? {
     principalId: staticWebApp.outputs.identityPrincipalId
     roleDefinitionId: storageDataOwnerRole.id
     principalType: 'ServicePrincipal'
-  }
+  } : {}
 ])
 
 module storageDataOwnerResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
@@ -1195,12 +1200,13 @@ var allstorageFileContribIdentityAssignments = concat([], [
     roleDefinitionId: storageFileContributorRole.id
     principalType: 'ServicePrincipal'
   }
-  {
+  deployStaticWebApp ? {
     principalId: staticWebApp.outputs.identityPrincipalId
     roleDefinitionId: storageFileContributorRole.id
     principalType: 'ServicePrincipal'
-  }
-])
+  } : {}
+]
+)
 
 module storageFileContribResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
   name: '${resourceGroupName}-role-storage-file-contributor'
@@ -1424,7 +1430,7 @@ module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse)
 
 output RESOURCE_GROUP string = resourceGroup.name
 output FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
-output AZURE_STORAGE_ACCOUNT string = processingFunctionApp.outputs.storageAccountName
+output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
 output FUNCTION_URL string = processingFunctionApp.outputs.uri
 output BLOB_ENDPOINT string = processingFunctionApp.outputs.blobEndpoint
 output PROMPT_FILE string = processingFunctionApp.outputs.promptFile
@@ -1435,6 +1441,7 @@ output FUNCTIONS_WORKER_RUNTIME string = processingFunctionApp.outputs.functionW
 output STATIC_WEB_APP_NAME string = deployStaticWebApp ? staticWebApp.outputs.name : '0'
 output COSMOS_DB_PROMPTS_CONTAINER string = promptsContainer
 output COSMOS_DB_CONFIG_CONTAINER string = configContainerName
+output COSMOS_DB_CONVERSATION_CONTAINER string = conversationHistoryContainerName
 output COSMOS_DB_PROMPTS_DB string = cosmosDatabaseName
 output COSMOS_DB_ACCOUNT_NAME string = cosmos.outputs.accountName
 output COSMOS_DB_URI string = 'https://${cosmosAccountName}.documents.azure.com:443/'
