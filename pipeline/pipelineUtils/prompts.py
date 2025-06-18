@@ -1,7 +1,7 @@
 import os
 import json
 from pipelineUtils.blob_functions import get_blob_content
-from pipelineUtils.db import get_prompt_by_id
+from pipelineUtils.db import get_prompt_by_id, get_live_prompt_id
 import yaml
 import logging
 
@@ -20,6 +20,30 @@ def load_prompts_from_cosmos():
     
     return prompt
 
+def load_prompts_from_blob(prompt_file):
+    """Load the prompt from YAML file in blob storage and return as a dictionary."""
+    try:
+        prompt_yaml = get_blob_content("prompts", prompt_file).decode('utf-8')
+        prompts = yaml.safe_load(prompt_yaml)
+        prompts_json = json.dumps(prompts, indent=4)
+        prompts = json.loads(prompts_json) 
+        return prompts
+    except Exception as e:
+        raise RuntimeError(f"Failed to load prompts file: {prompt_file} from blob storage. Prompt File should be a valid Blob path stored in the prompts container. Error: {e}")
+    
+
+def load_prompts_from_blob(prompt_file):
+    """Load the prompt from YAML file in blob storage and return as a dictionary."""
+    try:
+        prompt_yaml = get_blob_content("prompts", prompt_file).decode('utf-8')
+        prompts = yaml.safe_load(prompt_yaml)
+        prompts_json = json.dumps(prompts, indent=4)
+        prompts = json.loads(prompts_json) 
+        return prompts
+    except Exception as e:
+        raise RuntimeError(f"Failed to load prompts from blob storage: {e}")
+    
+
 def load_prompts():
     """Fetch prompts JSON from blob storage and return as a dictionary."""
     prompt_file = config.get_value("PROMPT_FILE")
@@ -28,15 +52,9 @@ def load_prompts():
         raise ValueError("Environment variable PROMPT_FILE is not set.")
     
     if prompt_file=="COSMOS":
-        return load_prompts_from_cosmos()
-
-    try:
-        prompt_yaml = get_blob_content("prompts", prompt_file).decode('utf-8')
-        prompts = yaml.safe_load(prompt_yaml)
-        prompts_json = json.dumps(prompts, indent=4)
-        prompts = json.loads(prompts_json)  # Ensure it's valid JSON
-    except Exception as e:
-        raise RuntimeError(f"Failed to load prompts from blob storage: {e}")
+        prompts = load_prompts_from_cosmos()
+    else:
+        prompts = load_prompts_from_blob(prompt_file)
 
     # Validate required fields
     required_keys = ["system_prompt", "user_prompt"]

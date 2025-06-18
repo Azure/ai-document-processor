@@ -70,7 +70,7 @@ def ai_doc_blob_trigger(req:func.InputStream):
       return None
 
 # An HTTP-triggered function with a Durable Functions client binding
-@app.route(route="orchestrators/{functionName}")
+@app.route(route="client/{functionName}")
 @app.durable_client_input(client_name="client")
 async def http_start(req: func.HttpRequest, client):
   """
@@ -96,7 +96,7 @@ async def http_start(req: func.HttpRequest, client):
   
   function_name = req.route_params.get('functionName')
   instance_id = await client.start_new(function_name, client_input=blobs)
-  logging.info(f"Started orchestration with ID = '{instance_id}'.")
+  logging.info(f"Started orchestration with Batch ID = '{instance_id}'.")
 
   response = client.create_check_status_response(req, instance_id)
   return response
@@ -127,10 +127,19 @@ def run(context):
 @app.orchestration_trigger(context_name="context")
 def process_blob(context):
   blob = context.get_input()
-  logging.info(f"Process Blob sub Orchestration - Processing blob: {blob}")
+  sub_orchestration_id = context.instance_id 
+  logging.info(f"Process Blob sub Orchestration - Processing blob: {blob} with sub orchestration id: {sub_orchestration_id}")
   # Waits for the result of an activity function that retrieves the blob content
   text_result = yield context.call_activity("runDocIntel", blob)
-  json_str = yield context.call_activity("callAoai", text_result)
+
+  # Package the data into a dictionary
+  call_aoai_input = {
+      "text_result": text_result,
+      "instance_id": sub_orchestration_id 
+  }
+
+  json_str = yield context.call_activity("callAoai", call_aoai_input)
+  
   task_result = yield context.call_activity(
       "writeToBlob", 
       {

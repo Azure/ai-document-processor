@@ -23,7 +23,7 @@ cd ..
     --name prompts.yaml \
     --file ./data/prompts.yaml \
     --auth-mode login
-  echo "Upload completed successfully."
+  echo "Upload of prompts.yaml completed successfully to $AZURE_STORAGE_ACCOUNT."
 } || {
   echo "file prompts.yaml may already exist. Skipping upload"
 }
@@ -36,7 +36,7 @@ cd ..
     --name role_library-3.pdf \
     --file ./data/role_library-3.pdf \
     --auth-mode login
-  echo "Upload completed successfully."
+  echo "Upload of role_library-3.pdf completed successfully to $AZURE_STORAGE_ACCOUNT."
 } || {
   echo "file role_library-3.pdf may already exist. Skipping upload"
 }
