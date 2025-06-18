@@ -1,8 +1,74 @@
 import azure.functions as func
 import azure.durable_functions as df
+
+from azure.ai.documentintelligence import DocumentIntelligenceClient
+from azure.ai.documentintelligence.models import AnalyzeResult, AnalyzeDocumentRequest
+
 from activities import getBlobContent, runDocIntel, callAoai, writeToBlob
+from configuration import Configuration
+
+from pipelineUtils.prompts import load_prompts
+from pipelineUtils.blob_functions import get_blob_content, write_to_blob
+from pipelineUtils.azure_openai import run_prompt
+
+config = Configuration()
+
+NEXT_STAGE = config.get_value("NEXT_STAGE")
+
 app = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+
 import logging
+
+@app.function_name(name="ai_doc_blob_trigger")
+@app.blob_trigger(arg_name="req", path=f'{config.get_value("AI_DOC_PROC_CONTAINER_NAME","bronze")}/{{name}}', connection=config.get_value("AI_DOC_PROC_CONNECTION_NAME","AzureWebJobsStorage"), data_type=func.DataType.BINARY)
+def ai_doc_blob_trigger(req:func.InputStream):
+    
+    source_container = config.get_value("AI_DOC_PROC_CONTAINER_NAME", "bronze")
+    endpoint = config.get_value("AIMULTISERVICES_ENDPOINT")
+    try:
+      client = DocumentIntelligenceClient(
+          endpoint=endpoint, credential=config.credential
+      )
+
+      poller = client.begin_analyze_document(
+          # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
+          "prebuilt-read", AnalyzeDocumentRequest(bytes_source=req.read())
+        )
+      
+      result: AnalyzeResult = poller.result()
+      
+      if result.paragraphs:    
+          paragraphs = "\n".join([paragraph.content for paragraph in result.paragraphs])            
+      
+      try:
+        # Load the prompt
+        prompt_json = load_prompts()
+        
+        # Call the Azure OpenAI service
+        response_content = run_prompt(paragraphs, prompt_json['system_prompt'])
+        if response_content.startswith('```json') and response_content.endswith('```'):
+          response_content = response_content.strip('`')
+          response_content = response_content.replace('json', '', 1).strip()
+
+        #remove the container name from start of the blob name using its length
+        if req.name.startswith(source_container + "/"):
+          output_name = req.name[len(source_container) + 1:]
+        
+          result = write_to_blob(NEXT_STAGE, f"{output_name}-output.json", response_content)
+        
+          if result:
+              logging.info(f"Successfully wrote output to blob {req.name}")
+          else:
+              logging.error(f"Failed to write output to blob {req.name}")
+    
+      except Exception as e:
+          logging.error(f"Error processing {paragraphs}: {e}")
+          return None
+        
+    except Exception as e:
+      logging.error(f"Error processing {req.name}: {e}")
+      return None
+
 # An HTTP-triggered function with a Durable Functions client binding
 @app.route(route="client/{functionName}")
 @app.durable_client_input(client_name="client")

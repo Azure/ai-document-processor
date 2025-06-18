@@ -9,18 +9,16 @@ from configuration import Configuration
 config = Configuration()
 
 def load_prompts_from_cosmos():
-    """Fetch prompts from Cosmos DB and return as a dictionary."""
+    """Fetch prompt from Cosmos DB and return as a dictionary."""
+    # Placeholder for Cosmos DB fetching logic
+    # Replace with actual implementation
 
-    logging.info("Fetching prompts from Cosmos DB")
-    live_prompt_id = get_live_prompt_id()
-    logging.info(f"Live prompt id: {live_prompt_id}")
-    prompts = get_prompt_by_id(live_prompt_id)
-    logging.info(f"Prompts: {prompts}")
-    if not prompts:
-        raise ValueError("No prompts found in Cosmos DB for prompt id: {live_prompt_id}")
-    # prompts_json = json.dumps(prompts, indent=4)
-
-    return prompts
+    logging.info("Fetching prompt from Cosmos DB")
+    prompt = get_prompt_by_id("doc_ai_prompt")  # Example ID, replace with actual logic
+    if not prompt:
+        raise ValueError("No prompts found in Cosmos DB.")
+    
+    return prompt
 
 def load_prompts_from_blob(prompt_file):
     """Load the prompt from YAML file in blob storage and return as a dictionary."""
