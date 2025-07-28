@@ -5,6 +5,22 @@ from azure.appconfiguration.provider import (
     AzureAppConfigurationKeyVaultOptions,
     load
 )
+import logging
+
+# Configure file logging
+# LOG_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app.log')
+
+# # Set up a file handler
+# file_handler = logging.FileHandler(LOG_FILE, mode="w")
+# file_handler.setLevel(logging.DEBUG)
+# file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# file_handler.setFormatter(file_formatter)
+
+# logger = logging.getLogger()
+# logger.addHandler(file_handler)
+logging.basicConfig(
+    level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from tenacity import retry, wait_random_exponential, stop_after_attempt, RetryError
 
@@ -13,7 +29,7 @@ class Configuration:
     credential = None
 
     def __init__(self):
-
+        logger.info("Configuration initialization started")
         try:
             self.tenant_id = os.environ.get('AZURE_TENANT_ID', "*")
         except Exception as e:
@@ -26,20 +42,26 @@ class Configuration:
             exclude_cli_credential=False,
             exclude_powershell_credential=True,
             exclude_shared_token_cache_credential=True,
-            exclude_developer_cli_credential=True,
+            exclude_developer_cli_credential=False,
             exclude_interactive_browser_credential=True
-            )
+        )
+
+        logger.info(f"Using DefaultAzureCredential with tenant ID: {self.tenant_id}")
 
         try:
+            logger.info("Attempting APP_CONFIGURATION_URI for configuration.")
             app_config_uri = os.environ['APP_CONFIGURATION_URI']
             self.config = load(endpoint=app_config_uri, credential=self.credential,key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential))
         except Exception as e:
             try:
+                
+                logger.info("Using AZURE_APPCONFIG_CONNECTION_STRING for configuration.")
                 connection_string = os.environ["AZURE_APPCONFIG_CONNECTION_STRING"]
+                logger.info(f"Using connection string: {connection_string}")
                 # Connect to Azure App Configuration using a connection string.
                 self.config = load(connection_string=connection_string, key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential))
             except Exception as e:
-                raise Exception("Unable to connect to Azure App Configuration. Please check your connection string or endpoint.")
+                raise Exception("Unable to connect to Azure App Configuration. Please check your connection string or endpoint. Error: " + str(e))
 
     # Connect to Azure App Configuration.
 

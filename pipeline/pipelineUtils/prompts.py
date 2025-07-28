@@ -1,24 +1,11 @@
 import os
 import json
 from pipelineUtils.blob_functions import get_blob_content
-from pipelineUtils.db import get_prompt_by_id, get_live_prompt_id
 import yaml
 import logging
 
 from configuration import Configuration
 config = Configuration()
-
-def load_prompts_from_cosmos():
-    """Fetch prompt from Cosmos DB and return as a dictionary."""
-    # Placeholder for Cosmos DB fetching logic
-    # Replace with actual implementation
-
-    logging.info("Fetching prompt from Cosmos DB")
-    prompt = get_prompt_by_id("doc_ai_prompt")  # Example ID, replace with actual logic
-    if not prompt:
-        raise ValueError("No prompts found in Cosmos DB.")
-    
-    return prompt
 
 def load_prompts_from_blob(prompt_file):
     """Load the prompt from YAML file in blob storage and return as a dictionary."""

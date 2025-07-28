@@ -2,19 +2,6 @@ import { identityInfo } from './modules/security/managed-identity.bicep'
 
 targetScope = 'subscription'
 
-var audienceMap = {
-  AzureCloud: '41b23e61-6c1e-4545-b367-cd054e0ed4b4'
-  AzureUSGovernment: '51bb15d4-3a4f-4ebf-9dca-40096fe32426'
-  AzureGermanCloud: '538ee9e6-310a-468d-afef-ea97365856a9'
-  AzureChinaCloud: '49f817b6-84ae-4cc0-928c-73f27289b3aa'
-}
-
-var tenantId = subscription().tenantId
-var cloud = environment().name
-var audience = audienceMap[cloud]
-var tenant = uri(environment().authentication.loginEndpoint, tenantId)
-var issuer = 'https://sts.windows.net/${tenantId}/'
-
 @description('Key-value pairs of tags to assign to all resources. The default azd tags are automatically added.')
 param deploymentTags object
 var tags = union(azdTags, deploymentTags)
@@ -136,24 +123,16 @@ param userPrincipalId string
 // param environmentName string = 'dev'
 var hostingPlanName = '${abbrs.compute.appServicePlan}${suffix}'
 var processingFunctionAppName = '${abbrs.compute.functionApp}processing-${suffix}'
-var webBackEndFunctionAppName = '${abbrs.compute.functionApp}webbackend-${suffix}'
-var staticWebAppName = '${abbrs.compute.staticWebApp}${suffix}'
+// var webBackEndFunctionAppName = '${abbrs.compute.functionApp}webbackend-${suffix}'
+// var staticWebAppName = '${abbrs.compute.staticWebApp}${suffix}'
 var storageAccountName = '${abbrs.storage.storageAccount}${suffix}'
 var keyVaultName = '${abbrs.security.keyVault}${suffix}'
 var aoaiName = '${abbrs.ai.openAIService}${suffix}'
-var cosmosAccountName = '${abbrs.databases.cosmosDBDatabase}${suffix}'
 var aiMultiServicesName = '${abbrs.ai.aiMultiServices}${suffix}'
 var appInsightsName = '${abbrs.managementGovernance.applicationInsights}${suffix}'
 var logAnalyticsName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${suffix}'
 var appConfigName = '${abbrs.configuration.appConfiguration}${suffix}'
 
-var promptsContainer = 'promptscontainer'
-var configContainerName = 'config'
-var conversationHistoryContainerName = 'conversationhistory'
-var cosmosDatabaseName = 'openaiPromptsDB'
-
-@description('Deploy a Static Web App front end? Set to true to deploy, false to skip.')
-param deployStaticWebApp bool = true
 
 @description('The name of the Azure Configuration Private Endpoint. If left empty, a random name will be generated.')
 param azureAppConfigPe string = ''
@@ -163,13 +142,6 @@ var _azureAppConfigPe = !empty(azureAppConfigPe) ? azureAppConfigPe : '${abbrs.c
 param azureAiServicesPe string = ''
 var _azureAiServicesPe = !empty(azureAiServicesPe) ? azureAiServicesPe : '${abbrs.ai.aiServices}${abbrs.networking.privateEndpoint}${suffix}'
 
-@description('The name of the Azure AI Services Private Endpoint. If left empty, a random name will be generated.')
-param staticWebAppPe string = ''
-var _staticWebAppPe = !empty(staticWebAppPe) ? staticWebAppPe : '${abbrs.compute.staticWebApp}${abbrs.networking.privateEndpoint}${suffix}'
-
-@description('The name of the Azure Cosmos DB Private Endpoint. If left empty, a random name will be generated.')
-param azureDbAccountPe string = ''
-var _azureDbAccountPe = !empty(azureDbAccountPe) ? azureDbAccountPe : '${abbrs.databases.cosmosDBDatabase}${abbrs.networking.privateEndpoint}${suffix}'
 
 @description('The name of the Azure AI Services Private Endpoint. If left empty, a random name will be generated.')
 param azureAiMultiServicesPe string = ''
@@ -192,10 +164,6 @@ var _azureFileStorageAccountPe = !empty(azureFileStorageAccountPe) ? azureFileSt
 param processingFuncAppPe string = ''
 var _processingfunctionAppPe = !empty(processingFuncAppPe) ? processingFuncAppPe : 'func-proc-${abbrs.networking.privateEndpoint}${suffix}'
 
-@description('The name of the Azure Storage Account Private Endpoint. If left empty, a random name will be generated.')
-param backendFuncAppPe string = ''
-var _backendFunctionAppPe = !empty(backendFuncAppPe) ? backendFuncAppPe : 'func-backend-${abbrs.networking.privateEndpoint}${suffix}'
-
 @description('The name of the Azure Key Vault Private Endpoint. If left empty, a random name will be generated.')
 param azureKeyvaultPe string = ''
 var _azureKeyvaultPe = !empty(azureKeyvaultPe) ? azureKeyvaultPe : '${abbrs.security.keyVault}${abbrs.networking.privateEndpoint}${suffix}'
@@ -212,8 +180,6 @@ module logAnalyticsWorkspace './modules/management_governance/log-analytics-work
   params: {
     name: logAnalyticsName
     location: location
-    //appInsightsReuse : false
-    //existingAppInsightsResourceGroupName : resourceGroup().name
     retentionInDays: 30
     publicNetworkAccessForIngestion: _networkIsolation?'Disabled':'Enabled'
     publicNetworkAccessForQuery: _networkIsolation?'Disabled':'Enabled'
@@ -327,7 +293,7 @@ var appSettings = [
   }
   {
     name: 'PROMPT_FILE'
-    value: 'COSMOS'
+    value: 'prompts.yaml'
   }
   {
     name: 'OPENAI_API_VERSION'
@@ -344,26 +310,6 @@ var appSettings = [
   {
     name: 'OPENAI_MODEL'
     value: 'gpt-4o'
-  }
-  {
-    name: 'COSMOS_DB_PROMPTS_CONTAINER'
-    value: promptsContainer
-  }
-  {
-    name: 'COSMOS_DB_CONVERSATION_HISTORY_CONTAINER'
-    value: conversationHistoryContainerName
-  }
-  {
-    name: 'COSMOS_DB_PROMPTS_DB'
-    value: '${abbrs.databases.cosmosDBDatabase}db${suffix}'
-  }
-  {
-    name: 'COSMOS_DB_CONFIG_CONTAINER'
-    value: configContainerName
-  }
-  {
-    name: 'COSMOS_DB_URI'
-    value: 'https://${cosmos.outputs.accountName}.documents.azure.com:443/'
   }
   {
     name: 'AIMULTISERVICES_ENDPOINT'
@@ -430,11 +376,6 @@ var keyVaultSecretsUserIdentityAssignmentsAll = concat(keyVaultSecretsUserIdenti
     roleDefinitionId: keyVaultSecretsUserRole.id
     principalType: 'ServicePrincipal'
   }
-  {
-    principalId: uaiBackendMsi.outputs.principalId
-    roleDefinitionId: keyVaultSecretsUserRole.id
-    principalType: 'ServicePrincipal'
-  }
 ])
 
 var subnets = reduce(
@@ -487,17 +428,6 @@ module keyVaultAccessFunc1 './modules/rbac/keyvault-access.bicep' = {
   name: 'keyvault-access-${processingFunctionAppName}'
   params: {
     principalId: processingFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: keyVaultSecretsUserRole.id
-    principalType: 'ServicePrincipal'
-    resourceName: keyVault.outputs.name
-  }
-}
-
-module keyVaultAccessFunc2 './modules/rbac/keyvault-access.bicep' = {
-  scope : resourceGroup
-  name: 'keyvault-access-${webBackEndFunctionAppName}'
-  params: {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
     roleDefinitionId: keyVaultSecretsUserRole.id
     principalType: 'ServicePrincipal'
     resourceName: keyVault.outputs.name
@@ -588,39 +518,6 @@ module documentsDnsZone './modules/network/private-dns-zones.bicep' = if (_netwo
   }
 }
 
-module cosmospe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
-  scope : resourceGroup
-  name: 'cosmospe'
-  params: {
-    location: location
-    name: _azureDbAccountPe
-    tags: tags
-    subnetId: _networkIsolation?vnet.outputs.databaseSubId:''
-    serviceId: cosmos.outputs.id
-    groupIds: ['Sql']
-    dnsZoneId: _networkIsolation?documentsDnsZone.outputs.id:''
-  }
-}
-
-// 4. Cosmos DB
-module cosmos './modules/db/cosmos.bicep' = {
-  scope : resourceGroup
-  name: 'cosmosModule'
-  params: {
-    location: location
-    accountName: cosmosAccountName
-    databaseName: cosmosDatabaseName
-    containerName: promptsContainer
-    configContainerName: configContainerName
-    conversationContainerName: conversationHistoryContainerName
-    cosmosDbReuse: _azureReuseConfig.cosmosDbReuse
-    datasourcesContainerName: configContainerName
-    existingCosmosDbAccountName: _azureReuseConfig.existingCosmosDbAccountName
-    existingCosmosDbResourceGroupName: _azureReuseConfig.existingCosmosDbResourceGroupName
-    keyVaultName: keyVault.outputs.name
-    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
-  }
-}
 module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
   scope : resourceGroup
   name: 'virtual-network'
@@ -843,51 +740,6 @@ module procFuncStorage './modules/storage/storage-account.bicep' = {
   }  
 }
 
-module backendStoragePe './modules/storage/storage-private-endpoints.bicep' = if (_networkIsolation && !_vnetReuse){
-  scope : resourceGroup
-  name: 'backend-storage-pe'
-  dependsOn: [
-    vnet
-    backendFuncStorage
-  ]
-  params: {
-    location: location
-    name: '${abbrs.storage.storageAccount}${suffix}fnbackend'
-    tags: tags
-    vnetName: _vnetName
-  }
-}
-
-module backendFuncStorage './modules/storage/storage-account.bicep' = {
-  scope : resourceGroup
-  name: 'backendfuncstorage'
-  params: {
-    name: '${abbrs.storage.storageAccount}${suffix}fnbackend'
-    location: location
-    storageReuse: _azureReuseConfig.storageReuse
-    existingStorageResourceGroupName: _azureReuseConfig.existingStorageResourceGroupName
-    tags: tags
-    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
-    allowBlobPublicAccess: false // Disable anonymous access
-    deleteRetentionPolicy: {
-      enabled: true
-      days: 7
-    }
-    networkAcls : {
-      resourceAccessRules :[]
-      bypass: 'AzureServices'
-      defaultAction: _networkIsolation?'Deny':'Allow'
-      ipRules : []
-      virtualNetworkRules : (_networkIsolation && !_vnetReuse) ? [
-        {
-          id: vnet.outputs.aiSubId
-          action: 'Allow'
-        }
-      ] : []
-    }
-  }  
-}
-
 module hostingPlan './modules/compute/hosting-plan.bicep' = {
   scope : resourceGroup
   name: 'hostingPlan'
@@ -949,111 +801,12 @@ module processingFunctionApp './modules/compute/functionApp.bicep' = {
     storageAccountName: procFuncStorage.outputs.name
     aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
     appConfigName: appConfigName
-    staticWebAppUrl: deployStaticWebApp?'https://${staticWebApp.outputs.defaultHostName}':'*'
     tags: union(tags , { 'azd-service-name' : 'processing' })
     networkIsolation: _networkIsolation
     virtualNetworkSubnetId : _networkIsolation?vnet.outputs.appServicesSubId:''
     appSettings: [
       
     ]
-  }
-}
-
-module backendFunctionAppPe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
-  scope : resourceGroup
-  name: _backendFunctionAppPe
-  params: {
-    location: location
-    name: _backendFunctionAppPe
-    tags: tags
-    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: backendFunctionApp.outputs.id
-    groupIds: ['sites']
-    dnsZoneId: _networkIsolation?websitesDnsZone.outputs.id:''
-  }
-}
-
-module uaiBackendMsi './modules/security/managed-identity.bicep' = {
-  scope: resourceGroup
-  name: 'uai-${webBackEndFunctionAppName}'
-  params: {
-    name: 'uai-${webBackEndFunctionAppName}'
-    location: location
-    tags: union(tags, {})
-  }
-}
-
-// 3. FunctionApp
-module backendFunctionApp './modules/compute/functionApp.bicep' = {
-  scope : resourceGroup
-  name: webBackEndFunctionAppName
-  params: {
-    identityId: uaiBackendMsi.outputs.id
-    principalId: uaiBackendMsi.outputs.principalId
-    clientId : uaiBackendMsi.outputs.clientId
-    appName: webBackEndFunctionAppName
-    appPurpose: 'backend'
-    location: location
-    storageAccountName: backendFuncStorage.outputs.name
-    hostingPlanName : hostingPlanName
-    applicationInsightsName: appInsights.outputs.name
-    aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
-    appConfigName: appConfigName
-    networkIsolation: _networkIsolation
-    virtualNetworkSubnetId : _networkIsolation?vnet.outputs.appServicesSubId:''
-    staticWebAppUrl: '*' 
-    tags: union(tags , { 'azd-service-name' : 'backend' })
-    appSettings: [
-     {
-      name: 'USE_SAS_TOKEN'
-      value: 'true'
-     } 
-     {
-      name: 'SAS_TOKEN_EXPIRY_HOURS'
-      value: '1'
-     } 
-    ]
-  }
-}
-
-module staticWebDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse && deployStaticWebApp) {
-  scope : resourceGroup
-  name: 'staticweb-dnzones'
-  params: {
-    dnsZoneName: 'privatelink.${split(staticWebApp.outputs.defaultHostName, '.')[1]}.azurestaticapps.net' 
-    tags: tags
-    virtualNetworkName: _networkIsolation?vnet.outputs.name:''
-  }
-}
-
-module staticWebAppPE './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse && deployStaticWebApp) {
-  name: _staticWebAppPe
-  scope: resourceGroup
-  params: {
-    location: location
-    name: _staticWebAppPe
-    tags: tags
-    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: staticWebApp.outputs.id
-    groupIds: ['staticSites']
-    dnsZoneId: _networkIsolation?staticWebDnsZone.outputs.id:''
-    //privateLinkServiceConnectionName: 'logAnalytics'
-  }
-}
-
-// 5. Static Web App
-module staticWebApp './modules/apps/staticWebapp.bicep' = if (deployStaticWebApp) {
-  scope : resourceGroup
-  name: 'staticWebAppModule'
-  params: {
-    staticWebAppName: staticWebAppName
-    functionAppResourceId: backendFunctionApp.outputs.id
-    user_gh_url: user_gh_url
-    location: location
-    cosmosId: cosmos.outputs.cosmosResourceId
-    appConfigName: appConfig.outputs.name
-    suffix : suffix
-    tags: tags
   }
 }
 
@@ -1088,16 +841,6 @@ var allstorageDataOwnerIdentityAssignments = concat([], [
     roleDefinitionId: storageDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
-  {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: storageDataOwnerRole.id
-    principalType: 'ServicePrincipal'
-  }
-  deployStaticWebApp ? {
-    principalId: staticWebApp.outputs.identityPrincipalId
-    roleDefinitionId: storageDataOwnerRole.id
-    principalType: 'ServicePrincipal'
-  } : {}
 ])
 
 module storageDataOwnerResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
@@ -1118,11 +861,6 @@ var allstorageQueueDataIdentityAssignments = concat([], [
     roleDefinitionId: storageQueueDataRole.id
     principalType: 'ServicePrincipal'
   }
-  {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: storageQueueDataRole.id
-    principalType: 'ServicePrincipal'
-  }
 ])
 
 module storageQueueResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
@@ -1140,11 +878,6 @@ module storageQueueResourceGroupRoleAssignment './modules/security/resource-grou
 var allstorageTableDataIdentityAssignments = concat([], [
   {
     principalId: processingFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: storageTableDataRole.id
-    principalType: 'ServicePrincipal'
-  }
-  {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
     roleDefinitionId: storageTableDataRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1169,11 +902,6 @@ var allstorageAccountContributorIdentityAssignments = concat([], [
     roleDefinitionId: storageContributorRole.id
     principalType: 'ServicePrincipal'
   }
-  {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: storageContributorRole.id
-    principalType: 'ServicePrincipal'
-  }
 ])
 
 
@@ -1195,16 +923,6 @@ var allstorageFileContribIdentityAssignments = concat([], [
     roleDefinitionId: storageFileContributorRole.id
     principalType: 'ServicePrincipal'
   }
-  {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: storageFileContributorRole.id
-    principalType: 'ServicePrincipal'
-  }
-  deployStaticWebApp ? {
-    principalId: staticWebApp.outputs.identityPrincipalId
-    roleDefinitionId: storageFileContributorRole.id
-    principalType: 'ServicePrincipal'
-  } : {}
 ]
 )
 
@@ -1231,11 +949,6 @@ var allcogServicesUserIdentityAssignments = concat([], [
     roleDefinitionId: cogServicesUserRole.id
     principalType: 'ServicePrincipal'
   }
-  {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: cogServicesUserRole.id
-    principalType: 'ServicePrincipal'
-  }
 ])
 
 
@@ -1259,11 +972,6 @@ resource cogServicesOpenAIUserRole 'Microsoft.Authorization/roleDefinitions@2022
 var allcogServicesOpenAIUserIdentityAssignments = concat([], [
   {
     principalId: processingFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: cogServicesOpenAIUserRole.id
-    principalType: 'ServicePrincipal'
-  }
-  {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
     roleDefinitionId: cogServicesOpenAIUserRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1308,11 +1016,6 @@ var allConfigDataOwnerIdentityAssignments = concat(appConfigDataOwnerIdentityAss
   }
   {
     principalId: processingFunctionApp.outputs.identityPrincipalId
-    roleDefinitionId: appConfigDataOwnerRole.id
-    principalType: 'ServicePrincipal'
-  }
-  {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
     roleDefinitionId: appConfigDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1380,35 +1083,6 @@ module aiMultiServices './modules/ai_ml/aimultiservices.bicep' = {
   }
 }
 
-// Invoke the role assignment module for Storage Queue Data Contributor
-module cosmosContributorbackend './modules/rbac/cosmos-contributor.bicep' = {
-  name: 'backendcosmosContributorModule'
-  scope: resourceGroup // Role assignment applies to the storage account
-  params: {
-    principalId: backendFunctionApp.outputs.identityPrincipalId
-    resourceName: cosmos.outputs.accountName
-  }
-}
-
-module cosmosContributorProcessor './modules/rbac/cosmos-contributor.bicep' = {
-  name: 'processingcosmosContributorModule'
-  scope: resourceGroup // Role assignment applies to the storage account
-  params: {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
-    resourceName: cosmos.outputs.accountName
-  }
-}
-
-// Invoke the role assignment module for Storage Queue Data Contributor
-module cosmosContributorUser './modules/rbac/cosmos-contributor.bicep' = {
-  name: 'cosmosContributorUserModule'
-  scope: resourceGroup // Role assignment applies to the storage account
-  params: {
-    principalId: userPrincipalId
-    resourceName: cosmos.outputs.accountName
-  }
-}
-
 module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse) || _deployVM)  {
   scope : resourceGroup
   name: 'testvm'
@@ -1438,19 +1112,10 @@ output OPENAI_API_VERSION string = processingFunctionApp.outputs.openaiApiVersio
 output OPENAI_API_BASE string = processingFunctionApp.outputs.openaiApiBase
 output OPENAI_MODEL string = processingFunctionApp.outputs.openaiModel
 output FUNCTIONS_WORKER_RUNTIME string = processingFunctionApp.outputs.functionWorkerRuntime
-output STATIC_WEB_APP_NAME string = deployStaticWebApp ? staticWebApp.outputs.name : '0'
-output COSMOS_DB_PROMPTS_CONTAINER string = promptsContainer
-output COSMOS_DB_CONFIG_CONTAINER string = configContainerName
-output COSMOS_DB_CONVERSATION_CONTAINER string = conversationHistoryContainerName
-output COSMOS_DB_PROMPTS_DB string = cosmosDatabaseName
-output COSMOS_DB_ACCOUNT_NAME string = cosmos.outputs.accountName
-output COSMOS_DB_URI string = 'https://${cosmosAccountName}.documents.azure.com:443/'
 output AIMULTISERVICES_NAME string = aiMultiServices.outputs.aiMultiServicesName
 output AIMULTISERVICES_ENDPOINT string = aiMultiServices.outputs.aiMultiServicesEndpoint
 output PROCESSING_FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
 output PROCESSING_FUNCTION_URL string = processingFunctionApp.outputs.uri
-output WEB_BACKEND_FUNCTION_APP_NAME string = deployStaticWebApp ? backendFunctionApp.outputs.name : ''
-output WEB_BACKEND_FUNCTION_URL string = deployStaticWebApp ? backendFunctionApp.outputs.uri : ''
 
 // Resue details
 @description('Settings to define reusable resources.')

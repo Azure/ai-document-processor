@@ -1,11 +1,9 @@
-eval $(azd env get-values)
+cd pipeline
+python -m venv .venv
 
-cd web-backend
-func azure functionapp fetch-app-settings $WEB_BACKEND_FUNCTION_APP_NAME
+source .venv/bin/activate
+pip install -r requirements.txt
 
-func start --build
+func start --build --verbose
 
-# cd ../pipeline
-# func azure functionapp fetch-app-settings $PROCESSING_FUNCTION_APP_NAME
 # func start --build
-

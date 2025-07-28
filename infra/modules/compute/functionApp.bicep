@@ -20,7 +20,6 @@ param linuxFxVersion string = 'Python|3.12'
 param appSettings array = []
 
 param networkIsolation bool = false
-param staticWebAppUrl string
 param identityId string
 param principalId string
 param clientId string
@@ -73,7 +72,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
     publicNetworkAccess: 'Enabled'  //this stays enabled even if network isolation is set to true
     virtualNetworkSubnetId: networkIsolation ? virtualNetworkSubnetId : null
     siteConfig: {
-      cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com', '${staticWebAppUrl}'] }
+      cors: {allowedOrigins: ['https://ms.portal.azure.com', 'https://portal.azure.com'] }
       alwaysOn: true
       publicNetworkAccess: networkIsolation ? null : 'Enabled'
       ipSecurityRestrictionsDefaultAction : networkIsolation ? 'Deny' : 'Allow'

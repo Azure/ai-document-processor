@@ -2,7 +2,7 @@ from openai import AzureOpenAI
 import os 
 import logging
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-from pipelineUtils.db import save_chat_message
+# from pipelineUtils.db import save_chat_message
 from configuration import Configuration
 config = Configuration()
 
