@@ -1,5 +1,6 @@
 *.bicepparam
-local
+local.settings.json
+oldsettings.json
 commandUtils
 *.ipynb
 # Byte-compiled / optimized / DLL files
