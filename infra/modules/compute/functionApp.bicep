@@ -180,7 +180,7 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         }
       ], appPurpose == 'processing' ? [
         {
-          name: 'AzureWebJobsFeatureFlag'
+          name: 'AzureWebJobsFeatureFlags'
           value: 'EnableWorkerIndexing'
         }
       ] : [])

@@ -68,7 +68,7 @@ param aoaiLocation string
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool
+param networkIsolation bool = false
 var _networkIsolation = networkIsolation
 
 @minLength(6)
@@ -115,7 +115,6 @@ param vnetAddress string = ''
 var _vnetAddress = !empty(vnetAddress) ? vnetAddress : '10.0.0.0/23'
 
 @description('Forked Git repository URL for the Static Web App')
-param user_gh_url string = ''
 param userPrincipalId string
 
 // Environment name. This is automatically set by the 'azd' tool.
@@ -650,6 +649,10 @@ module storagePe './modules/storage/storage-private-endpoints.bicep' = if (_netw
   dependsOn: [
     vnet
     storage
+    blobDnsZone
+    queueDnsZone
+    tableDnsZone
+    fileDnsZone
   ]
   params: {
     location: location
@@ -701,6 +704,9 @@ module procStoragePe './modules/storage/storage-private-endpoints.bicep' = if (_
   dependsOn: [
     vnet
     procFuncStorage
+    queueDnsZone
+    tableDnsZone
+    fileDnsZone
   ]
   params: {
     location: location
@@ -1104,7 +1110,7 @@ module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse)
 
 output RESOURCE_GROUP string = resourceGroup.name
 output FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
-output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
+output AZURE_STORAGE_ACCOUNT string = procFuncStorage.outputs.name
 output FUNCTION_URL string = processingFunctionApp.outputs.uri
 output BLOB_ENDPOINT string = processingFunctionApp.outputs.blobEndpoint
 output PROMPT_FILE string = processingFunctionApp.outputs.promptFile
@@ -1116,6 +1122,8 @@ output AIMULTISERVICES_NAME string = aiMultiServices.outputs.aiMultiServicesName
 output AIMULTISERVICES_ENDPOINT string = aiMultiServices.outputs.aiMultiServicesEndpoint
 output PROCESSING_FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
 output PROCESSING_FUNCTION_URL string = processingFunctionApp.outputs.uri
+output APP_CONFIG_NAME string = appConfig.outputs.name
+output KEY_VAULT_NAME string = keyVault.outputs.name
 
 // Resue details
 @description('Settings to define reusable resources.')

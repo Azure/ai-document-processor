@@ -24,4 +24,3 @@ output id string = hostingPlan.id
 output name string = hostingPlan.name
 output location string = hostingPlan.location
 output skuName string = hostingPlan.sku.name
-

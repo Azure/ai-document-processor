@@ -31,7 +31,6 @@ def ai_doc_blob_trigger(req:func.InputStream):
       )
 
       poller = client.begin_analyze_document(
-          # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
           "prebuilt-read", AnalyzeDocumentRequest(bytes_source=req.read())
         )
       
@@ -57,7 +56,7 @@ def ai_doc_blob_trigger(req:func.InputStream):
           result = write_to_blob(NEXT_STAGE, f"{output_name}-output.json", response_content)
         
           if result:
-              logging.info(f"Successfully wrote output to blob {req.name}")
+              logging.info(f"Successfully wrote output to blob {req.name}, NEXT_STAGE: {NEXT_STAGE}")
           else:
               logging.error(f"Failed to write output to blob {req.name}")
     

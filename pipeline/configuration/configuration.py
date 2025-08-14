@@ -57,7 +57,6 @@ class Configuration:
                 
                 logger.info("Using AZURE_APPCONFIG_CONNECTION_STRING for configuration.")
                 connection_string = os.environ["AZURE_APPCONFIG_CONNECTION_STRING"]
-                logger.info(f"Using connection string: {connection_string}")
                 # Connect to Azure App Configuration using a connection string.
                 self.config = load(connection_string=connection_string, key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential))
             except Exception as e:
