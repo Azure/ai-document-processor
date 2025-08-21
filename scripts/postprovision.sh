@@ -10,7 +10,7 @@ echo "Post-provision script started."
 echo "Current Path: $(pwd)"
 eval "$(azd env get-values)"
 eval "$(azd env get-values | sed 's/^/export /')"
-echo "Uploading Blob"
+echo "Uploading Blob to Azure Storage Account: $AZURE_STORAGE_ACCOUNT"
 
 {
   az storage blob upload \

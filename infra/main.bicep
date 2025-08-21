@@ -125,6 +125,7 @@ var processingFunctionAppName = '${abbrs.compute.functionApp}processing-${suffix
 // var webBackEndFunctionAppName = '${abbrs.compute.functionApp}webbackend-${suffix}'
 // var staticWebAppName = '${abbrs.compute.staticWebApp}${suffix}'
 var storageAccountName = '${abbrs.storage.storageAccount}${suffix}'
+var funcStorageName = '${abbrs.storage.storageAccount}${suffix}func'
 var keyVaultName = '${abbrs.security.keyVault}${suffix}'
 var aoaiName = '${abbrs.ai.openAIService}${suffix}'
 var aiMultiServicesName = '${abbrs.ai.aiMultiServices}${suffix}'
@@ -283,11 +284,15 @@ var appSettings = [
     value: appInsights.outputs.connectionString
   }
   {
-    name: 'STORAGE_ACCOUNT_NAME'
-    value : storageAccountName
+    name: 'FUNC_STORAGE_ACCOUNT_NAME'
+    value : funcStorageName
   }
   {
-    name: 'BLOB_ENDPOINT'
+    name: 'DATA_STORAGE_ACCOUNT_NAME'
+    value: storageAccountName
+  }
+  {
+    name: 'DATA_STORAGE_ENDPOINT'
     value: 'https://${storageAccountName}.blob.${environment().suffixes.storage}'
   }
   {
@@ -367,7 +372,7 @@ var keyVaultSecretsUserIdentityAssignments = [
     principalType: identity.principalType
   }
 ]
-
+// 
 var keyVaultSecretsUserIdentityAssignmentsAll = concat(keyVaultSecretsUserIdentityAssignments,
 [
   {
@@ -442,6 +447,16 @@ module keyVaultAccessPolicies './modules/rbac/keyvault-access-policy.bicep' = {
     }
     principalId: processingFunctionApp.outputs.identityPrincipalId
     resourceName: keyVault.outputs.name
+  }
+}
+
+module keyVaultAdmin './modules/rbac/role.bicep' = {
+  scope : resourceGroup
+  name: 'keyvault-admin-${keyVaultName}'
+  params: {
+    principalId: principalId
+    roleDefinitionId: roles.security.keyVaultAdministrator
+    principalType: 'User'
   }
 }
 
@@ -720,7 +735,7 @@ module procFuncStorage './modules/storage/storage-account.bicep' = {
   scope : resourceGroup
   name: 'procfuncstorage'
   params: {
-    name: '${abbrs.storage.storageAccount}${suffix}fnproc'
+    name: funcStorageName // '${abbrs.storage.storageAccount}${suffix}func'
     location: location
     storageReuse: _azureReuseConfig.storageReuse
     existingStorageResourceGroupName: _azureReuseConfig.existingStorageResourceGroupName
@@ -804,7 +819,8 @@ module processingFunctionApp './modules/compute/functionApp.bicep' = {
     location: location
     hostingPlanName : hostingPlanName
     applicationInsightsName: appInsights.outputs.name
-    storageAccountName: procFuncStorage.outputs.name
+    storageAccountName: storage.outputs.name
+    funcStorageName: procFuncStorage.outputs.name
     aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
     appConfigName: appConfigName
     tags: union(tags , { 'azd-service-name' : 'processing' })
@@ -1052,6 +1068,7 @@ resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleDefinitions@2022-0
   name: roles.security.keyVaultSecretsUser
 }
 
+
 var aiMultiServiceManagedIdentityName = '${abbrs.security.managedIdentity}${abbrs.ai.aiMultiServices}${suffix}'
 module aiMultiServiceManagedIdentity './modules/security/managed-identity.bicep' = {
   scope: resourceGroup
@@ -1110,10 +1127,8 @@ module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse)
 
 output RESOURCE_GROUP string = resourceGroup.name
 output FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
-output AZURE_STORAGE_ACCOUNT string = procFuncStorage.outputs.name
+output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
 output FUNCTION_URL string = processingFunctionApp.outputs.uri
-output BLOB_ENDPOINT string = processingFunctionApp.outputs.blobEndpoint
-output PROMPT_FILE string = processingFunctionApp.outputs.promptFile
 output OPENAI_API_VERSION string = processingFunctionApp.outputs.openaiApiVersion
 output OPENAI_API_BASE string = processingFunctionApp.outputs.openaiApiBase
 output OPENAI_MODEL string = processingFunctionApp.outputs.openaiModel

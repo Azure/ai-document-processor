@@ -7,19 +7,12 @@ from azure.appconfiguration.provider import (
 )
 import logging
 
-# Configure file logging
-# LOG_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'app.log')
 
-# # Set up a file handler
-# file_handler = logging.FileHandler(LOG_FILE, mode="w")
-# file_handler.setLevel(logging.DEBUG)
-# file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# file_handler.setFormatter(file_formatter)
-
-# logger = logging.getLogger()
-# logger.addHandler(file_handler)
 logging.basicConfig(
-    level=logging.INFO)
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+    handlers=[logging.StreamHandler()]
+)
 logger = logging.getLogger(__name__)
 
 from tenacity import retry, wait_random_exponential, stop_after_attempt, RetryError
@@ -36,7 +29,7 @@ class Configuration:
             raise e
         
         self.credential = DefaultAzureCredential(
-            additionally_allowed_tenants=self.tenant_id,
+            additionally_allowed_tenants='self.tenant_id',
             exclude_environment_credential=True, 
             exclude_managed_identity_credential=False,
             exclude_cli_credential=False,
@@ -57,6 +50,7 @@ class Configuration:
                 
                 logger.info("Using AZURE_APPCONFIG_CONNECTION_STRING for configuration.")
                 connection_string = os.environ["AZURE_APPCONFIG_CONNECTION_STRING"]
+                logging.info(f"Using connection string: {connection_string}")
                 # Connect to Azure App Configuration using a connection string.
                 self.config = load(connection_string=connection_string, key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential))
             except Exception as e:

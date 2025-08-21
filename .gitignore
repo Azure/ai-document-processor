@@ -1,3 +1,4 @@
+localscripts/*
 *.bicepparam
 local.settings.json
 oldsettings.json

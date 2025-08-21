@@ -32,12 +32,10 @@ param appConfigName string
 param hostingPlanName string
 param applicationInsightsName string
 param virtualNetworkSubnetId string
-
+param funcStorageName string
 var functionAppName = appName
 var functionWorkerRuntime = runtime
 
-var blobEndpoint = 'https://${storageAccountName}.blob.${environment().suffixes.storage}'
-var promptFile = 'COSMOS'
 
 var openaiApiVersion = '2024-05-01-preview'
 var openaiApiBase = aoaiEndpoint
@@ -45,11 +43,6 @@ var openaiModel = 'gpt-4o'
 
 resource hostingPlan 'Microsoft.Web/serverfarms@2024-04-01' existing = {
   name: hostingPlanName
-}
-
-//get existing storage account
-resource storageAccount 'Microsoft.Storage/storageAccounts@2024-01-01' existing = {
-  name: storageAccountName
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
@@ -87,15 +80,6 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           }
         }
       ] : null
-      connectionStrings: [
-        /*
-        {
-          name: 'AzureWebJobsStorage'
-          connectionString: concat('DefaultEndpointsProtocol=https;AccountName=', storageAccountName, ';AccountKey=', listKeys(storageAccountName, '2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)
-          type: 'Custom'
-        }
-          */
-      ]
       appSettings: concat(appSettings, [
         {
           name: 'AZURE_CLIENT_ID'
@@ -105,16 +89,6 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           name: 'AZURE_TENANT_ID'
           value: subscription().tenantId
         }
-        /*
-        {
-          name: 'AzureWebJobsStorage'
-          value: concat('DefaultEndpointsProtocol=https;AccountName=', storageAccountName, ';AccountKey=', storageAccount.listkeys('2024-01-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)
-        }
-        {
-          name: 'AzureWebJobsSecretStorageType'
-          value: 'files'
-        }
-        */
         {
           name:'allow_environment_variables'
           value: 'true'
@@ -129,7 +103,19 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         }
         {
           name: 'AzureWebJobsStorage__accountName'
+          value: funcStorageName
+        }
+        {
+          name: 'DataStorage__clientId'
+          value: clientId
+        }
+        {
+          name: 'DataStorage__accountName'
           value: storageAccountName
+        }
+        {
+          name: 'DataStorage__credential'
+          value: 'managedidentity'
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
@@ -210,9 +196,7 @@ output name string = functionApp.name
 output uri string = 'https://${functionApp.properties.defaultHostName}'
 output identityPrincipalId string = principalId
 output location string = functionApp.location
-output storageAccountName string = storageAccountName
-output blobEndpoint string = blobEndpoint
-output promptFile string = promptFile
+output funcStorageName string = funcStorageName
 output openaiApiVersion string = openaiApiVersion
 output openaiApiBase string = openaiApiBase
 output openaiModel string = openaiModel

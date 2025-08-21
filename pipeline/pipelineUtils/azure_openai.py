@@ -55,12 +55,7 @@ def run_prompt(system_prompt, user_prompt):
             messages=[{ "role": "system", "content": system_prompt},
                 {"role":"user","content":user_prompt}])
         assistant_msg = response.choices[0].message.content
-        usage = {
-            "prompt_tokens":   response.usage.prompt_tokens,
-            "completion_tokens": response.usage.completion_tokens,
-            "total_tokens":    response.usage.total_tokens,
-            "model":           response.model
-        }
+
         return assistant_msg
     
     except Exception as e:
