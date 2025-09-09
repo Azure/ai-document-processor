@@ -29,9 +29,9 @@ class Configuration:
             raise e
         
         self.credential = DefaultAzureCredential(
-            additionally_allowed_tenants='self.tenant_id',
+            additionally_allowed_tenants=self.tenant_id,
             exclude_environment_credential=True, 
-            exclude_managed_identity_credential=False,
+            exclude_managed_identity_credential=True,
             exclude_cli_credential=False,
             exclude_powershell_credential=True,
             exclude_shared_token_cache_credential=True,
@@ -43,7 +43,9 @@ class Configuration:
 
         try:
             logger.info("Attempting APP_CONFIGURATION_URI for configuration.")
+            logger.info(f"Using APP_CONFIGURATION_URI: {os.environ['APP_CONFIGURATION_URI']}")
             app_config_uri = os.environ['APP_CONFIGURATION_URI']
+            logger.info(f"Using endpoint: {app_config_uri} and credential: {self.credential} and key vault credenial: {self.credential}")
             self.config = load(endpoint=app_config_uri, credential=self.credential,key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential))
         except Exception as e:
             try:
