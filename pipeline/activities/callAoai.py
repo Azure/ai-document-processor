@@ -32,7 +32,7 @@ def run(inputData: dict):
       full_user_prompt = prompt_json['user_prompt'] + "\n\n" + text_result
       # Call the Azure OpenAI service
       logging.info(f"callAoai.py: Full user prompt: {full_user_prompt}")
-      response_content = run_prompt(instance_id, prompt_json['system_prompt'], full_user_prompt)
+      response_content = run_prompt(prompt_json['system_prompt'], full_user_prompt)
       if response_content.startswith('```json') and response_content.endswith('```'):
         response_content = response_content.strip('`')
         response_content = response_content.replace('json', '', 1).strip()

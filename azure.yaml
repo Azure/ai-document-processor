@@ -7,17 +7,8 @@ infra:
     file: ./infra/main.bicep
     
 services:
-  web:
-    host: staticwebapp
-    resourceName: ${STATIC_WEB_APP_NAME}
-    project: ./frontend
-    language: js
   processing:
     project: ./pipeline
-    language: python
-    host: function
-  backend:
-    project: ./web-backend
     language: python
     host: function
 

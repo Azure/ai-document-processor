@@ -1,13 +1,15 @@
 import os
 import logging
+from dataclasses import dataclass
+import json
+
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 
 from configuration import Configuration
 config = Configuration()
 
-ACCOUNT_NAME = config.get_value("STORAGE_ACCOUNT_NAME")
-BLOB_ENDPOINT=f"https://{ACCOUNT_NAME}.blob.core.windows.net"
+BLOB_ENDPOINT=config.get_value("DATA_STORAGE_ENDPOINT")
 
 # if os.getenv("IS_LOCAL"):
 #     BLOB_ENDPOINT = os.getenv("BLOB_ENDPOINT")
@@ -16,7 +18,18 @@ token = config.credential.get_token("https://storage.azure.com/.default")
 
 blob_service_client = BlobServiceClient(account_url=BLOB_ENDPOINT, credential=config.credential)
 
-logging.info(f"BLOB_ENDPOINT: {BLOB_ENDPOINT}")
+@dataclass
+class BlobMetadata:
+    name: str
+    url: str
+    container: str
+
+    def to_dict(self):
+        return {"name": self.name, "url": self.url, "container": self.container}
+
+    def to_json(self):
+        return json.dumps(self.to_dict(), ensure_ascii=False)
+    
 
 def write_to_blob(container_name, blob_path, data):
 

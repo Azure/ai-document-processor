@@ -5,7 +5,6 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 
 ## Business Value
 - *Developer Foundation* -  AI Document Processor is intended to serve as an initial foundation to build your workflow on top of. Developers can write custom logic within the azure functions and leverage existing utility functions to write to blob and call Azure OpenAI models.
-- *Business User UI* - Business users can leverage the UI to update prompts and files to immediately test the results.
 - *Automated Infrastructure Provisioning* - The bicep templates spin up the required infrastructure and builds a deployment pipeline for Azure Functions and the Static Web App 
 - *RBAC Configuration* - The bicep templates spin up infrastructure with managed identities and appropriate access to reduce initial overhead tasks such as granting permissions between services. 
 
@@ -23,7 +22,8 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 ## Architecture
 
 ### Main Components
-![image](https://github.com/user-attachments/assets/47a64ff8-1185-48ec-904f-2cebefc26687)
+<img width="835" height="535" alt="image" src="https://github.com/user-attachments/assets/e23c9da1-8102-4d1d-8fa7-ca36f4511230" />
+
 
 ### Data Flow
 ![image](https://github.com/user-attachments/assets/5721a5be-2f93-44a5-a259-928bfd1b5e83)

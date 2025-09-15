@@ -7,7 +7,7 @@ from configuration import Configuration
 config = Configuration()
 
 NEXT_STAGE = config.get_value("NEXT_STAGE")
-
+logging.info(f"writeToBlob.py: NEXT_STAGE is {NEXT_STAGE}")
 name = "writeToBlob"
 bp = df.Blueprint()
 
@@ -23,8 +23,9 @@ def extract_text_from_blob(args: dict):
       args['json_bytes'] = args['json_str'].encode('utf-8')
       
       sourcefile = os.path.splitext(os.path.basename(args['blob_name']))[0]
+      logging.info(f"writeToBlob.py: Writing output to blob {sourcefile}-output.json with source file {sourcefile} and NEXT_STAGE {NEXT_STAGE}")
       result = write_to_blob(NEXT_STAGE, f"{sourcefile}-output.json", args['json_bytes'])
-      
+      logging.info(f"writeToBlob.py: Result of write_to_blob: {result}")
       if result:
           logging.info(f"writeToBlob.py: Successfully wrote output to blob {args['blob_name']}")
           return {

@@ -8,7 +8,7 @@ from activities import getBlobContent, runDocIntel, callAoai, writeToBlob
 from configuration import Configuration
 
 from pipelineUtils.prompts import load_prompts
-from pipelineUtils.blob_functions import get_blob_content, write_to_blob
+from pipelineUtils.blob_functions import get_blob_content, write_to_blob, BlobMetadata
 from pipelineUtils.azure_openai import run_prompt
 
 config = Configuration()
@@ -19,58 +19,36 @@ app = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 import logging
 
-@app.function_name(name="ai_doc_blob_trigger")
-@app.blob_trigger(arg_name="req", path=f'{config.get_value("AI_DOC_PROC_CONTAINER_NAME","bronze")}/{{name}}', connection=config.get_value("AI_DOC_PROC_CONNECTION_NAME","AzureWebJobsStorage"), data_type=func.DataType.BINARY)
-def ai_doc_blob_trigger(req:func.InputStream):
-    
-    source_container = config.get_value("AI_DOC_PROC_CONTAINER_NAME", "bronze")
-    endpoint = config.get_value("AIMULTISERVICES_ENDPOINT")
-    try:
-      client = DocumentIntelligenceClient(
-          endpoint=endpoint, credential=config.credential
-      )
+# Blob-triggered starter
+@app.function_name(name="start_orchestrator_on_blob")
+@app.blob_trigger(
+    arg_name="blob",
+    path="bronze/{name}",
+    connection="DataStorage",
+)
+@app.durable_client_input(client_name="client")
+async def start_orchestrator_on_blob(
+    blob: func.InputStream,
+    client: df.DurableOrchestrationClient,
+):
+    logging.info(f"Blob Received: {blob}") 
+    logging.info(f"path: {blob.name}")
+    logging.info(f"Size: {blob.length} bytes")
+    logging.info(f"URI: {blob.uri}")   
 
-      poller = client.begin_analyze_document(
-          # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
-          "prebuilt-read", AnalyzeDocumentRequest(bytes_source=req.read())
-        )
-      
-      result: AnalyzeResult = poller.result()
-      
-      if result.paragraphs:    
-          paragraphs = "\n".join([paragraph.content for paragraph in result.paragraphs])            
-      
-      try:
-        # Load the prompt
-        prompt_json = load_prompts()
-        
-        # Call the Azure OpenAI service
-        response_content = run_prompt(paragraphs, prompt_json['system_prompt'])
-        if response_content.startswith('```json') and response_content.endswith('```'):
-          response_content = response_content.strip('`')
-          response_content = response_content.replace('json', '', 1).strip()
+    blob_metadata = BlobMetadata(
+        name=blob.name,          # e.g. 'bronze/file.txt'
+        url=blob.uri,            # full blob URL
+        container="bronze",
+    )
+    logging.info(f"Blob Metadata: {blob_metadata}")
+    logging.info(f"Blob Metadata JSON: {blob_metadata.to_dict()}")
+    instance_id = await client.start_new("orchestrator", client_input=[blob_metadata.to_dict()])
+    logging.info(f"Started orchestration {instance_id} for blob {blob.name}")
 
-        #remove the container name from start of the blob name using its length
-        if req.name.startswith(source_container + "/"):
-          output_name = req.name[len(source_container) + 1:]
-        
-          result = write_to_blob(NEXT_STAGE, f"{output_name}-output.json", response_content)
-        
-          if result:
-              logging.info(f"Successfully wrote output to blob {req.name}")
-          else:
-              logging.error(f"Failed to write output to blob {req.name}")
-    
-      except Exception as e:
-          logging.error(f"Error processing {paragraphs}: {e}")
-          return None
-        
-    except Exception as e:
-      logging.error(f"Error processing {req.name}: {e}")
-      return None
 
 # An HTTP-triggered function with a Durable Functions client binding
-@app.route(route="client/{functionName}")
+@app.route(route="client")
 @app.durable_client_input(client_name="client")
 async def http_start(req: func.HttpRequest, client):
   """
@@ -83,19 +61,28 @@ async def http_start(req: func.HttpRequest, client):
     func.HttpResponse: The HTTP response object.
   """
   
-  body = req.get_json()
-  logging.info(f"Request body: {body}")
+  #Perform basic validation on the request body
+  try:
+      body = req.get_json()
+  except ValueError:
+      return func.HttpResponse("Invalid JSON.", status_code=400)
 
-  blobs = body.get("blobs", [])
-  # Validate the blobs array
-  if not blobs or not isinstance(blobs, list):
-      return func.HttpResponse(
-        "Invalid request: 'blobs' must be a non-empty array.",
-        status_code=400
-      )
+  logging.info(f"Request body: {body}")
+  logging.info(f"config.get_value('STORAGE_ACCOUNT_NAME'): {config.get_value('STORAGE_ACCOUNT_NAME')}")
+
+  blobs = body.get("blobs")
+  if not isinstance(blobs, list) or not blobs:
+      return func.HttpResponse("Invalid request: 'blobs' must be a non-empty array.", status_code=400)
+
+  required = ("name", "url", "container")
+  for i, b in enumerate(blobs):
+      if not isinstance(b, dict):
+          return func.HttpResponse(f"Invalid request: blobs[{i}] must be an object.", status_code=400)
+      if any(k not in b or not isinstance(b[k], str) or not b[k].strip() for k in required):
+          return func.HttpResponse(f"Invalid request: blobs[{i}] must contain non-empty string keys {required}.", status_code=400)
   
-  function_name = req.route_params.get('functionName')
-  instance_id = await client.start_new(function_name, client_input=blobs)
+  #invoke the orchestrator function with the list of blobs
+  instance_id = await client.start_new('orchestrator', client_input=blobs)
   logging.info(f"Started orchestration with Batch ID = '{instance_id}'.")
 
   response = client.create_check_status_response(req, instance_id)
@@ -111,13 +98,13 @@ def run(context):
   
   sub_tasks = []
 
-  for blob in input_data:
-    logging.info(f"Calling sub orchestrator for blob: {blob}")
-    sub_tasks.append(context.call_sub_orchestrator("ProcessBlob", blob))
+  for blob_metadata in input_data:
+    logging.info(f"Calling sub orchestrator for blob: {blob_metadata}")
+    sub_tasks.append(context.call_sub_orchestrator("ProcessBlob", blob_metadata))
 
   logging.info(f"Sub tasks: {sub_tasks}")
 
-  # Runs a list of asynchronous tasks in parallel and waits for all of them to complete. In this case, the tasks are sub-orchestrations that process each blob in parallel
+  # Runs a list of asynchronous tasks in parallel and waits for all of them to complete. In this case, the tasks are sub-orchestrations that process each blob_metadata in parallel
   results = yield context.task_all(sub_tasks)
   logging.info(f"Results: {results}")
   return results
@@ -126,11 +113,11 @@ def run(context):
 @app.function_name(name="ProcessBlob")
 @app.orchestration_trigger(context_name="context")
 def process_blob(context):
-  blob = context.get_input()
+  blob_metadata = context.get_input()
   sub_orchestration_id = context.instance_id 
-  logging.info(f"Process Blob sub Orchestration - Processing blob: {blob} with sub orchestration id: {sub_orchestration_id}")
-  # Waits for the result of an activity function that retrieves the blob content
-  text_result = yield context.call_activity("runDocIntel", blob)
+  logging.info(f"Process Blob sub Orchestration - Processing blob_metadata: {blob_metadata} with sub orchestration id: {sub_orchestration_id}")
+  # Waits for the result of an activity function that retrieves the blob_metadata content
+  text_result = yield context.call_activity("runDocIntel", blob_metadata)
 
   # Package the data into a dictionary
   call_aoai_input = {
@@ -144,11 +131,11 @@ def process_blob(context):
       "writeToBlob", 
       {
           "json_str": json_str, 
-          "blob_name": blob["name"]
+          "blob_name": blob_metadata["name"]
       }
   )
   return {
-      "blob": blob,
+      "blob": blob_metadata,
       "text_result": text_result,
       "task_result": task_result
   }   
