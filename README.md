@@ -22,7 +22,8 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 ## Architecture
 
 ### Main Components
-![image](https://github.com/user-attachments/assets/47a64ff8-1185-48ec-904f-2cebefc26687)
+<img width="835" height="535" alt="image" src="https://github.com/user-attachments/assets/e23c9da1-8102-4d1d-8fa7-ca36f4511230" />
+
 
 ### Data Flow
 ![image](https://github.com/user-attachments/assets/5721a5be-2f93-44a5-a259-928bfd1b5e83)
