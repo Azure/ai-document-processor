@@ -39,6 +39,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 - npm 9.x.x
 - node 18.x.x
 - Python 3.11
+- azure-functiosn-core-tools
   
 ## Deployment Instructions
 
@@ -65,7 +66,6 @@ The intent is for this base use case to be updated by the developer to meet the 
 ### Run the Pipeline
 The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated either in Cosmos DB or in a prompts.yaml file depending on whether you deployed with or without a frontend UI.
 
-#### Without frontend UI
 - Verify Function App deployment. Navigate to the function app overview page and confirm functions are present
 - Update the `prompts.yaml` file in the prompts container of the storage account with your desired prompt instructions for the pipeline
 - Send a POST request to the http_start endpoint
@@ -85,17 +85,22 @@ The default pipeline processes PDFs from the azure storage account bronze contai
 - Results written to gold container of the storage account
 - Monitor progress of pipeline using Log Stream
 
-#### With frontend UI
-- Open Static Web App URL (find link on Static Web App overview page)
-- Upload desired files
-- Update system prompts and user prompts in the Prompt Editor. This will update the backend Cosmos DB, which will be used in the pipeline.
-- Click "Start Workflow" to start the pipeline
-- Messages will populate to indicate the success or failure of the job
+## Start the function locally
+- ./scripts/getRemoteSettings.sh
+- ./scripts/startLocal.sh
+
 
 ### Troubleshooting
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
 - Leverage Log Analytics Workspace to run queries and see exceptions that occurred in the app
 - For deployment issues, use the Development Tools SSH console to inspect the internal file system and get deployment logs
+
+### Common Issues
+1. "The deployment pipeline appears to complete without error, but no functions appear in my Azure portal.
+- Check Logs > Exceptions
+- If there is an issue in the Configuration.py, it is possible that the function is not authenticating successfully with App Config.
+  - Check that appropriate IAM roles are assigned
+  - Check the DefaultAzureCredential settings and ensure that they make sense
 
 ##  MIT License
 https://opensource.org/license/MIT 

@@ -30,12 +30,12 @@ class Configuration:
         
         self.credential = DefaultAzureCredential(
             additionally_allowed_tenants=self.tenant_id,
-            exclude_environment_credential=True, 
-            exclude_managed_identity_credential=True,
-            exclude_cli_credential=False,
+            exclude_environment_credential=False, 
+            exclude_managed_identity_credential=False,
+            exclude_cli_credential=True,
             exclude_powershell_credential=True,
             exclude_shared_token_cache_credential=True,
-            exclude_developer_cli_credential=False,
+            exclude_developer_cli_credential=True,
             exclude_interactive_browser_credential=True
         )
 
