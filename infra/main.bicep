@@ -68,7 +68,7 @@ param aoaiLocation string
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([true, false])
-param networkIsolation bool = false
+param networkIsolation bool = true
 var _networkIsolation = networkIsolation
 
 @minLength(6)
@@ -79,7 +79,7 @@ param vmUserInitialPassword string
 
 @description('Deploy VM? If yes it will create the virtual machine to access the network isolated environment in the zero trust configuration.')
 @allowed([true, false])
-param deployVM bool = false
+param deployVM bool = true
 var _deployVM = deployVM
 
 @description('Deploy VPN?')
@@ -614,7 +614,7 @@ module appConfig './modules/app_config/appconfig.bicep' = {
     //timestamp: ''
     //subnetId: (_networkIsolation && !_vnetReuse)?vnet.outputs.appIntSubId:''
     //uaiId: ''  //uaiAppConfig.id
-    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+    publicNetworkAccess: 'Enabled'
   }
 }
 
@@ -725,7 +725,7 @@ module procStoragePe './modules/storage/storage-private-endpoints.bicep' = if (_
   ]
   params: {
     location: location
-    name: '${abbrs.storage.storageAccount}${suffix}fnproc'
+    name: '${abbrs.storage.storageAccount}${suffix}func'
     tags: tags
     vnetName: _vnetName
   }
