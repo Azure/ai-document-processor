@@ -91,8 +91,8 @@ The default pipeline processes PDFs from the azure storage account bronze contai
   - ./scripts/startLocal.sh
 
 - Windows / PWSH
-  -./scripts/getRemoteSettings.ps1
-  -./scripts/startLocal.ps1
+  - ./scripts/getRemoteSettings.ps1
+  - ./scripts/startLocal.ps1
 
 ### Troubleshooting
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
