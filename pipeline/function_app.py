@@ -27,7 +27,7 @@ import logging
     connection="DataStorage",
 )
 @app.durable_client_input(client_name="client")
-async def start_orchestrator_on_blob(
+async def start_orchestrator_blob(
     blob: func.InputStream,
     client: df.DurableOrchestrationClient,
 ):
@@ -50,7 +50,7 @@ async def start_orchestrator_on_blob(
 # An HTTP-triggered function with a Durable Functions client binding
 @app.route(route="client")
 @app.durable_client_input(client_name="client")
-async def http_start(req: func.HttpRequest, client):
+async def start_orchestrator_http(req: func.HttpRequest, client):
   """
   Starts a new orchestration instance and returns a response to the client.
 
@@ -66,9 +66,6 @@ async def http_start(req: func.HttpRequest, client):
       body = req.get_json()
   except ValueError:
       return func.HttpResponse("Invalid JSON.", status_code=400)
-
-  logging.info(f"Request body: {body}")
-  logging.info(f"config.get_value('STORAGE_ACCOUNT_NAME'): {config.get_value('STORAGE_ACCOUNT_NAME')}")
 
   blobs = body.get("blobs")
   if not isinstance(blobs, list) or not blobs:

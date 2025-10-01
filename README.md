@@ -86,6 +86,7 @@ The default pipeline processes PDFs from the azure storage account bronze contai
 - Monitor progress of pipeline using Log Stream
 
 ## Start the function locally
+- Start azurite (`azurite start`)
 - ./scripts/getRemoteSettings.sh
 - ./scripts/startLocal.sh
 
@@ -94,6 +95,7 @@ The default pipeline processes PDFs from the azure storage account bronze contai
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
 - Leverage Log Analytics Workspace to run queries and see exceptions that occurred in the app
 - For deployment issues, use the Development Tools SSH console to inspect the internal file system and get deployment logs
+- Consider running `azd up --debug 2>&1 | tee debug.log` to output detailed deployment logs and save to a local file for inspection
 
 ### Common Issues
 1. "The deployment pipeline appears to complete without error, but no functions appear in my Azure portal.

@@ -30,16 +30,9 @@ param identities identityInfo[] = union([], [{
 }])
 
 @description('Location for the Static Web App and Azure Function App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
-@allowed([
-  'centralus'
-  'eastus2'
-  'westeurope'
-  'westus2'
-  'southeastasia'
-])
 param location string
 
-@description('Location for the Azure OpenAI account')
+@description('Location for the Azure AI Foundry account')
 @allowed([
   'East US'
   'East US 2'
@@ -128,11 +121,21 @@ var storageAccountName = '${abbrs.storage.storageAccount}${suffix}'
 var funcStorageName = '${abbrs.storage.storageAccount}${suffix}func'
 var keyVaultName = '${abbrs.security.keyVault}${suffix}'
 var aoaiName = '${abbrs.ai.openAIService}${suffix}'
+var cosmosAccountName = '${abbrs.databases.cosmosDBDatabase}${suffix}'
 var aiMultiServicesName = '${abbrs.ai.aiMultiServices}${suffix}'
 var appInsightsName = '${abbrs.managementGovernance.applicationInsights}${suffix}'
 var logAnalyticsName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${suffix}'
 var appConfigName = '${abbrs.configuration.appConfiguration}${suffix}'
 
+var promptsContainer = 'promptscontainer'
+var configContainerName = 'config'
+var conversationHistoryContainerName = 'conversationhistory'
+var cosmosDatabaseName = 'openaiPromptsDB'
+
+
+@description('The name of the Azure Cosmos DB Private Endpoint. If left empty, a random name will be generated.')
+param azureDbAccountPe string = ''
+var _azureDbAccountPe = !empty(azureDbAccountPe) ? azureDbAccountPe : '${abbrs.databases.cosmosDBDatabase}${abbrs.networking.privateEndpoint}${suffix}'
 
 @description('The name of the Azure Configuration Private Endpoint. If left empty, a random name will be generated.')
 param azureAppConfigPe string = ''
@@ -286,6 +289,14 @@ var appSettings = [
   {
     name: 'FUNC_STORAGE_ACCOUNT_NAME'
     value : funcStorageName
+  }
+  {
+    name: 'COSMOS_DB_CONVERSATION_HISTORY_CONTAINER'
+    value: conversationHistoryContainerName
+  }
+  {
+    name: 'COSMOS_DB_URI'
+    value: 'https://${cosmos.outputs.accountName}.documents.azure.com:443/'
   }
   {
     name: 'DATA_STORAGE_ACCOUNT_NAME'
@@ -460,6 +471,26 @@ module keyVaultAdmin './modules/rbac/role.bicep' = {
   }
 }
 
+
+module cosmosContributorProcessor './modules/rbac/cosmos-contributor.bicep' = {
+  name: 'processingcosmosContributorModule'
+  scope: resourceGroup // Role assignment applies to the storage account
+  params: {
+    principalId: processingFunctionApp.outputs.identityPrincipalId
+    resourceName: cosmos.outputs.accountName
+  }
+}
+
+// Invoke the role assignment module for Storage Queue Data Contributor
+module cosmosContributorUser './modules/rbac/cosmos-contributor.bicep' = {
+  name: 'cosmosContributorUserModule'
+  scope: resourceGroup // Role assignment applies to the storage account
+  params: {
+    principalId: userPrincipalId
+    resourceName: cosmos.outputs.accountName
+  }
+}
+
 module aiservicesDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   scope : resourceGroup
   name: 'aiservices-dnzones'
@@ -497,6 +528,52 @@ module aiServicesPe './modules/network/private-endpoint.bicep' = if (_networkIso
   ]
 }
 
+// Cosmos DB Module
+module documentsDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
+  scope : resourceGroup
+  name: 'documents-dnzones'
+  params: {
+    dnsZoneName: 'privatelink.documents.azure.com' 
+    tags: tags
+    virtualNetworkName: _networkIsolation?vnet.outputs.name:''
+  }
+}
+
+module cosmospe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+  scope : resourceGroup
+  name: 'cosmospe'
+  params: {
+    location: location
+    name: _azureDbAccountPe
+    tags: tags
+    subnetId: _networkIsolation?vnet.outputs.databaseSubId:''
+    serviceId: cosmos.outputs.id
+    groupIds: ['Sql']
+    dnsZoneId: _networkIsolation?documentsDnsZone.outputs.id:''
+  }
+}
+
+// 4. Cosmos DB
+module cosmos './modules/db/cosmos.bicep' = {
+  scope : resourceGroup
+  name: 'cosmosModule'
+  params: {
+    location: location
+    accountName: cosmosAccountName
+    databaseName: cosmosDatabaseName
+    containerName: promptsContainer
+    configContainerName: configContainerName
+    conversationContainerName: conversationHistoryContainerName
+    cosmosDbReuse: _azureReuseConfig.cosmosDbReuse
+    datasourcesContainerName: configContainerName
+    existingCosmosDbAccountName: _azureReuseConfig.existingCosmosDbAccountName
+    existingCosmosDbResourceGroupName: _azureReuseConfig.existingCosmosDbResourceGroupName
+    keyVaultName: keyVault.outputs.name
+    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+  }
+}
+
+
 // 2. OpenAI
 module aoaiAccountModule './modules/ai_ml/aoai-account.bicep' = {
   scope : resourceGroup
@@ -520,16 +597,6 @@ module aoaiModelDeploymentModule './modules/ai_ml/modelDeployment.bicep' = {
   dependsOn: [
     aoaiAccountModule
   ]
-}
-
-module documentsDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
-  scope : resourceGroup
-  name: 'documents-dnzones'
-  params: {
-    dnsZoneName: 'privatelink.documents.azure.com' 
-    tags: tags
-    virtualNetworkName: _networkIsolation?vnet.outputs.name:''
-  }
 }
 
 module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
@@ -725,7 +792,7 @@ module procStoragePe './modules/storage/storage-private-endpoints.bicep' = if (_
   ]
   params: {
     location: location
-    name: '${abbrs.storage.storageAccount}${suffix}fnproc'
+    name: '${abbrs.storage.storageAccount}${suffix}func'
     tags: tags
     vnetName: _vnetName
   }
@@ -1118,7 +1185,6 @@ module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse)
     vmUserPassword: vmUserInitialPassword
     vmUserName: _vmUserName
     keyVaultName: keyVault.outputs.name
-    // this is the named of the secret to store the vm password in keyvault. It matches what is used on main.parameters.json
     vmUserPasswordKey: _vmKeyVaultSecName
     principalId: principalId
     azdEnvironmentName: environmentName
@@ -1139,6 +1205,10 @@ output PROCESSING_FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
 output PROCESSING_FUNCTION_URL string = processingFunctionApp.outputs.uri
 output APP_CONFIG_NAME string = appConfig.outputs.name
 output KEY_VAULT_NAME string = keyVault.outputs.name
+output COSMOS_DB_CONVERSATION_CONTAINER string = conversationHistoryContainerName
+output COSMOS_DB_ACCOUNT_NAME string = cosmos.outputs.accountName
+output COSMOS_DB_URI string = 'https://${cosmosAccountName}.documents.azure.com:443/'
+
 
 // Resue details
 @description('Settings to define reusable resources.')
