@@ -130,7 +130,7 @@ var appConfigName = '${abbrs.configuration.appConfiguration}${suffix}'
 var promptsContainer = 'promptscontainer'
 var configContainerName = 'config'
 var conversationHistoryContainerName = 'conversationhistory'
-var cosmosDatabaseName = 'openaiPromptsDB'
+var cosmosDatabaseName = 'conversationHistoryDB'
 
 
 @description('The name of the Azure Cosmos DB Private Endpoint. If left empty, a random name will be generated.')
@@ -329,6 +329,10 @@ var appSettings = [
   {
     name: 'AIMULTISERVICES_ENDPOINT'
     value: aiMultiServices.outputs.aiMultiServicesEndpoint
+  }
+  {
+    name: 'COSMOS_DB_DATABASE_NAME'
+    value: cosmos.outputs.databaseName
   }
   {
     name: 'PROCESSING_FUNCTION_APP_NAME'
@@ -1208,7 +1212,7 @@ output KEY_VAULT_NAME string = keyVault.outputs.name
 output COSMOS_DB_CONVERSATION_CONTAINER string = conversationHistoryContainerName
 output COSMOS_DB_ACCOUNT_NAME string = cosmos.outputs.accountName
 output COSMOS_DB_URI string = 'https://${cosmosAccountName}.documents.azure.com:443/'
-
+output COSMOS_DB_DATABASE_NAME string = cosmos.outputs.databaseName
 
 // Resue details
 @description('Settings to define reusable resources.')
