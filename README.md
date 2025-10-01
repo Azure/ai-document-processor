@@ -86,10 +86,16 @@ The default pipeline processes PDFs from the azure storage account bronze contai
 - Monitor progress of pipeline using Log Stream
 
 ## Start the function locally
+- Linux / WSL
+  - ./scripts/getRemoteSettings.sh
+  - ./scripts/startLocal.sh
 - Start azurite (`azurite start`)
 - ./scripts/getRemoteSettings.sh
 - ./scripts/startLocal.sh
 
+- Windows / PWSH
+  - ./scripts/getRemoteSettings.ps1
+  - ./scripts/startLocal.ps1
 
 ### Troubleshooting
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
