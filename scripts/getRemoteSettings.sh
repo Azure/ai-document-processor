@@ -13,7 +13,10 @@ CONN_STRING=$(az appconfig credential list \
   --query "[?name=='Primary'].connectionString" \
   -o tsv)
 
-jq --arg conn "$CONN_STRING" \
-   '.Values.AZURE_APPCONFIG_CONNECTION_STRING = $conn' \
-   local.settings.json > local.settings.tmp && mv local.settings.tmp local.settings.json
-
+jq --arg conn "$CONN_STRING" '
+  .Values.AZURE_APPCONFIG_CONNECTION_STRING = $conn
+  | .Values.AzureWebJobsStorage = "UseDevelopmentStorage=true"
+  | .Values.DataStorage = "UseDevelopmentStorage=true"
+  | .Values.blob_uploads = "UseDevelopmentStorage=true"
+  | .Values.AZURE_FUNCTIONS_ENVIRONMENT = "Development"
+' local.settings.json > local.settings.tmp && mv local.settings.tmp local.settings.json

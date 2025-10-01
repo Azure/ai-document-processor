@@ -14,6 +14,8 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
+azure_id_logger = logging.getLogger("azure.identity")
+azure_id_logger.setLevel(logging.DEBUG)
 
 from tenacity import retry, wait_random_exponential, stop_after_attempt, RetryError
 
@@ -28,16 +30,28 @@ class Configuration:
         except Exception as e:
             raise e
         
-        self.credential = DefaultAzureCredential(
-            additionally_allowed_tenants=self.tenant_id,
-            exclude_environment_credential=True, 
-            exclude_managed_identity_credential=True,
-            exclude_cli_credential=False,
-            exclude_powershell_credential=True,
-            exclude_shared_token_cache_credential=True,
-            exclude_developer_cli_credential=False,
-            exclude_interactive_browser_credential=True
-        )
+        if os.environ.get("AZURE_FUNCTIONS_ENVIRONMENT") == "Development":
+            self.credential = DefaultAzureCredential(
+                additionally_allowed_tenants=self.tenant_id,
+                exclude_environment_credential=True, 
+                exclude_managed_identity_credential=True,
+                exclude_cli_credential=False,
+                exclude_powershell_credential=True,
+                exclude_shared_token_cache_credential=True,
+                exclude_developer_cli_credential=False,
+                exclude_interactive_browser_credential=True
+            )
+        else:
+            self.credential = DefaultAzureCredential(
+                additionally_allowed_tenants=self.tenant_id,
+                exclude_environment_credential=True, 
+                exclude_managed_identity_credential=False,
+                exclude_cli_credential=True,
+                exclude_powershell_credential=True,
+                exclude_shared_token_cache_credential=True,
+                exclude_developer_cli_credential=True,
+                exclude_interactive_browser_credential=True
+            )
 
         logger.info(f"Using DefaultAzureCredential with tenant ID: {self.tenant_id}")
 
@@ -50,11 +64,14 @@ class Configuration:
         except Exception as e:
             try:
                 
-                logger.info("Using AZURE_APPCONFIG_CONNECTION_STRING for configuration.")
+                logger.info(f"Using AZURE_APPCONFIG_CONNECTION_STRING for configuration: {os.environ['AZURE_APPCONFIG_CONNECTION_STRING']}")
                 connection_string = os.environ["AZURE_APPCONFIG_CONNECTION_STRING"]
                 logging.info(f"Using connection string: {connection_string}")
                 # Connect to Azure App Configuration using a connection string.
-                self.config = load(connection_string=connection_string, key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential))
+                self.config = load(
+                    connection_string=connection_string, 
+                    key_vault_options=AzureAppConfigurationKeyVaultOptions(credential=self.credential)
+                )
             except Exception as e:
                 raise Exception("Unable to connect to Azure App Configuration. Please check your connection string or endpoint. Error: " + str(e))
 
