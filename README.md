@@ -29,7 +29,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 ![image](https://github.com/user-attachments/assets/5721a5be-2f93-44a5-a259-928bfd1b5e83)
 
 ### ZTA Network Architecture
-![image](https://github.com/user-attachments/assets/a761cb68-8603-44c2-acd6-b20a9055c57d)
+<img width="1840" height="935" alt="image" src="https://github.com/user-attachments/assets/41adbe41-c7de-4cbe-84a8-4110c28f40e4" />
 
 
 
