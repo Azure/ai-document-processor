@@ -392,7 +392,7 @@ var keyVaultSecretsUserIdentityAssignments = [
 var keyVaultSecretsUserIdentityAssignmentsAll = concat(keyVaultSecretsUserIdentityAssignments,
 [
   {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     roleDefinitionId: keyVaultSecretsUserRole.id
     principalType: 'ServicePrincipal'
   }
@@ -447,7 +447,7 @@ module keyVaultAccessFunc1 './modules/rbac/keyvault-access.bicep' = {
   scope : resourceGroup
   name: 'keyvault-access-${processingFunctionAppName}'
   params: {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     roleDefinitionId: keyVaultSecretsUserRole.id
     principalType: 'ServicePrincipal'
     resourceName: keyVault.outputs.name
@@ -461,7 +461,7 @@ module keyVaultAccessPolicies './modules/rbac/keyvault-access-policy.bicep' = {
     permissions: {
       secrets: [ 'get', 'list', 'set', 'delete' ]
     }
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     resourceName: keyVault.outputs.name
   }
 }
@@ -481,7 +481,7 @@ module cosmosContributorProcessor './modules/rbac/cosmos-contributor.bicep' = {
   name: 'processingcosmosContributorModule'
   scope: resourceGroup // Role assignment applies to the storage account
   params: {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     resourceName: cosmos.outputs.accountName
   }
 }
@@ -917,7 +917,7 @@ module uaiFrontendMsi './modules/security/managed-identity.bicep' = {
 //   name: processingFunctionAppName
 //   params: {
 //     identityId: uaiFrontendMsi.outputs.id
-//     principalId: uaiFrontendMsi.outputs.principalId
+//     principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
 //     clientId : uaiFrontendMsi.outputs.clientId
 //     appName: processingFunctionAppName
 //     appPurpose: 'processing'
@@ -1007,14 +1007,14 @@ module processingFunctionApp 'br/public:avm/res/web/site:0.16.0' = {
         ApplicationInsights__InstrumentationKey: appInsights.outputs.instrumentationKey
 
         // Identity / environment
-        AZURE_CLIENT_ID: uaiFrontendMsi.outputs.clientId
+        // AZURE_CLIENT_ID: uaiFrontendMsi.outputs.clientId
         AZURE_TENANT_ID: subscription().tenantId
         allow_environment_variables: 'true'
 
         // Storage identities
-        AzureWebJobsStorage__clientId: uaiFrontendMsi.outputs.clientId
+        // AzureWebJobsStorage__clientId: uaiFrontendMsi.outputs.clientId
         AzureWebJobsStorage__accountName: funcStorageName
-        DataStorage__clientId: uaiFrontendMsi.outputs.clientId
+        // DataStorage__clientId: uaiFrontendMsi.outputs.clientId
         DataStorage__accountName: storageAccountName
         DataStorage__credential: 'managedidentity'
 
@@ -1023,8 +1023,8 @@ module processingFunctionApp 'br/public:avm/res/web/site:0.16.0' = {
         // FUNCTIONS_WORKER_RUNTIME: 'python'
 
         // Build settings
-        ENABLE_ORYX_BUILD: 'true'
-        SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
+        // ENABLE_ORYX_BUILD: 'true'
+        // SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
 
         // App Configuration
         APP_CONFIGURATION_URI: 'https://${appConfigName}.azconfig.io'
@@ -1068,7 +1068,7 @@ resource storageFileContributorRole 'Microsoft.Authorization/roleDefinitions@202
 
 var allstorageDataOwnerIdentityAssignments = concat([], [
   {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     roleDefinitionId: storageDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1088,7 +1088,7 @@ module storageDataOwnerResourceGroupRoleAssignment './modules/security/resource-
 
 var allstorageQueueDataIdentityAssignments = concat([], [
   {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId ?? ''
     roleDefinitionId: storageQueueDataRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1108,7 +1108,7 @@ module storageQueueResourceGroupRoleAssignment './modules/security/resource-grou
 
 var allstorageTableDataIdentityAssignments = concat([], [
   {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     roleDefinitionId: storageTableDataRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1129,7 +1129,7 @@ module storageTableResourceGroupRoleAssignment './modules/security/resource-grou
 // Invoke the role assignment module for Storage Queue Data Contributor
 var allstorageAccountContributorIdentityAssignments = concat([], [
   {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     roleDefinitionId: storageContributorRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1150,7 +1150,7 @@ module storageAccountResourceGroupRoleAssignment './modules/security/resource-gr
 
 var allstorageFileContribIdentityAssignments = concat([], [
   {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     roleDefinitionId: storageFileContributorRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1176,7 +1176,7 @@ resource cogServicesUserRole 'Microsoft.Authorization/roleDefinitions@2022-05-01
 
 var allcogServicesUserIdentityAssignments = concat([], [
   {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     roleDefinitionId: cogServicesUserRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1202,7 +1202,7 @@ resource cogServicesOpenAIUserRole 'Microsoft.Authorization/roleDefinitions@2022
 
 var allcogServicesOpenAIUserIdentityAssignments = concat([], [
   {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     roleDefinitionId: cogServicesOpenAIUserRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1246,7 +1246,7 @@ var allConfigDataOwnerIdentityAssignments = concat(appConfigDataOwnerIdentityAss
     principalType: 'ServicePrincipal'
   }
   {
-    principalId: uaiFrontendMsi.outputs.principalId
+    principalId: processingFunctionApp.outputs.?systemAssignedMIPrincipalId
     roleDefinitionId: appConfigDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
