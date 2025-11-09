@@ -15,7 +15,7 @@ param location string
 @description('Tags.')
 param tags object
 
-param linuxFxVersion string = 'Python|3.12'
+// param linuxFxVersion string = 'Python|3.12'
 
 param appSettings array = []
 
@@ -33,6 +33,7 @@ param hostingPlanName string
 param applicationInsightsName string
 param virtualNetworkSubnetId string
 param funcStorageName string
+param functionAppConfig object = {}
 var functionAppName = appName
 var functionWorkerRuntime = runtime
 
@@ -171,9 +172,10 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
         }
       ] : [])
       ftpsState: 'FtpsOnly'
-      linuxFxVersion: linuxFxVersion
+      // linuxFxVersion: linuxFxVersion
       minTlsVersion: '1.2'
-    }  
+    }
+    functionAppConfig: functionAppConfig
     httpsOnly: true
   }
 }
