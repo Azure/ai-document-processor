@@ -87,15 +87,12 @@ The default pipeline processes PDFs from the azure storage account bronze contai
 
 ## Start the function locally
 - Linux / WSL
-  - ./scripts/getRemoteSettings.sh
-  - ./scripts/startLocal.sh
-- Start azurite (`azurite start`)
-- ./scripts/getRemoteSettings.sh
-- ./scripts/startLocal.sh
+  - Get Remote settings from the function app: `./scripts/getRemoteSettings.sh`
+  - Start the venv and the function app locally `./scripts/startLocal.sh`
 
 - Windows / PWSH
-  - ./scripts/getRemoteSettings.ps1
-  - ./scripts/startLocal.ps1
+  - Get Remote settings from the function app: `./scripts/getRemoteSettings.ps1`
+  - Start the venv and the function app locally `./scripts/startLocal.ps1`
 
 ### Troubleshooting
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
@@ -103,12 +100,14 @@ The default pipeline processes PDFs from the azure storage account bronze contai
 - For deployment issues, use the Development Tools SSH console to inspect the internal file system and get deployment logs
 - Consider running `azd up --debug 2>&1 | tee debug.log` to output detailed deployment logs and save to a local file for inspection
 
+
 ### Common Issues
 1. "The deployment pipeline appears to complete without error, but no functions appear in my Azure portal.
 - Check Logs > Exceptions
 - If there is an issue in the Configuration.py, it is possible that the function is not authenticating successfully with App Config.
   - Check that appropriate IAM roles are assigned
   - Check the DefaultAzureCredential settings and ensure that they make sense
+- Attempt to deploy the function app locally to confirm that there are no version or ModuleNotFound errors preventing start up.
 
 ##  MIT License
 https://opensource.org/license/MIT 
