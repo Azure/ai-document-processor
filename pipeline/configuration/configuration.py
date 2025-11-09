@@ -36,7 +36,7 @@ class Configuration:
                 exclude_environment_credential=True, 
                 exclude_managed_identity_credential=True,
                 exclude_cli_credential=False,
-                exclude_powershell_credential=True,
+                exclude_powershell_credential=False,
                 exclude_shared_token_cache_credential=True,
                 exclude_developer_cli_credential=False,
                 exclude_interactive_browser_credential=True

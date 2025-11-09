@@ -11,8 +11,8 @@ config = Configuration()
 
 BLOB_ENDPOINT=config.get_value("DATA_STORAGE_ENDPOINT")
 
-# if os.getenv("IS_LOCAL"):
-#     BLOB_ENDPOINT = os.getenv("BLOB_ENDPOINT")
+# if os.environ.get("AZURE_FUNCTIONS_ENVIRONMENT") == "Development":
+#     BLOB_ENDPOINT = os.getenv("AzureWebJobsStorage")
 
 token = config.credential.get_token("https://storage.azure.com/.default")
 

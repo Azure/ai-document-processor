@@ -72,7 +72,7 @@ param vmUserInitialPassword string
 
 @description('Deploy VM? If yes it will create the virtual machine to access the network isolated environment in the zero trust configuration.')
 @allowed([true, false])
-param deployVM bool = true
+param deployVM bool
 var _deployVM = deployVM
 
 @description('Deploy VPN?')
@@ -1197,7 +1197,8 @@ module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse)
 
 output RESOURCE_GROUP string = resourceGroup.name
 output FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
-output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
+output DATA_STORAGE_ACCOUNT string = storage.outputs.name
+output FUNC_STORAGE_ACCOUNT string = procFuncStorage.outputs.name
 output FUNCTION_URL string = processingFunctionApp.outputs.uri
 output OPENAI_API_VERSION string = processingFunctionApp.outputs.openaiApiVersion
 output OPENAI_API_BASE string = processingFunctionApp.outputs.openaiApiBase
