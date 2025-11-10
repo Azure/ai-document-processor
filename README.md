@@ -36,9 +36,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 ## Pre-Requisites
 - az cli
 - azd cli
-- npm 9.x.x
-- node 18.x.x
-- Python 3.11
+- Python 3.11+
 - azure-functiosn-core-tools
   
 ## Deployment Instructions
