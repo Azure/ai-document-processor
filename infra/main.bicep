@@ -72,7 +72,7 @@ param vmUserInitialPassword string
 
 @description('Deploy VM? If yes it will create the virtual machine to access the network isolated environment in the zero trust configuration.')
 @allowed([true, false])
-param deployVM bool = true
+param deployVM bool
 var _deployVM = deployVM
 
 @description('Deploy VPN?')

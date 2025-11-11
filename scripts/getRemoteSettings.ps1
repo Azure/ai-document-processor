@@ -23,6 +23,8 @@ azd env get-values | ForEach-Object {
 # (Optional) Quick debug echo – comment out when stable
 Write-Host "PROCESSING_FUNCTION_APP_NAME => '$($env:PROCESSING_FUNCTION_APP_NAME)'" 
 Write-Host "APP_CONFIG_NAME              => '$($env:APP_CONFIG_NAME)'" 
+Write-Host "AZURE_STORAGE_ACCOUNT        => '$($env:AZURE_STORAGE_ACCOUNT)'" 
+Write-Host "RESOURCE_GROUP               => '$($env:RESOURCE_GROUP)'" 
 
 # Move into pipeline directory relative to script location
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -46,6 +48,30 @@ if (-not $connString) {
     throw "Failed to retrieve App Configuration connection string."
 }
 
+# Retrieve Storage account connection strings (function + data storage)
+$storageAccount = $env:AZURE_STORAGE_ACCOUNT
+$resourceGroup  = $env:RESOURCE_GROUP
+
+if (-not $storageAccount) { throw "AZURE_STORAGE_ACCOUNT not set." }
+if (-not $resourceGroup)  { throw "RESOURCE_GROUP not set." }
+
+$blobFuncConnString = az storage account show-connection-string `
+    --name $storageAccount `
+    --resource-group $resourceGroup `
+    --query connectionString `
+    -o tsv
+
+if (-not $blobFuncConnString) { throw "Failed to retrieve function storage account connection string." }
+
+# If a distinct data storage account is desired in future, adjust here. For now we mirror the same account like the bash script.
+$blobDataStorageConnString = az storage account show-connection-string `
+    --name $storageAccount `
+    --resource-group $resourceGroup `
+    --query connectionString `
+    -o tsv
+
+if (-not $blobDataStorageConnString) { throw "Failed to retrieve data storage account connection string." }
+
 # Update local.settings.json (replace jq operation)
 $localSettingsPath = "local.settings.json"
 if (-not (Test-Path $localSettingsPath)) {
@@ -60,7 +86,12 @@ if (-not $json.Values) {
 }
 
 $json.Values.AZURE_APPCONFIG_CONNECTION_STRING = $connString
+$json.Values.AzureWebJobsStorage               = $blobFuncConnString
+$json.Values.DataStorage                       = $blobDataStorageConnString
 
 # Write back (preserve UTF-8)
 $json | ConvertTo-Json -Depth 10 | Set-Content $localSettingsPath -Encoding UTF8
-Write-Host "Updated AZURE_APPCONFIG_CONNECTION_STRING in local.settings.json"
+Write-Host "Updated local.settings.json with:"
+Write-Host "  AZURE_APPCONFIG_CONNECTION_STRING => (length: $($connString.Length))"
+Write-Host "  AzureWebJobsStorage               => (length: $($blobFuncConnString.Length))"
+Write-Host "  DataStorage                       => (length: $($blobDataStorageConnString.Length))"

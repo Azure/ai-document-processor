@@ -10,10 +10,8 @@ cd "$REPO_ROOT/pipeline"
 python -m venv .venv
 
 source ./.venv/bin/activate
-ls -la 
-
 pip install -r requirements.txt
 
-func start --build --verbose
+func start --build
 
 # func start --build

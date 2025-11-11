@@ -78,7 +78,7 @@ param blobContainerRetention blobContainerRetentionInfo = {
   enabled: false
 }
 @description('Whether to disable local (key-based) authentication. Defaults to true.')
-param disableLocalAuth bool = true
+param disableLocalAuth bool = false
 @description('Role assignments to create for the Storage Account.')
 param roleAssignments roleAssignmentInfo[] = []
 

@@ -62,38 +62,28 @@ This repository is intended to set up the scaffolding for an Azure OpenAI pipeli
 The intent is for this base use case to be updated by the developer to meet the specific customer's use case.
 
 ### Run the Pipeline
-The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated either in Cosmos DB or in a prompts.yaml file depending on whether you deployed with or without a frontend UI.
+The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated in a prompts.yaml file depending on whether you deployed with or without a frontend UI.
 
 - Verify Function App deployment. Navigate to the function app overview page and confirm functions are present
 - Update the `prompts.yaml` file in the prompts container of the storage account with your desired prompt instructions for the pipeline
-- Send a POST request to the http_start endpoint
-
-`curl -v -X POST "http://<FUNCTION_APP_NAME>/api/orchestrators/orchestrator?code=<AUTH_KEY>" \
--H "Content-Type: application/json" \
--d '{
-  "blobs": [
-    {
-      "name": "<BLOB_NAME>",
-      "url": "https://<STORAGE_ACCOUNT_NAME>.blob.core.windows.net/bronze?<SAS_TOKEN>",
-      "container": "bronze"
-    }
-  ]
-}'`
+- Use test_client.ipynb to test your function app endpoint
 - Pipeline should take ~30 sec to execute
-- Results written to gold container of the storage account
+- Results written to silver container of the storage account
 - Monitor progress of pipeline using Log Stream
 
 ## Start the function locally
 - Linux / WSL
-  - ./scripts/getRemoteSettings.sh
-  - ./scripts/startLocal.sh
-- Start azurite (`azurite start`)
-- ./scripts/getRemoteSettings.sh
-- ./scripts/startLocal.sh
+  - Ensure Storage accounts enable shared key access (Azure Portal > Storage Account > Configuration). May need to refresh page to ensure update was effective
+  - Get Remote settings from the function app: `./scripts/getRemoteSettings.sh`\
+  - Check to ensure that Blob Connections strings are present in local.settings.json
+  - Start the venv and the function app locally `./scripts/startLocal.sh`
 
 - Windows / PWSH
-  - ./scripts/getRemoteSettings.ps1
-  - ./scripts/startLocal.ps1
+  - Ensure Storage accounts enable shared key access (Azure Portal > Storage Account > Configuration). May need to refresh page to ensure update was effective
+  - Get Remote settings from the function app: `./scripts/getRemoteSettings.ps1`
+  - Check to ensure that Blob Connections strings are present in local.settings.json
+  - Start the venv and the function app locally `./scripts/startLocal.ps1`
+
 
 ### Troubleshooting
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
@@ -101,12 +91,14 @@ The default pipeline processes PDFs from the azure storage account bronze contai
 - For deployment issues, use the Development Tools SSH console to inspect the internal file system and get deployment logs
 - Consider running `azd up --debug 2>&1 | tee debug.log` to output detailed deployment logs and save to a local file for inspection
 
+
 ### Common Issues
 1. "The deployment pipeline appears to complete without error, but no functions appear in my Azure portal.
 - Check Logs > Exceptions
 - If there is an issue in the Configuration.py, it is possible that the function is not authenticating successfully with App Config.
   - Check that appropriate IAM roles are assigned
   - Check the DefaultAzureCredential settings and ensure that they make sense
+- Attempt to deploy the function app locally to confirm that there are no version or ModuleNotFound errors preventing start up.
 
 ##  MIT License
 https://opensource.org/license/MIT 
