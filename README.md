@@ -1,11 +1,11 @@
 # AI Document Processor (ADP)
 
 ## Description
-AI Document Processor Accelerator is designed to help companies leverage LLMs to automate document and file processing tasks. The accelerator uses bicep templates to provision Azure Function App, Storage account, and static web app to manage your documents life cycle from raw PDF, word doc, or .mp3, extract meaningful entities and insights, and write an output report, CSV, or JSON to a blob storage container. 
+AI Document Processor Accelerator is designed to help companies leverage LLMs to automate document and file processing tasks. The accelerator uses bicep templates to provision Azure Function App, Storage account,  to manage your documents life cycle from raw PDF, word doc, or .mp3, extract meaningful entities and insights, and write an output report, CSV, or JSON to a blob storage container. 
 
 ## Business Value
 - *Developer Foundation* -  AI Document Processor is intended to serve as an initial foundation to build your workflow on top of. Developers can write custom logic within the azure functions and leverage existing utility functions to write to blob and call Azure OpenAI models.
-- *Automated Infrastructure Provisioning* - The bicep templates spin up the required infrastructure and builds a deployment pipeline for Azure Functions and the Static Web App 
+- *Automated Infrastructure Provisioning* - The bicep templates spin up the required infrastructure and builds a deployment pipeline for Azure Functions
 - *RBAC Configuration* - The bicep templates spin up infrastructure with managed identities and appropriate access to reduce initial overhead tasks such as granting permissions between services. 
 
 ## Resources
@@ -13,7 +13,6 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 - Azure Function App
 - App Service Plan
 - Azure Storage Account
-- Azure Static Web App
 - Key Vault
 - Application insights
 - Azure Cognitive Services (Multi-Service)
@@ -26,7 +25,7 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
 
 
 ### Data Flow
-![image](https://github.com/user-attachments/assets/5721a5be-2f93-44a5-a259-928bfd1b5e83)
+<img width="935" height="617" alt="image" src="https://github.com/user-attachments/assets/8d7d4aad-961f-4d1a-a6ea-660dbdf6fc43" />
 
 ### ZTA Network Architecture
 <img width="1840" height="935" alt="image" src="https://github.com/user-attachments/assets/41adbe41-c7de-4cbe-84a8-4110c28f40e4" />
