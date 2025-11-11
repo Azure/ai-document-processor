@@ -62,35 +62,28 @@ This repository is intended to set up the scaffolding for an Azure OpenAI pipeli
 The intent is for this base use case to be updated by the developer to meet the specific customer's use case.
 
 ### Run the Pipeline
-The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated either in Cosmos DB or in a prompts.yaml file depending on whether you deployed with or without a frontend UI.
+The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated in a prompts.yaml file depending on whether you deployed with or without a frontend UI.
 
 - Verify Function App deployment. Navigate to the function app overview page and confirm functions are present
 - Update the `prompts.yaml` file in the prompts container of the storage account with your desired prompt instructions for the pipeline
-- Send a POST request to the http_start endpoint
-
-`curl -v -X POST "http://<FUNCTION_APP_NAME>/api/orchestrators/orchestrator?code=<AUTH_KEY>" \
--H "Content-Type: application/json" \
--d '{
-  "blobs": [
-    {
-      "name": "<BLOB_NAME>",
-      "url": "https://<STORAGE_ACCOUNT_NAME>.blob.core.windows.net/bronze?<SAS_TOKEN>",
-      "container": "bronze"
-    }
-  ]
-}'`
+- Use test_client.ipynb to test your function app endpoint
 - Pipeline should take ~30 sec to execute
-- Results written to gold container of the storage account
+- Results written to silver container of the storage account
 - Monitor progress of pipeline using Log Stream
 
 ## Start the function locally
 - Linux / WSL
-  - Get Remote settings from the function app: `./scripts/getRemoteSettings.sh`
+  - Ensure Storage accounts enable shared key access (Azure Portal > Storage Account > Configuration). May need to refresh page to ensure update was effective
+  - Get Remote settings from the function app: `./scripts/getRemoteSettings.sh`\
+  - Check to ensure that Blob Connections strings are present in local.settings.json
   - Start the venv and the function app locally `./scripts/startLocal.sh`
 
 - Windows / PWSH
+  - Ensure Storage accounts enable shared key access (Azure Portal > Storage Account > Configuration). May need to refresh page to ensure update was effective
   - Get Remote settings from the function app: `./scripts/getRemoteSettings.ps1`
+  - Check to ensure that Blob Connections strings are present in local.settings.json
   - Start the venv and the function app locally `./scripts/startLocal.ps1`
+
 
 ### Troubleshooting
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline

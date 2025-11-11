@@ -2,13 +2,24 @@
   "version": "2.0",
   "logging": {
     "logLevel": {
-      "default": "Information"
+      "default": "Warning",
+      "Host.Aggregator": "Error",
+      "Host.Results": "Error",
+      "Function": "Information",
+      "DurableTask": "Warning",
+      "Worker": "Warning"
     },
     "applicationInsights": {
       "samplingSettings": {
         "isEnabled": true,
         "excludedTypes": "Request"
       }
+    }
+  },
+  "durableTask": {
+    "tracing": {
+      "traceInputsAndOutputs": false,
+      "traceReplayEvents": false
     }
   },
   "extensionBundle": {

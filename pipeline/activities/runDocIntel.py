@@ -27,48 +27,40 @@ def normalize_blob_name(container: str, raw_name: str) -> str:
     return raw_name
 
 @bp.function_name(name)
-@bp.activity_trigger(input_name="blobObj")
-def extract_text_from_blob(blobObj: dict):
-  logging.info(f"[runDocIntel] raw input type={type(blobObj)} preview={repr(blobObj)[:200]}")
+@bp.activity_trigger(input_name="blob_input")
+def extract_text_from_blob(blob_input: dict):
 
-  if isinstance(blobObj, str):
-      try:
-          blobObj = json.loads(blobObj)
-      except Exception as e:
-          raise TypeError(f"runDocIntel expected dict or JSON string; got str that failed JSON decode: {e}")
-  if not isinstance(blobObj, dict):
-      raise TypeError(f"runDocIntel expected dict; got {type(blobObj)}")
+    blob_name = blob_input.get('name')
+    container = blob_input.get('container')
 
-  try:
+    try:
     
-    client = DocumentIntelligenceClient(
-        endpoint=endpoint, credential=config.credential
-    )
-    logging.info(f"BlobObj: {blobObj}")
-    # 
+        client = DocumentIntelligenceClient(
+            endpoint=endpoint, credential=config.credential
+        )
 
-    blob_name = normalize_blob_name(blobObj["container"],blobObj["name"])
-    logging.info(f"Normalized Blob Name: {blob_name}")
-    blob_content = get_blob_content(
-        container_name=blobObj["container"],
-        blob_path=blob_name
-    )
-    logging.info(f"Response status code: {blob_content}")
+        normalized_blob_name = normalize_blob_name(container, blob_name)
+        logging.info(f"Normalized Blob Name: {normalized_blob_name}")
+        blob_content = get_blob_content(
+            container_name=blob_input["container"],
+            blob_path=normalized_blob_name
+        )
+        logging.info(f"Response status code: {blob_content}")
 
-    
-    logging.info(f"Starting analyze document: {blob_content[:100]}...")  # Log the first 50 bytes of the file for debugging}")
-    poller = client.begin_analyze_document(
-        # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
-        "prebuilt-read", AnalyzeDocumentRequest(bytes_source=blob_content)
-      )
-    
-    result: AnalyzeResult = poller.result()
-    logging.info(f"Analyze document completed with status: {result}")
-    if result.paragraphs:    
-        paragraphs = "\n".join([paragraph.content for paragraph in result.paragraphs])            
-    
-    return paragraphs
+        
+        logging.info(f"Starting analyze document: {blob_content[:100]}...")  # Log the first 50 bytes of the file for debugging}")
+        poller = client.begin_analyze_document(
+            # AnalyzeDocumentRequest Class: https://learn.microsoft.com/en-us/python/api/azure-ai-documentintelligence/azure.ai.documentintelligence.models.analyzedocumentrequest?view=azure-python
+            "prebuilt-read", AnalyzeDocumentRequest(bytes_source=blob_content)
+        )
+        
+        result: AnalyzeResult = poller.result()
+        logging.info(f"Analyze document completed with status: {result}")
+        if result.paragraphs:    
+            paragraphs = "\n".join([paragraph.content for paragraph in result.paragraphs])            
+        
+        return paragraphs
       
-  except Exception as e:
-    logging.error(f"Error processing {blobObj}: {e}")
+    except Exception as e:
+        logging.error(f"Error processing {blob_input}: {e}")
     return None

@@ -36,4 +36,4 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 
 # Start Azure Functions host
-func start --build --verbose
+func start --build
