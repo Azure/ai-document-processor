@@ -78,20 +78,22 @@ if (-not (Test-Path $localSettingsPath)) {
     throw "File not found: $localSettingsPath"
 }
 
-$json = Get-Content $localSettingsPath -Raw | ConvertFrom-Json
+# Parse as hashtable so we can add keys easily
+$json = Get-Content $localSettingsPath -Raw | ConvertFrom-Json -AsHashtable
 
-if (-not $json.Values) {
-    # Ensure Values object exists
-    $json | Add-Member -NotePropertyName Values -NotePropertyValue (@{}) -Force
+if (-not $json.ContainsKey('Values') -or -not $json['Values']) {
+    $json['Values'] = @{}
 }
 
-$json.Values.AZURE_APPCONFIG_CONNECTION_STRING = $connString
-$json.Values.AzureWebJobsStorage               = $blobFuncConnString
-$json.Values.DataStorage                       = $blobDataStorageConnString
+# Assign (creates or overwrites keys)
+$json['Values']['AZURE_APPCONFIG_CONNECTION_STRING'] = $connString
+$json['Values']['AzureWebJobsStorage']               = $blobFuncConnString
+$json['Values']['DataStorage']                       = $blobDataStorageConnString
 
-# Write back (preserve UTF-8)
+# Write back
 $json | ConvertTo-Json -Depth 10 | Set-Content $localSettingsPath -Encoding UTF8
+
 Write-Host "Updated local.settings.json with:"
 Write-Host "  AZURE_APPCONFIG_CONNECTION_STRING => (length: $($connString.Length))"
 Write-Host "  AzureWebJobsStorage               => (length: $($blobFuncConnString.Length))"
-Write-Host "  DataStorage                       => (length: $($blobDataStorageConnString.Length))"
+Write-Host "  DataStorage                  => (length: $($blobDataStorageConnString.Length))"
