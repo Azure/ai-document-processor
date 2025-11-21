@@ -48,7 +48,6 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
   - azd up
   - Enter your User Principal ID when prompted
   - To get your User principal ID run `az ad signed-in-user show --query id -o tsv`
-  - Select whether you would like to deploy a frontend UI. The UI is not necessary, but is helpful for quick testing of prompts and seeing pipeline progress.
 
 ### Update the Pipeline for a customer's specific use case
 This repository is intended to set up the scaffolding for an Azure OpenAI pipeline. The developer is expected to update the code in the `pipeline/activities` and `pipeline/function_app.py` to meet the customer's needs.
@@ -61,7 +60,7 @@ This repository is intended to set up the scaffolding for an Azure OpenAI pipeli
 The intent is for this base use case to be updated by the developer to meet the specific customer's use case.
 
 ### Run the Pipeline
-The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated in a prompts.yaml file depending on whether you deployed with or without a frontend UI.
+The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated in a prompts.yaml file.
 
 - Verify Function App deployment. Navigate to the function app overview page and confirm functions are present
 - Update the `prompts.yaml` file in the prompts container of the storage account with your desired prompt instructions for the pipeline
