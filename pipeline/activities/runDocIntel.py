@@ -14,8 +14,6 @@ import requests
 from configuration import Configuration
 config = Configuration()
 
-# Variables used by Document Processing client code
-endpoint = config.get_value("AIMULTISERVICES_ENDPOINT") # Add the AI Services Endpoint value from Azure Function App settings
 
 name = "runDocIntel"
 bp = df.Blueprint()
@@ -33,6 +31,8 @@ def extract_text_from_blob(blob_input: dict):
     blob_name = blob_input.get('name')
     container = blob_input.get('container')
 
+    endpoint = config.get_value("AIMULTISERVICES_ENDPOINT") # Add the AI Services Endpoint value from Azure Function App settings
+
     try:
     
         client = DocumentIntelligenceClient(
@@ -45,7 +45,6 @@ def extract_text_from_blob(blob_input: dict):
             container_name=blob_input["container"],
             blob_path=normalized_blob_name
         )
-        logging.info(f"Response status code: {blob_content}")
 
         
         logging.info(f"Starting analyze document: {blob_content[:100]}...")  # Log the first 50 bytes of the file for debugging}")

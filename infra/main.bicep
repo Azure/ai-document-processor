@@ -60,7 +60,7 @@ param location string
 param aoaiLocation string
 
 @description('Network isolation? If yes it will create the private endpoints.')
-@allowed([true, false])
+@allowed([false, true])
 param networkIsolation bool
 var _networkIsolation = networkIsolation
 
@@ -71,18 +71,27 @@ var _networkIsolation = networkIsolation
 param vmUserInitialPassword string
 
 @description('Deploy VM? If yes it will create the virtual machine to access the network isolated environment in the zero trust configuration.')
-@allowed([true, false])
+@allowed([false, true])
 param deployVM bool
 var _deployVM = deployVM
 
 @description('Deploy VPN?')
-@allowed([true, false])
+@allowed([false, true])
 param deployVPN bool = false
 var _deployVPN = deployVPN
 
 @description('Test vm gpt user name. Needed only when choosing network isolation and create bastion option. If not you can leave it blank.')
 param vmUserName string = ''
 var _vmUserName = !empty(vmUserName) ? vmUserName : 'adp-user'
+
+
+@allowed([false, true])
+param multiModal bool = false
+var _multiModal = multiModal
+
+@allowed([false, true])
+param ai_vision_enabled bool = false
+var _ai_vision_enabled = ai_vision_enabled
 
 // PricipalId that will have access to KeyVault secrets, this is automatically set by the 'azd' tool to the principal runing azd
 @description('Id of the user or app to assign application roles')
@@ -934,6 +943,11 @@ var allstorageDataOwnerIdentityAssignments = concat([], [
     roleDefinitionId: storageDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
+  {
+    principalId: aiMultiServiceManagedIdentity.outputs.principalId
+    roleDefinitionId: storageDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
 ])
 
 module storageDataOwnerResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
@@ -1213,6 +1227,7 @@ output COSMOS_DB_CONVERSATION_CONTAINER string = conversationHistoryContainerNam
 output COSMOS_DB_ACCOUNT_NAME string = cosmos.outputs.accountName
 output COSMOS_DB_URI string = 'https://${cosmosAccountName}.documents.azure.com:443/'
 output COSMOS_DB_DATABASE_NAME string = cosmos.outputs.databaseName
+output FUNCTION_STORAGE_ACCOUNT string = procFuncStorage.outputs.name
 
 // Resue details
 @description('Settings to define reusable resources.')

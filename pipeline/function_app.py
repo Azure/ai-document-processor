@@ -1,15 +1,11 @@
 import azure.functions as func
 import azure.durable_functions as df
 
-from azure.ai.documentintelligence import DocumentIntelligenceClient
-from azure.ai.documentintelligence.models import AnalyzeResult, AnalyzeDocumentRequest
 
-from activities import getBlobContent, runDocIntel, callAoai, writeToBlob
+from activities import getBlobContent, runDocIntel, callAoai, writeToBlob, speechToText, callAoaiMultiModal
 from configuration import Configuration
 
-from pipelineUtils.prompts import load_prompts
-from pipelineUtils.blob_functions import get_blob_content, write_to_blob, BlobMetadata
-from pipelineUtils.azure_openai import run_prompt
+from pipelineUtils.blob_functions import BlobMetadata
 
 config = Configuration()
 
@@ -31,7 +27,7 @@ async def start_orchestrator_blob(
     blob: func.InputStream,
     client: df.DurableOrchestrationClient,
 ):
-    logging.info(f"Blob Received: {blob}") 
+    logging.info(f" Blob Trigger (start_orchestrator_blob) - Blob Received: {blob}") 
     logging.info(f"path: {blob.name}")
     logging.info(f"Size: {blob.length} bytes")
     logging.info(f"URI: {blob.uri}")   
@@ -39,10 +35,11 @@ async def start_orchestrator_blob(
     blob_metadata = BlobMetadata(
         name=blob.name,          # e.g. 'bronze/file.txt'
         container="bronze",
+        uri=blob.uri
     )
     logging.info(f"Blob Metadata: {blob_metadata}")
     logging.info(f"Blob Metadata JSON: {blob_metadata.to_dict()}")
-    instance_id = await client.start_new("orchestrator", client_input=[blob_metadata.to_dict()])
+    instance_id = await client.start_new("process_blob", client_input=blob_metadata.to_dict())
     logging.info(f"Started orchestration {instance_id} for blob {blob.name}")
 
 
@@ -64,6 +61,7 @@ async def start_orchestrator_http(req: func.HttpRequest, client):
     try:
         body = req.get_json()
         blob_name = body.get("name")
+        blob_uri = body.get("uri")
 
     except ValueError:
         return func.HttpResponse("Invalid JSON.", status_code=400)
@@ -71,7 +69,8 @@ async def start_orchestrator_http(req: func.HttpRequest, client):
    
     blob_input = {
         "name": blob_name,
-        "container": "bronze"
+        "container": "bronze",
+        "uri": blob_uri
     }
 
     #invoke the process_blob function with the list of blobs
@@ -89,12 +88,47 @@ def process_blob(context):
     blob_input = context.get_input()
     sub_orchestration_id = context.instance_id 
     logging.info(f"Process Blob sub Orchestration - Processing blob_metadata: {blob_input} with sub orchestration id: {sub_orchestration_id}")
-    # Waits for the result of an activity function that retrieves the blob_input content
-    doc_intel_output = yield context.call_activity("runDocIntel", blob_input)
+    # Get file extensions
+    blob_name = blob_input.get("name", "")
+    file_extension = blob_name.lower().split('.')[-1] if '.' in blob_name else ""
+    # Audio file extensions
+    audio_extensions = ['wav', 'mp3', 'opus', 'ogg', 'flac', 'wma', 'aac', 'webm']
+    # Document file extensions
+    document_extensions = ['pdf', 'docx', 'doc', 'xlsx', 'pptx', 'jpg', 'jpeg', 'png', 'tiff', 'bmp']
+    
+    if config.get_value("AOAI_MULTI_MODAL", "false").lower() == "true" and file_extension in document_extensions:
+        aoai_input = {
+            "blob_input": blob_input,
+            "instance_id": sub_orchestration_id
+        }
 
+        text_result = yield context.call_activity("callAoaiMultiModal", aoai_input)
+
+
+    elif config.get_value("AI_VISION_ENABLED", "false").lower() == "true":
+        pass
+
+    elif file_extension in audio_extensions:
+        # Process audio with speech-to-text
+        logging.info(f"Processing audio file: {blob_name}")
+        text_result = yield context.call_activity("speechToText", blob_input)
+
+    elif file_extension in document_extensions:
+        # Process document with Document Intelligence
+        logging.info(f"Processing document file: {blob_name}")
+        text_result = yield context.call_activity("runDocIntel", blob_input)
+        
+    else:
+        # Unsupported file type
+        logging.warning(f"Unsupported file type: {file_extension} for blob: {blob_name}")
+        return {
+            "blob": blob_input,
+            "error": f"Unsupported file type: {file_extension}",
+            "status": "skipped"
+        }
     # Package the data into a dictionary
     call_aoai_input = {
-        "text_result": doc_intel_output,
+        "text_result": text_result,
         "instance_id": sub_orchestration_id 
     }
 
@@ -117,3 +151,4 @@ app.register_functions(getBlobContent.bp)
 app.register_functions(runDocIntel.bp)
 app.register_functions(callAoai.bp)
 app.register_functions(writeToBlob.bp)
+app.register_functions(speechToText.bp)  # Add this line

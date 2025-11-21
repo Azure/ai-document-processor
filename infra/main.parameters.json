@@ -17,6 +17,12 @@
       "networkIsolation": {
         "value": "${AZURE_NETWORK_ISOLATION}"
       },
+      "ai_vision_enabled": {
+        "value": "${AI_VISION_ENABLED}"
+      },
+      "multimodal": {
+        "value": "${AOAI_MULTI_MODAL}"
+      },
       "deploymentTags":{
         "value": {}
       },
