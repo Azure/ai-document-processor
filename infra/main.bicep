@@ -1049,6 +1049,7 @@ module processingFunctionApp 'br/public:avm/res/web/site:0.16.0' = {
     virtualNetworkSubnetId: _networkIsolation?vnet.outputs.appServicesSubId:''
     siteConfig: {
       alwaysOn: false
+      linuxFxVersion: (functionAppHostPlan != 'FlexConsumption') ? 'Python|3.11' : null
     }
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     configs: [{

@@ -33,7 +33,7 @@ async def start_orchestrator_blob(
     logging.info(f"URI: {blob.uri}")   
 
     blob_metadata = BlobMetadata(
-        name=blob.name,          # e.g. 'bronze/file.txt'
+        name=blob.name,
         container="bronze",
         uri=blob.uri
     )

@@ -15,7 +15,7 @@ param location string
 @description('Tags.')
 param tags object
 
-param linuxFxVersion string = 'Python|3.12'
+param linuxFxVersion string = 'Python|3.11'
 
 param appSettings array = []
 
