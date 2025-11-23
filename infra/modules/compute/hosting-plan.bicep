@@ -1,7 +1,7 @@
 param name string
 param location string = resourceGroup().location
 param kind string = 'linux'
-param sku string = 'P0v3'
+param sku string
 
 @description('Tags.')
 param tags object

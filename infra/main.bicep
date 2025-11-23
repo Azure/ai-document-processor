@@ -22,7 +22,7 @@ param resourceGroupName string
 var _resourceGroupName = !empty(resourceGroupName) ? resourceGroupName : '${abbrs.managementGovernance.resourceGroup}-${environmentName}'
 
 var suffix = toLower(uniqueString(subscription().id, environmentName, location))
-
+var deploymentStorageContainerName = 'app-package'
 @description('Identities to assign roles to.')
 param identities identityInfo[] = union([], [{
   principalId: principalId
@@ -60,7 +60,7 @@ param location string
 param aoaiLocation string
 
 @description('Network isolation? If yes it will create the private endpoints.')
-@allowed([true, false])
+@allowed([false, true])
 param networkIsolation bool
 var _networkIsolation = networkIsolation
 
@@ -71,12 +71,12 @@ var _networkIsolation = networkIsolation
 param vmUserInitialPassword string
 
 @description('Deploy VM? If yes it will create the virtual machine to access the network isolated environment in the zero trust configuration.')
-@allowed([true, false])
+@allowed([false, true])
 param deployVM bool
 var _deployVM = deployVM
 
 @description('Deploy VPN?')
-@allowed([true, false])
+@allowed([false, true])
 param deployVPN bool = false
 var _deployVPN = deployVPN
 
@@ -113,10 +113,19 @@ param userPrincipalId string
 // Environment name. This is automatically set by the 'azd' tool.
 @description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
 // param environmentName string = 'dev'
+
+@allowed(['FlexConsumption', 'Dedicated'])
+param functionAppHostPlan string
+
+@allowed(['S3', 'B2', 'P1v2', 'P2v2', 'P3v2', 'FC1'])
+param functionAppSKU string = (functionAppHostPlan == 'FlexConsumption') ? 'FC1' : 'B2'
+
+var openaiApiVersion = '2024-05-01-preview'
+var openaiModel = 'gpt-4o'
+var functionRuntime = 'python'
+
 var hostingPlanName = '${abbrs.compute.appServicePlan}${suffix}'
 var processingFunctionAppName = '${abbrs.compute.functionApp}processing-${suffix}'
-// var webBackEndFunctionAppName = '${abbrs.compute.functionApp}webbackend-${suffix}'
-// var staticWebAppName = '${abbrs.compute.staticWebApp}${suffix}'
 var storageAccountName = '${abbrs.storage.storageAccount}${suffix}'
 var funcStorageName = '${abbrs.storage.storageAccount}${suffix}func'
 var keyVaultName = '${abbrs.security.keyVault}${suffix}'
@@ -253,7 +262,6 @@ module logAnalyticsPe './modules/network/private-endpoint.bicep' = if (_networkI
     serviceId: azureMonitorPrivateLinkScope.outputs.id
     groupIds: ['azuremonitor']
     dnsZoneId: _networkIsolation?azMonitorDnsZone.outputs.id:''
-    //privateLinkServiceConnectionName: 'logAnalytics'
   }
 }
 
@@ -446,7 +454,7 @@ module keyVaultAccessFunc1 './modules/rbac/keyvault-access.bicep' = {
   scope : resourceGroup
   name: 'keyvault-access-${processingFunctionAppName}'
   params: {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: keyVaultSecretsUserRole.id
     principalType: 'ServicePrincipal'
     resourceName: keyVault.outputs.name
@@ -460,7 +468,7 @@ module keyVaultAccessPolicies './modules/rbac/keyvault-access-policy.bicep' = {
     permissions: {
       secrets: [ 'get', 'list', 'set', 'delete' ]
     }
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     resourceName: keyVault.outputs.name
   }
 }
@@ -480,7 +488,7 @@ module cosmosContributorProcessor './modules/rbac/cosmos-contributor.bicep' = {
   name: 'processingcosmosContributorModule'
   scope: resourceGroup // Role assignment applies to the storage account
   params: {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     resourceName: cosmos.outputs.accountName
   }
 }
@@ -614,7 +622,7 @@ module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReus
     existingVnetResourceGroupName: _azureReuseConfig.existingVnetResourceGroupName
     tags: tags
     vnetAddress: _vnetAddress
-    appServicePlanId: hostingPlan.outputs.id
+    appServicePlanId: hostingPlan.outputs.resourceId
     appServicePlanName: hostingPlan.outputs.name
   }
 }
@@ -802,50 +810,93 @@ module procStoragePe './modules/storage/storage-private-endpoints.bicep' = if (_
   }
 }
 
-module procFuncStorage './modules/storage/storage-account.bicep' = {
-  scope : resourceGroup
+// module procFuncStorage './modules/storage/storage-account.bicep' = {
+//   scope : resourceGroup
+//   name: 'procfuncstorage'
+//   params: {
+//     name: funcStorageName // '${abbrs.storage.storageAccount}${suffix}func'
+//     location: location
+//     storageReuse: _azureReuseConfig.storageReuse
+//     existingStorageResourceGroupName: _azureReuseConfig.existingStorageResourceGroupName
+//     tags: tags
+//     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+//     allowBlobPublicAccess: false // Disable anonymous access
+//     deleteRetentionPolicy: {
+//       enabled: true
+//       days: 7
+//     }
+//     networkAcls : {
+//       resourceAccessRules :[]
+//       bypass: 'AzureServices'
+//       defaultAction: _networkIsolation?'Deny':'Allow'
+//       ipRules : []
+//       virtualNetworkRules : (_networkIsolation && !_vnetReuse) ? [
+//         {
+//           id: vnet.outputs.aiSubId
+//           action: 'Allow'
+//         }
+//       ] : []
+//     }
+//   }  
+// }
+
+module procFuncStorage 'br/public:avm/res/storage/storage-account:0.25.0' = {
   name: 'procfuncstorage'
+  scope: resourceGroup
   params: {
-    name: funcStorageName // '${abbrs.storage.storageAccount}${suffix}func'
-    location: location
-    storageReuse: _azureReuseConfig.storageReuse
-    existingStorageResourceGroupName: _azureReuseConfig.existingStorageResourceGroupName
-    tags: tags
+    name: funcStorageName
+    allowBlobPublicAccess: true
+    allowSharedKeyAccess: false // Disable local authentication methods as per policy
+    dnsEndpointType: 'Standard'
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
-    allowBlobPublicAccess: false // Disable anonymous access
-    deleteRetentionPolicy: {
-      enabled: true
-      days: 7
-    }
-    networkAcls : {
-      resourceAccessRules :[]
+    networkAcls: {
+      defaultAction:  _networkIsolation?'Deny':'Allow'
       bypass: 'AzureServices'
-      defaultAction: _networkIsolation?'Deny':'Allow'
-      ipRules : []
-      virtualNetworkRules : (_networkIsolation && !_vnetReuse) ? [
+      virtualNetworkRules: (_networkIsolation && !_vnetReuse) ? [
         {
           id: vnet.outputs.aiSubId
           action: 'Allow'
         }
       ] : []
+      ipRules: []
+      resourceAccessRules: []
     }
-  }  
+    blobServices: {
+      containers: [{name: deploymentStorageContainerName}]
+    }
+    tableServices:{}
+    queueServices: {}
+    minimumTlsVersion: 'TLS1_2'  // Enforcing TLS 1.2 for better security
+    location: location
+    tags: tags
+  }
 }
 
-module hostingPlan './modules/compute/hosting-plan.bicep' = {
+// @allowed(['Consumption', 'Premium', 'Dedicated'])
+// param functionAppHostPlan string
+
+// @allowed(['S3', 'B2', 'P1v2', 'P2v2', 'P3v2', 'FC1']) if 
+// param functionAppSKU string
+
+module hostingPlan 'br/public:avm/res/web/serverfarm:0.1.1' ={
   scope : resourceGroup
   name: 'hostingPlan'
   params: {
     name: hostingPlanName
     location: location
-    sku: 'S3'
+    sku: {
+      name: functionAppSKU
+      tier: functionAppHostPlan
+    }
+    reserved: true
     tags: tags
+    zoneRedundant: false
   }
 }
 
 module websitesDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   scope : resourceGroup
-  name: 'websites-dnzones'
+  name: 'websites-dnszones'
   params: {
     dnsZoneName: 'privatelink.azurewebsites.net' 
     tags: tags
@@ -861,7 +912,7 @@ module processingFunctionAppPe './modules/network/private-endpoint.bicep' = if (
     name: _processingfunctionAppPe
     tags: tags
     subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: processingFunctionApp.outputs.id
+    serviceId: processingFunctionApp.outputs.resourceId
     groupIds: ['sites']
     dnsZoneId: _networkIsolation?websitesDnsZone.outputs.id:''
   }
@@ -877,29 +928,124 @@ module uaiFrontendMsi './modules/security/managed-identity.bicep' = {
   }
 }
 
-// 3. FunctionApp
-module processingFunctionApp './modules/compute/functionApp.bicep' = {
-  scope : resourceGroup
-  name: processingFunctionAppName
-  params: {
-    identityId: uaiFrontendMsi.outputs.id
-    principalId: uaiFrontendMsi.outputs.principalId
-    clientId : uaiFrontendMsi.outputs.clientId
-    appName: processingFunctionAppName
-    appPurpose: 'processing'
-    location: location
-    hostingPlanName : hostingPlanName
-    applicationInsightsName: appInsights.outputs.name
-    storageAccountName: storage.outputs.name
-    funcStorageName: procFuncStorage.outputs.name
-    aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
-    appConfigName: appConfigName
-    tags: union(tags , { 'azd-service-name' : 'processing' })
-    networkIsolation: _networkIsolation
-    virtualNetworkSubnetId : _networkIsolation?vnet.outputs.appServicesSubId:''
-    appSettings: [
+
+var commonAppSettings = {
+  AZURE_TENANT_ID: subscription().tenantId
+  AZURE_CLIENT_ID: uaiFrontendMsi.outputs.clientId
+  allow_environment_variables: 'true'
+  APP_CONFIGURATION_URI: 'https://${appConfigName}.azconfig.io'
+  WEBSITE_VNET_ROUTE_ALL: networkIsolation ? '1' : '0'
+  WEBSITE_DNS_SERVER: networkIsolation ? '168.63.129.16' : ''
+  WEBSITE_HTTPLOGGING_RETENTION_DAYS: '7'
+  FUNCTIONS_EXTENSION_VERSION: '~4'
+  APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.outputs.instrumentationKey
+  ApplicationInsights__InstrumentationKey: appInsights.outputs.instrumentationKey
+  AzureWebJobsStorage__blobServiceUri: 'https://${procFuncStorage.outputs.name}.blob.${environment().suffixes.storage}'
+  AzureWebJobsStorage__queueServiceUri: 'https://${procFuncStorage.outputs.name}.queue.${environment().suffixes.storage}'
+  AzureWebJobsStorage__tableServiceUri: 'https://${procFuncStorage.outputs.name}.table.${environment().suffixes.storage}'
+  AzureWebJobsStorage__credential: 'managedidentity'
+  AzureWebJobsStorage__clientId: uaiFrontendMsi.outputs.clientId
+  AzureWebJobsStorage__accountName: funcStorageName
+
+  DataStorage__clientId: uaiFrontendMsi.outputs.clientId
+  DataStorage__accountName: storageAccountName
+  DataStorage__credential: 'managedidentity'
+
+}
+
+var flexConsumptionAppSettings = (functionAppHostPlan == 'FlexConsumption') ? {
+  APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.outputs.connectionString
+  APPLICATIONINSIGHTS_AUTHENTICATION_STRING: 'Authorization=AAD'
+} : {}
+
+var dedicatedAppSettings = (functionAppHostPlan != 'FlexConsumption') ? {
+  FUNCTIONS_WORKER_RUNTIME: functionRuntime
+  AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
+  ENABLE_ORYX_BUILD: 'true'
+  SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
+} : {}
+
+var planSpecificAppSettings = functionAppHostPlan == 'FlexConsumption'
+  ? flexConsumptionAppSettings
+  : dedicatedAppSettings
+
+var functionAppSettings = union(commonAppSettings, planSpecificAppSettings)
+
+
+
+// // 3. FunctionApp Dedicated / Premium
+// module processingFunctionApp_dedicated './modules/compute/functionApp.bicep' = if (functionAppHostPlan != 'FlexConsumption') {
+//   scope : resourceGroup
+//   name: processingFunctionAppName
+//   params: {
+//     identityId: uaiFrontendMsi.outputs.id
+//     principalId: uaiFrontendMsi.outputs.principalId
+//     clientId : uaiFrontendMsi.outputs.clientId
+//     appName: processingFunctionAppName
+//     appPurpose: 'processing'
+//     location: location
+//     hostingPlanName : hostingPlanName
+//     applicationInsightsName: appInsights.outputs.name
+//     storageAccountName: storage.outputs.name
+//     funcStorageName: procFuncStorage.outputs.name
+//     aoaiEndpoint: aoaiAccountModule.outputs.AOAI_ENDPOINT
+//     appConfigName: appConfigName
+//     tags: union(tags , { 'azd-service-name' : 'processing' })
+//     networkIsolation: _networkIsolation
+//     virtualNetworkSubnetId : _networkIsolation?vnet.outputs.appServicesSubId:''
+//     appSettings: [
       
-    ]
+//     ]
+//   }
+// } 
+// 3. FunctionApp Flex Consumption
+// Azure Functions Flex Consumption
+
+module processingFunctionApp 'br/public:avm/res/web/site:0.16.0' = {
+  name: processingFunctionAppName
+  scope: resourceGroup
+  params: {
+    kind: 'functionapp,linux'
+    name: processingFunctionAppName
+    location: location
+    tags: union(tags , { 'azd-service-name' : 'processing' })
+    serverFarmResourceId: hostingPlan.outputs.resourceId
+    httpsOnly: true
+    managedIdentities: {
+        systemAssigned: false
+        userAssignedResourceIds: [
+          uaiFrontendMsi.outputs.id
+        ]
+    }
+    functionAppConfig: (functionAppHostPlan == 'FlexConsumption') ? {
+      deployment: {
+        storage: {
+          type: 'blobContainer'
+          value: '${procFuncStorage.outputs.primaryBlobEndpoint}${deploymentStorageContainerName}'
+          authentication: { 
+            type: 'UserAssignedIdentity'
+            userAssignedIdentityResourceId: uaiFrontendMsi.outputs.id
+          }
+        }
+      }
+      scaleAndConcurrency: {
+        maximumInstanceCount: 100
+        instanceMemoryMB: 2048
+      }
+      runtime: { 
+        name: functionRuntime
+        version: '3.11'
+      }
+    } : null
+    virtualNetworkSubnetId: _networkIsolation?vnet.outputs.appServicesSubId:''
+    siteConfig: {
+      alwaysOn: false
+    }
+    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+    configs: [{
+      name: 'appsettings'
+      properties: functionAppSettings
+    }]
   }
 }
 
@@ -930,7 +1076,7 @@ resource storageFileContributorRole 'Microsoft.Authorization/roleDefinitions@202
 
 var allstorageDataOwnerIdentityAssignments = concat([], [
   {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: storageDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
@@ -950,7 +1096,7 @@ module storageDataOwnerResourceGroupRoleAssignment './modules/security/resource-
 
 var allstorageQueueDataIdentityAssignments = concat([], [
   {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: storageQueueDataRole.id
     principalType: 'ServicePrincipal'
   }
@@ -970,7 +1116,7 @@ module storageQueueResourceGroupRoleAssignment './modules/security/resource-grou
 
 var allstorageTableDataIdentityAssignments = concat([], [
   {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: storageTableDataRole.id
     principalType: 'ServicePrincipal'
   }
@@ -991,7 +1137,7 @@ module storageTableResourceGroupRoleAssignment './modules/security/resource-grou
 // Invoke the role assignment module for Storage Queue Data Contributor
 var allstorageAccountContributorIdentityAssignments = concat([], [
   {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: storageContributorRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1012,7 +1158,7 @@ module storageAccountResourceGroupRoleAssignment './modules/security/resource-gr
 
 var allstorageFileContribIdentityAssignments = concat([], [
   {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: storageFileContributorRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1038,7 +1184,7 @@ resource cogServicesUserRole 'Microsoft.Authorization/roleDefinitions@2022-05-01
 
 var allcogServicesUserIdentityAssignments = concat([], [
   {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: cogServicesUserRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1064,7 +1210,7 @@ resource cogServicesOpenAIUserRole 'Microsoft.Authorization/roleDefinitions@2022
 
 var allcogServicesOpenAIUserIdentityAssignments = concat([], [
   {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: cogServicesOpenAIUserRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1108,7 +1254,7 @@ var allConfigDataOwnerIdentityAssignments = concat(appConfigDataOwnerIdentityAss
     principalType: 'ServicePrincipal'
   }
   {
-    principalId: processingFunctionApp.outputs.identityPrincipalId
+    principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: appConfigDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
@@ -1195,18 +1341,19 @@ module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse)
   }
 }
 
+
 output RESOURCE_GROUP string = resourceGroup.name
 output FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
-output FUNCTION_URL string = processingFunctionApp.outputs.uri
-output OPENAI_API_VERSION string = processingFunctionApp.outputs.openaiApiVersion
-output OPENAI_API_BASE string = processingFunctionApp.outputs.openaiApiBase
-output OPENAI_MODEL string = processingFunctionApp.outputs.openaiModel
-output FUNCTIONS_WORKER_RUNTIME string = processingFunctionApp.outputs.functionWorkerRuntime
+// output FUNCTION_URL string = processingFunctionApp.outputs.uri
+output OPENAI_API_VERSION string = openaiApiVersion
+output OPENAI_API_BASE string = aoaiAccountModule.outputs.AOAI_ENDPOINT
+output OPENAI_MODEL string = openaiModel
+output FUNCTIONS_WORKER_RUNTIME string = functionRuntime
 output AIMULTISERVICES_NAME string = aiMultiServices.outputs.aiMultiServicesName
 output AIMULTISERVICES_ENDPOINT string = aiMultiServices.outputs.aiMultiServicesEndpoint
 output PROCESSING_FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
-output PROCESSING_FUNCTION_URL string = processingFunctionApp.outputs.uri
+output PROCESSING_FUNCTION_URL string = 'https://${processingFunctionApp.outputs.defaultHostname}'
 output APP_CONFIG_NAME string = appConfig.outputs.name
 output KEY_VAULT_NAME string = keyVault.outputs.name
 output COSMOS_DB_CONVERSATION_CONTAINER string = conversationHistoryContainerName
