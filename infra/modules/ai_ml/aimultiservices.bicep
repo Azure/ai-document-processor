@@ -19,13 +19,13 @@ resource aiMultiServices 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
     name: sku
   }
   identity: {
-    type: identityId == null ? 'SystemAssigned' : 'UserAssigned'
+    type: 'SystemAssigned, UserAssigned'
     userAssignedIdentities: identityId == null
       ? null
       : {
           '${identityId}': {
-            //principalId: identityPrincipalId
-            //clientId: identityClientId
+            // principalId: identityPrincipalId
+            // clientId: identityClientId
           }
         }
   }

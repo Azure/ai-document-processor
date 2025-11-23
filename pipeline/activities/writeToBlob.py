@@ -8,12 +8,13 @@ config = Configuration()
 
 NEXT_STAGE = config.get_value("NEXT_STAGE")
 logging.info(f"writeToBlob.py: NEXT_STAGE is {NEXT_STAGE}")
+
 name = "writeToBlob"
 bp = df.Blueprint()
 
 @bp.function_name(name)
 @bp.activity_trigger(input_name="args")
-def extract_text_from_blob(args: dict):
+def write_to_blob_activity(args: dict):
   """
   Writes the JSON bytes to a blob storage.
   Args:
