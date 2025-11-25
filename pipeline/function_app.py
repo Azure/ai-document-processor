@@ -11,36 +11,36 @@ config = Configuration()
 
 NEXT_STAGE = config.get_value("NEXT_STAGE")
 
-app = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+app = df.DFApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 import logging
 
 # # Blob-triggered starter
-# @app.function_name(name="start_orchestrator_on_blob")
-# @app.blob_trigger(
-#     arg_name="blob",
-#     path="bronze/{name}",
-#     connection="DataStorage",
-# )
-# @app.durable_client_input(client_name="client")
-# async def start_orchestrator_blob(
-#     blob: func.InputStream,
-#     client: df.DurableOrchestrationClient,
-# ):
-#     logging.info(f" Blob Trigger (start_orchestrator_blob) - Blob Received: {blob}") 
-#     logging.info(f"path: {blob.name}")
-#     logging.info(f"Size: {blob.length} bytes")
-#     logging.info(f"URI: {blob.uri}")   
+@app.function_name(name="start_orchestrator_on_blob")
+@app.blob_trigger(
+    arg_name="blob",
+    path="bronze/{name}",
+    connection="DataStorage",
+)
+@app.durable_client_input(client_name="client")
+async def start_orchestrator_blob(
+    blob: func.InputStream,
+    client: df.DurableOrchestrationClient,
+):
+    logging.info(f" Blob Trigger (start_orchestrator_blob) - Blob Received: {blob}") 
+    logging.info(f"path: {blob.name}")
+    logging.info(f"Size: {blob.length} bytes")
+    logging.info(f"URI: {blob.uri}")   
 
-#     blob_metadata = BlobMetadata(
-#         name=blob.name,
-#         container="bronze",
-#         uri=blob.uri
-#     )
-#     logging.info(f"Blob Metadata: {blob_metadata}")
-#     logging.info(f"Blob Metadata JSON: {blob_metadata.to_dict()}")
-#     instance_id = await client.start_new("process_blob", client_input=blob_metadata.to_dict())
-#     logging.info(f"Started orchestration {instance_id} for blob {blob.name}")
+    blob_metadata = BlobMetadata(
+        name=blob.name,
+        container="bronze",
+        uri=blob.uri
+    )
+    logging.info(f"Blob Metadata: {blob_metadata}")
+    logging.info(f"Blob Metadata JSON: {blob_metadata.to_dict()}")
+    instance_id = await client.start_new("process_blob", client_input=blob_metadata.to_dict())
+    logging.info(f"Started orchestration {instance_id} for blob {blob.name}")
 
 
 # An HTTP-triggered function with a Durable Functions client binding
@@ -97,10 +97,12 @@ def process_blob(context):
     document_extensions = ['pdf', 'docx', 'doc', 'xlsx', 'pptx', 'jpg', 'jpeg', 'png', 'tiff', 'bmp']
     
 
-
+    # 1. Process Data Source based on file type
     if config.get_value("AOAI_MULTI_MODAL", "false").lower() == "true" and file_extension in document_extensions:
         aoai_input = {
-            "blob_input": blob_input,
+            "name": blob_input.get("name"),
+            "container": blob_input.get("container"),
+            "uri": blob_input.get("uri"),
             "instance_id": sub_orchestration_id
         }
 
@@ -128,6 +130,8 @@ def process_blob(context):
             "error": f"Unsupported file type: {file_extension}",
             "status": "skipped"
         }
+    
+    # 2. Feed Output into AOAI to get insights
     # Package the data into a dictionary
     call_aoai_input = {
         "text_result": text_result,
@@ -136,6 +140,8 @@ def process_blob(context):
 
     aoai_output = yield context.call_activity("callAoai", call_aoai_input)
     
+
+    # 3. Write AOAI output to Blob Storage
     task_result = yield context.call_activity(
         "writeToBlob", 
         {
@@ -153,4 +159,5 @@ app.register_functions(getBlobContent.bp)
 app.register_functions(runDocIntel.bp)
 app.register_functions(callAoai.bp)
 app.register_functions(writeToBlob.bp)
-app.register_functions(speechToText.bp)  # Add this line
+app.register_functions(speechToText.bp) 
+app.register_functions(callAoaiMultiModal.bp)

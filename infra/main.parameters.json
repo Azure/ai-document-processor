@@ -32,7 +32,9 @@
       "deployVPN": {
         "value": "${AZURE_DEPLOY_VPN}"
       },
-
+      "aoaiLocation": {
+        "value": "${AOAI_LOCATION}"
+      },
       "azureReuseConfig":{
         "value": {
           "aoaiReuse": "${AOAI_REUSE}",

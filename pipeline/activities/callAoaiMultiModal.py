@@ -81,3 +81,4 @@ def run(blob_input: dict):
     )
     response_content = run_prompt(instance_id, system_prompt, full_user_prompt, base64_images=base64_images)
 
+    return response_content

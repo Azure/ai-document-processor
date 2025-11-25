@@ -82,6 +82,18 @@ The default pipeline processes PDFs from the azure storage account bronze contai
   - Check to ensure that Blob Connections strings are present in local.settings.json
   - Start the venv and the function app locally `./scripts/startLocal.ps1`
 
+## Private Network Deployment (ZTA)
+- After entering the VM, run the following in Powershell
+
+```pwsh
+winget install --id Git.Git -e --source winget
+```
+
+- Restart powershell
+- git clone https://github.com/azure/ai-document-processor
+- cd infra
+- .\install.ps1 
+- This will install all required dependencies
 
 ### Troubleshooting
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
@@ -98,6 +110,12 @@ The default pipeline processes PDFs from the azure storage account bronze contai
   - Check the DefaultAzureCredential settings and ensure that they make sense
 - Attempt to deploy the function app locally to confirm that there are no version or ModuleNotFound errors preventing start up.
 
+
+2. "InternalSubscriptionIsOverQuotaForSku",a
+            "message": "Operation cannot be completed without additional quota. See https://aka.ms/antquotahelp for instructions on requesting limit increases. \r\nAdditional details - Location:  \r\nCurrent Limit (Basic VMs): 0 \r\nCurrent Usage: 0\r\nAmount required for this deployment (Basic VMs): 1 \r\n(Minimum) New Limit that you should request to enable this deployment: 1. \r\nNote that if you experience multiple scaling operations failing (in addition to this one) and need to accommodate the aggregate quota requirements of these operations, you will need to request a higher quota limit than the one currently displayed."
+- Try different regions and redeploy. The quota dashboard is not accurate. Attempt to deploy in West US2.
+
+--------------------------------------------------------------------------------
 ##  MIT License
 https://opensource.org/license/MIT 
 

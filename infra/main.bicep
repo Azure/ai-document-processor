@@ -5,7 +5,7 @@ targetScope = 'subscription'
 @description('Key-value pairs of tags to assign to all resources. The default azd tags are automatically added.')
 param deploymentTags object
 var tags = union(azdTags, deploymentTags)
-
+// var _manifest = loadJsonContent('./manifest.json')
 // Environment name. This is automatically set by the 'azd' tool.
 @description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
 param environmentName string = ''
@@ -99,7 +99,7 @@ param principalId string = ''
 
 @description('The name of the Zero Trust VM. If left empty, a random name will be generated.')
 param ztVmName string = ''
-var _ztVmName = !empty(ztVmName) ? ztVmName : 'testvm-${suffix}'
+var _ztVmName = !empty(ztVmName) ? ztVmName : 'vm-${take(suffix, 12)}'
 
 @description('The name of the VM Key Vault Secret. If left empty, a random name will be generated.')
 param vmKeyVaultSecName string = ''
@@ -1448,7 +1448,7 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (_deployVM
       
     }
     osType: 'Windows'
-    zone: 1
+    zone: 0
     nicConfigurations: [
       {
         nicSuffix: '-nic-01'
@@ -1470,6 +1470,59 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (_deployVM
   //   useExistingVNet ? virtualNetworkSubnets : null
   // ]
 }
+
+// var _fileUris = [
+//   'https://raw.githubusercontent.com/Azure/GPT-RAG/refs/tags/${_manifest.tag}/infra/install.ps1'
+// ]
+// var _fileUris = [
+//   'https://raw.githubusercontent.com/azure/ai-document-processor/refs/heads/cjg-zta-durable/infra/install.ps1'
+// ]
+
+
+// resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (_deployVM && _networkIsolation) {
+//   scope: resourceGroup
+//   name: '${_ztVmName}/cse'
+//   location: location
+//   properties: {
+//     publisher: 'Microsoft.Compute'
+//     type: 'CustomScriptExtension' 
+//     typeHandlerVersion: '1.10'
+//     autoUpgradeMinorVersion: true
+//     forceUpdateTag: 'alwaysRun'
+//     settings: {
+//       fileUris: _fileUris
+//       commandToExecute:  'powershell.exe -ExecutionPolicy Unrestricted -File install.ps1 -AzureTenantId ${subscription().tenantId} -AzureSubscriptionId ${subscription().subscriptionId} -AzureResourceGroupName ${resourceGroup.name} -AzdEnvName ${environmentName}'
+//     }
+//     protectedSettings: {
+      
+//     }
+//   }
+// }
+
+
+
+// // Managed Identity Operator -> TestVm
+// module assignManagedIdentityOperatorTestVm 'modules/security/resource-role-assignment.bicep' = if (deployVM && deployAppConfig && deployContainerRegistry && _networkIsolation) {
+//   name: 'assignManagedIdentityOperatorTestVm'
+//   params: {
+//     name: 'assignManagedIdentityOperatorTestVm'
+//     roleAssignments: [
+//       {
+//         roleDefinitionId: subscriptionResourceId(
+//           'Microsoft.Authorization/roleDefinitions',
+//           const.roles.ManagedIdentityOperator.guid
+//         )
+//         #disable-next-line BCP318
+//         principalId: (_useUAI) ? testVmUAI.outputs.principalId : testVm.outputs.systemAssignedMIPrincipalId!
+//         #disable-next-line BCP318
+//         resourceId: ''
+//         principalType: 'ServicePrincipal'
+//       }
+      
+//     ]
+//   }
+// }
+
 
 
 output RESOURCE_GROUP string = resourceGroup.name
