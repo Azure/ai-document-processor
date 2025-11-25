@@ -15,32 +15,32 @@ app = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 import logging
 
-# Blob-triggered starter
-@app.function_name(name="start_orchestrator_on_blob")
-@app.blob_trigger(
-    arg_name="blob",
-    path="bronze/{name}",
-    connection="DataStorage",
-)
-@app.durable_client_input(client_name="client")
-async def start_orchestrator_blob(
-    blob: func.InputStream,
-    client: df.DurableOrchestrationClient,
-):
-    logging.info(f" Blob Trigger (start_orchestrator_blob) - Blob Received: {blob}") 
-    logging.info(f"path: {blob.name}")
-    logging.info(f"Size: {blob.length} bytes")
-    logging.info(f"URI: {blob.uri}")   
+# # Blob-triggered starter
+# @app.function_name(name="start_orchestrator_on_blob")
+# @app.blob_trigger(
+#     arg_name="blob",
+#     path="bronze/{name}",
+#     connection="DataStorage",
+# )
+# @app.durable_client_input(client_name="client")
+# async def start_orchestrator_blob(
+#     blob: func.InputStream,
+#     client: df.DurableOrchestrationClient,
+# ):
+#     logging.info(f" Blob Trigger (start_orchestrator_blob) - Blob Received: {blob}") 
+#     logging.info(f"path: {blob.name}")
+#     logging.info(f"Size: {blob.length} bytes")
+#     logging.info(f"URI: {blob.uri}")   
 
-    blob_metadata = BlobMetadata(
-        name=blob.name,
-        container="bronze",
-        uri=blob.uri
-    )
-    logging.info(f"Blob Metadata: {blob_metadata}")
-    logging.info(f"Blob Metadata JSON: {blob_metadata.to_dict()}")
-    instance_id = await client.start_new("process_blob", client_input=blob_metadata.to_dict())
-    logging.info(f"Started orchestration {instance_id} for blob {blob.name}")
+#     blob_metadata = BlobMetadata(
+#         name=blob.name,
+#         container="bronze",
+#         uri=blob.uri
+#     )
+#     logging.info(f"Blob Metadata: {blob_metadata}")
+#     logging.info(f"Blob Metadata JSON: {blob_metadata.to_dict()}")
+#     instance_id = await client.start_new("process_blob", client_input=blob_metadata.to_dict())
+#     logging.info(f"Started orchestration {instance_id} for blob {blob.name}")
 
 
 # An HTTP-triggered function with a Durable Functions client binding
@@ -96,6 +96,8 @@ def process_blob(context):
     # Document file extensions
     document_extensions = ['pdf', 'docx', 'doc', 'xlsx', 'pptx', 'jpg', 'jpeg', 'png', 'tiff', 'bmp']
     
+
+
     if config.get_value("AOAI_MULTI_MODAL", "false").lower() == "true" and file_extension in document_extensions:
         aoai_input = {
             "blob_input": blob_input,

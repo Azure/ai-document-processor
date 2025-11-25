@@ -105,6 +105,21 @@ var _ztVmName = !empty(ztVmName) ? ztVmName : 'testvm-${suffix}'
 param vmKeyVaultSecName string = ''
 var _vmKeyVaultSecName = !empty(vmKeyVaultSecName) ? vmKeyVaultSecName : 'vmUserInitialPassword'
 
+@description('Size of the test VM')
+param vmSize string = 'Standard_D8s_v5'
+
+@description('Image SKU (e.g., win11-25h2-ent, win11-23h2-ent, 2022-datacenter).')
+param vmImageSku string = 'win11-25h2-ent'
+
+@description('Image publisher (Windows 11: MicrosoftWindowsDesktop, Windows Server: MicrosoftWindowsServer).')
+param vmImagePublisher string = 'MicrosoftWindowsDesktop'
+
+@description('Image offer (Windows 11: windows-11, Windows Server: WindowsServer).')
+param vmImageOffer string = 'windows-11'
+
+@description('Image version (use latest unless you need a pinned build).')
+param vmImageVersion string = 'latest'
+
 // flag that indicates if we're reusing a vnet
 var _vnetReuse = _azureReuseConfig.vnetReuse
 
@@ -126,8 +141,8 @@ param userPrincipalId string
 @allowed(['FlexConsumption', 'Dedicated'])
 param functionAppHostPlan string
 
-@allowed(['S3', 'B2', 'P1v2', 'P2v2', 'P3v2', 'FC1'])
-param functionAppSKU string = (functionAppHostPlan == 'FlexConsumption') ? 'FC1' : 'B2'
+@allowed(['B1', 'B2', 'S1', 'S2', 'S3', 'P1v2', 'P2v2', 'P3v2', 'FC1'])
+param functionAppSKU string = (functionAppHostPlan == 'FlexConsumption') ? 'FC1' : 'S2'
 
 var openaiApiVersion = '2024-05-01-preview'
 var openaiModel = 'gpt-4o'
@@ -438,24 +453,24 @@ module keyVault './modules/security/key-vault.bicep' = {
     secureAppSettings: secureAppSettings
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     roleAssignments: concat(keyVaultSecretsUserIdentityAssignmentsAll, [])
-    subnets : (_networkIsolation && !_vnetReuse) ? [
-      {
-        name: 'aiSubId'
-        id: _networkIsolation?vnet.outputs.aiSubId:''
-      }
-      {
-        name: 'databaseSubId'
-        id: _networkIsolation?vnet.outputs.databaseSubId:''
-      }
-      {
-        name: 'appIntSubId'
-        id: _networkIsolation?vnet.outputs.appIntSubId:''
-      }
-      {
-        name: 'appServiceSubId'
-        id: _networkIsolation?vnet.outputs.appServicesSubId:''
-      }
-    ] : []
+    // subnets : (_networkIsolation && !_vnetReuse) ? [
+    //   {
+    //     name: 'aiSubId'
+    //     id: _networkIsolation?vnet.outputs.aiSubId:''
+    //   }
+    //   {
+    //     name: 'databaseSubId'
+    //     id: _networkIsolation?vnet.outputs.databaseSubId:''
+    //   }
+    //   {
+    //     name: 'appIntSubId'
+    //     id: _networkIsolation?vnet.outputs.appIntSubId:''
+    //   }
+    //   {
+    //     name: 'appServiceSubId'
+    //     id: _networkIsolation?vnet.outputs.appServicesSubId:''
+    //   }
+    // ] : []
   }
 }
 
@@ -887,7 +902,7 @@ module procFuncStorage 'br/public:avm/res/storage/storage-account:0.25.0' = {
 // @allowed(['S3', 'B2', 'P1v2', 'P2v2', 'P3v2', 'FC1']) if 
 // param functionAppSKU string
 
-module hostingPlan 'br/public:avm/res/web/serverfarm:0.1.1' ={
+module hostingPlan 'br/public:avm/res/web/serverfarm:0.1.1' = {
   scope : resourceGroup
   name: 'hostingPlan'
   params: {
@@ -1338,22 +1353,122 @@ module aiMultiServices './modules/ai_ml/aimultiservices.bicep' = {
   }
 }
 
-module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse) || _deployVM)  {
-  scope : resourceGroup
-  name: 'testvm'
+// module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse) || _deployVM)  {
+//   scope : resourceGroup
+//   name: 'testvm'
+//   params: {
+//     location: location
+//     name: _ztVmName
+//     tags: tags
+//     subnetId: subnets['aiSubnet'].id
+//     bastionSubId: subnets['AzureBastionSubnet'].id
+//     vmUserPassword: vmUserInitialPassword
+//     vmUserName: _vmUserName
+//     keyVaultName: keyVault.outputs.name
+//     vmUserPasswordKey: _vmKeyVaultSecName
+//     principalId: principalId
+//     azdEnvironmentName: environmentName
+//   }
+// }
+
+// Bastion Host
+module testVmBastionHost 'br/public:avm/res/network/bastion-host:0.8.0' = if (_deployVM && _networkIsolation) {
+  scope: resourceGroup
+  name: 'bastionHost'
   params: {
+    // Bastion host name
+    name: '${abbrs.security.bastion}testvm-${suffix}'
+    #disable-next-line BCP318
+    virtualNetworkResourceId: vnet.outputs.id
     location: location
-    name: _ztVmName
+    skuName: 'Standard'
     tags: tags
-    subnetId: subnets['aiSubnet'].id
-    bastionSubId: subnets['AzureBastionSubnet'].id
-    vmUserPassword: vmUserInitialPassword
-    vmUserName: _vmUserName
-    keyVaultName: keyVault.outputs.name
-    vmUserPasswordKey: _vmKeyVaultSecName
-    principalId: principalId
-    azdEnvironmentName: environmentName
+    availabilityZones: []
+
+    // Configuration for the Public IP that the module will create
+    publicIPAddressObject: {
+      // Name for the Public IP resource
+      name: '${abbrs.networking.publicIPAddress}bastion-${suffix}'
+      publicIPAllocationMethod: 'Static'
+      skuName: 'Standard'
+      skuTier: 'Regional'
+      availabilityZones: []
+      tags: tags
+    }
   }
+  // dependsOn: [
+  //   #disable-next-line BCP321
+  //   !useExistingVNet ? virtualNetwork : null
+  //   #disable-next-line BCP321
+  //   useExistingVNet ? virtualNetworkSubnets : null
+  // ]
+}
+
+//AI Foundry Search User Managed Identity
+module testVmUAI 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.1' = if (_deployVM && _networkIsolation) {
+  scope: resourceGroup
+  name: '${abbrs.security.managedIdentity}${_ztVmName}'
+  params: {
+    // Required parameters
+    name: '${abbrs.security.managedIdentity}${_ztVmName}'
+    // Non-required parameters
+    location: location
+  }
+}
+
+// Test VM
+module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (_deployVM && _networkIsolation) {
+  scope: resourceGroup
+  name: 'testVmDeployment'
+  params: {
+    name: _ztVmName
+    location: location
+    adminUsername: _vmUserName
+    adminPassword: vmUserInitialPassword
+    tags: tags
+    managedIdentities: {
+      systemAssigned: false
+      #disable-next-line BCP318
+      userAssignedResourceIds: [testVmUAI.outputs.resourceId]
+    }
+    imageReference: {
+      publisher: vmImagePublisher
+      offer:     vmImageOffer
+      sku:       vmImageSku
+      version:   vmImageVersion
+    }
+    encryptionAtHost: false 
+    vmSize: vmSize
+    osDisk: {
+      caching: 'ReadWrite'
+      diskSizeGB: 250
+      managedDisk: {
+        storageAccountType: 'Standard_LRS'
+      }
+      
+    }
+    osType: 'Windows'
+    zone: 1
+    nicConfigurations: [
+      {
+        nicSuffix: '-nic-01'
+        ipConfigurations: [
+          {
+            name: 'ipconfig01'
+            #disable-next-line BCP318
+            subnetResourceId: vnet.outputs.aiSubId
+          }
+        ]
+      }
+    ]
+  }
+  // dependsOn: [
+  //   testVmBastionHost
+  //   #disable-next-line BCP321
+  //   !useExistingVNet ? virtualNetwork : null
+  //   #disable-next-line BCP321
+  //   useExistingVNet ? virtualNetworkSubnets : null
+  // ]
 }
 
 

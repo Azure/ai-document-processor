@@ -16,7 +16,7 @@ param publicNetworkAccess string = 'Enabled'
 @description('Secret Keys to add to App Configuration')
 param secureAppSettings array = []
 
-param subnets array = []
+// param subnets array = []
 
 @description('Key Vault SKU name. Defaults to standard.')
 @allowed([
