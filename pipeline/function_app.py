@@ -10,6 +10,7 @@ from pipelineUtils.blob_functions import BlobMetadata
 config = Configuration()
 
 NEXT_STAGE = config.get_value("NEXT_STAGE")
+FINAL_OUTPUT_CONTAINER = config.get_value("FINAL_OUTPUT_CONTAINER")
 
 app = df.DFApp(http_auth_level=func.AuthLevel.FUNCTION)
 
@@ -146,7 +147,8 @@ def process_blob(context):
         "writeToBlob", 
         {
             "json_str": aoai_output, 
-            "blob_name": blob_input["name"]
+            "blob_name": blob_input["name"],
+            "final_output_container": FINAL_OUTPUT_CONTAINER
         }
     )
     return {

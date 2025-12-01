@@ -99,7 +99,7 @@ winget install --id Git.Git -e --source winget
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
 - Leverage Log Analytics Workspace to run queries and see exceptions that occurred in the app
 - For deployment issues, use the Development Tools SSH console to inspect the internal file system and get deployment logs
-- Consider running `azd up --debug 2>&1 | tee debug.log` to output detailed deployment logs and save to a local file for inspection
+- Consider running `azd up --debug 2>&1 | tee debug.log` (bash) or `azd up --debug 2>&1 | Tee-Object -FilePath debug.log` (pwsh) to output detailed deployment logs and save to a local file for inspection
 
 
 ### Common Issues
