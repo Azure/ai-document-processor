@@ -78,7 +78,7 @@ def run(blob_input: dict):
 
         files_response = requests.get(files_url, headers=headers)
         content_url = files_response.json()['values'][0]['links']['contentUrl']
-        content_response = requests.get(content_url)
+        content_response = requests.get(content_url).json()
         # content_response.json()
         full_text = content_response['combinedRecognizedPhrases'][0]['display']
 

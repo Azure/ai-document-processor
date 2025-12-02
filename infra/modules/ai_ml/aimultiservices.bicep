@@ -42,3 +42,4 @@ resource aiMultiServices 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
 output id string = aiMultiServices.id
 output aiMultiServicesName string = aiMultiServices.name
 output aiMultiServicesEndpoint string = aiMultiServices.properties.endpoint
+output aimsaSystemAssignedPrincipalId string = aiMultiServices.identity.principalId

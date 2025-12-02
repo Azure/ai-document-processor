@@ -18,3 +18,8 @@ hooks:
       run: scripts/postprovision.sh
     windows:
       run: scripts/postprovision.ps1
+  postdeploy:
+    posix:
+      run: scripts/postDeploy.sh
+    windows:
+      run: scripts/postDeploy.ps1

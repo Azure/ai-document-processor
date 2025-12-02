@@ -139,7 +139,7 @@ param userPrincipalId string
 @description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
 // param environmentName string = 'dev'
 
-@allowed(['FlexConsumption', 'Dedicated'])
+@allowed(['Dedicated', 'FlexConsumption'])
 param functionAppHostPlan string
 
 @allowed(['B1', 'B2', 'S1', 'S2', 'S3', 'P1v2', 'P2v2', 'P3v2', 'FC1'])
@@ -385,7 +385,7 @@ var appSettings = [
   }
   {
     name: 'FINAL_OUTPUT_CONTAINER'
-    value: 'gold'
+    value: 'silver'
   }
 ]
 
@@ -997,7 +997,7 @@ var planSpecificAppSettings = functionAppHostPlan == 'FlexConsumption'
 
 var functionAppSettings = union(commonAppSettings, planSpecificAppSettings)
 
-
+  
 
 module processingFunctionApp 'br/public:avm/res/web/site:0.16.0' = {
   name: processingFunctionAppName
@@ -1081,6 +1081,11 @@ var allstorageDataOwnerIdentityAssignments = concat([], [
   }
   {
     principalId: aiMultiServiceManagedIdentity.outputs.principalId
+    roleDefinitionId: storageDataOwnerRole.id
+    principalType: 'ServicePrincipal'
+  }
+  {
+    principalId: aiMultiServices.outputs.aimsaSystemAssignedPrincipalId
     roleDefinitionId: storageDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }

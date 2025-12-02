@@ -49,6 +49,17 @@ AI Document Processor Accelerator is designed to help companies leverage LLMs to
   - Enter your User Principal ID when prompted
   - To get your User principal ID run `az ad signed-in-user show --query id -o tsv`
 
+#### Deployment Options
+ - functionAppHostPlan 
+    - Select `Dedicated` - if you want to have a dedicated VM. This gives you a dedicated VM which enables simpler troubleshooting. 
+    - Select `FlexConsumption` if you want to have the function app scale based on the workload. The downsides of this is that you will nto be able to SSH into your deployed code base, and troubleshooting can be a bit more difficult. Also, you may experience cold starts. 
+ - Network isolation (See "Network Isolated Deployment" below for more details)
+    - Select `false` if you want to deploy the function app on public IPs. This means all traffic will travel over the public internet. The endpoint can still be protected with authentication. This option is simpler and enables easy troubleshooting
+    - Select `true` to deploy all resources on private endpoints behind a virtual network. This means all endpoints will not be exposed to the public internet, adding an additional layer of protection. Select this if policy or security consideration requires you to deploy on private endpoints.
+ - Deploy VM (See "Network Isolated Deployment" below for more details)
+    - Select `false` if you are deploying on public endpoints, it is only needed when deploying on a private network.
+    - Select `true` if you are deploying to private endpoints. This will enable you to access your resources behind the virtual network. If you have other means of connecting to your virtual network (e.g. peering to a connectivity Virtual Network with a P2S VPN or S2S connection), then you can proceed without the VM.
+
 ### Update the Pipeline for a customer's specific use case
 This repository is intended to set up the scaffolding for an Azure OpenAI pipeline. The developer is expected to update the code in the `pipeline/activities` and `pipeline/function_app.py` to meet the customer's needs.
 - `pipeline/function_app.py` - contains the standard logic for handling HTTP requests and invoking the pipeline leveraging [Azure Durable functions function chaining pattern](https://learn.microsoft.com/en-us/azure/azure-functions/durable/durable-functions-sequence?tabs=csharp). This file controls the high level orchestration logic for each step in the pipeline, while the logic for each step is contained within the `activities` directory
@@ -60,7 +71,7 @@ This repository is intended to set up the scaffolding for an Azure OpenAI pipeli
 The intent is for this base use case to be updated by the developer to meet the specific customer's use case.
 
 ### Run the Pipeline
-The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Doc Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Write the output JSON to blob storage gold container. The system prompt and user prompt can be updated in a prompts.yaml file.
+The default pipeline processes PDFs from the azure storage account bronze container by extracting their text using Azure Document Intelligence, sending the text results to Azure OpenAI along with prompt instructions to create a summary JSON. Then we write the output JSON to blob storage silver container. The system prompt and user prompt can be updated in data/prompts.yaml file, which gets uploaded to the `prompts` container in the Azure Storage account.
 
 - Verify Function App deployment. Navigate to the function app overview page and confirm functions are present
 - Update the `prompts.yaml` file in the prompts container of the storage account with your desired prompt instructions for the pipeline
@@ -70,6 +81,8 @@ The default pipeline processes PDFs from the azure storage account bronze contai
 - Monitor progress of pipeline using Log Stream
 
 ## Start the function locally
+Starting the function app locally helps you quickly troubleshoot issues and add custom logic.
+
 - Linux / WSL
   - Ensure Storage accounts enable shared key access (Azure Portal > Storage Account > Configuration). May need to refresh page to ensure update was effective
   - Get Remote settings from the function app: `./scripts/getRemoteSettings.sh`\
@@ -82,18 +95,18 @@ The default pipeline processes PDFs from the azure storage account bronze contai
   - Check to ensure that Blob Connections strings are present in local.settings.json
   - Start the venv and the function app locally `./scripts/startLocal.ps1`
 
-## Private Network Deployment (ZTA)
-- After entering the VM, run the following in Powershell
+## Network Isolated Deployment (ZTA)
+To deploy this accelerator in a network isolated environment with private endpoints follow the following steps:
 
-```pwsh
-winget install --id Git.Git -e --source winget
-```
-
-- Restart powershell
-- git clone https://github.com/azure/ai-document-processor
-- cd infra
-- .\install.ps1 
-- This will install all required dependencies
+- Run azd provision
+- When prompted to Deploy VM, select True
+- When prompted for Network Isolation, select True
+- After the provisioning pipeline is complete, connect to the Test VM in your Azure Portal using the username "adp-user" and the Password you previously entered
+- Open VS Code or Command Terminal
+- Clone the fork of the repo from github
+- Copy the .azure from your local machine, or create a new one using azd init
+- Run azd deploy
+    - If this fails, ensure that the variables in .azure/*/.env match your local machine's deployment
 
 ### Troubleshooting
 - Leverage Log Stream to get real-time logging, which will give visibility into each step in the pipeline
