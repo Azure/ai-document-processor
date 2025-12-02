@@ -829,7 +829,7 @@ module procStoragePe './modules/storage/storage-private-endpoints.bicep' = if (_
   ]
   params: {
     location: location
-    name: '${abbrs.storage.storageAccount}${suffix}func'
+    name: funcStorageName
     tags: tags
     vnetName: _vnetName
   }
