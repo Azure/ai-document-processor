@@ -1,0 +1,4 @@
+{
+    "name": "<file_name>",
+    "uri": "https://<storage_account>.blob.core.windows.net/bronze/<file_name>"
+}

@@ -6,7 +6,9 @@ param gatewayName string = 'vnetGateway'
 param gatewayPublicIPName string = 'vnetGatewayPublicIP'
 
 param vnetAddressPrefix string = '10.0.0.0/23'
-param gatewaySubPrefix string = '10.0.2.0/26'
+// param vnetAddress string = '10.0.0.0/23'
+param gatewaySubnetPrefix string = '10.0.1.64/26'
+var gatewaySubPrefix = gatewaySubnetPrefix
 
 @description('The SKU of the Gateway. This must be either Standard or HighPerformance to work with OpenVPN')
 @allowed([

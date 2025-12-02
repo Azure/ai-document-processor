@@ -1,0 +1,74 @@
+{
+  "aimultiserviceS_ENDPOINT": {
+    "type": "String",
+    "value": "https://aimsa-2g7fenk3mteey.cognitiveservices.azure.com/"
+  },
+  "aimultiserviceS_NAME": {
+    "type": "String",
+    "value": "aimsa-2g7fenk3mteey"
+  },
+  "apP_CONFIG_NAME": {
+    "type": "String",
+    "value": "appconfig-2g7fenk3mteey"
+  },
+  "azurE_STORAGE_ACCOUNT": {
+    "type": "String",
+    "value": "st2g7fenk3mteey"
+  },
+  "cosmoS_DB_ACCOUNT_NAME": {
+    "type": "String",
+    "value": "cosmos-2g7fenk3mteey"
+  },
+  "cosmoS_DB_CONVERSATION_CONTAINER": {
+    "type": "String",
+    "value": "conversationhistory"
+  },
+  "cosmoS_DB_DATABASE_NAME": {
+    "type": "String",
+    "value": "conversationHistoryDB"
+  },
+  "cosmoS_DB_URI": {
+    "type": "String",
+    "value": "https://cosmos-2g7fenk3mteey.documents.azure.com:443/"
+  },
+  "functioN_APP_NAME": {
+    "type": "String",
+    "value": "func-processing-2g7fenk3mteey"
+  },
+  "functioN_STORAGE_ACCOUNT": {
+    "type": "String",
+    "value": "st2g7fenk3mteeyfunc"
+  },
+  "functionS_WORKER_RUNTIME": {
+    "type": "String",
+    "value": "python"
+  },
+  "keY_VAULT_NAME": {
+    "type": "String",
+    "value": "kv-2g7fenk3mteey"
+  },
+  "openaI_API_BASE": {
+    "type": "String",
+    "value": "https://oai-2g7fenk3mteey.openai.azure.com/"
+  },
+  "openaI_API_VERSION": {
+    "type": "String",
+    "value": "2024-05-01-preview"
+  },
+  "openaI_MODEL": {
+    "type": "String",
+    "value": "gpt-4o"
+  },
+  "processinG_FUNCTION_APP_NAME": {
+    "type": "String",
+    "value": "func-processing-2g7fenk3mteey"
+  },
+  "processinG_FUNCTION_URL": {
+    "type": "String",
+    "value": "https://func-processing-2g7fenk3mteey.azurewebsites.net"
+  },
+  "resourcE_GROUP": {
+    "type": "String",
+    "value": "rg-dev"
+  }
+}

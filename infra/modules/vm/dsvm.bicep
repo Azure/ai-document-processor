@@ -1,4 +1,5 @@
 param location string
+// var _location = 'westus'
 param name string
 param tags object = {}
 param subnetId string
@@ -75,6 +76,9 @@ resource nic 'Microsoft.Network/networkInterfaces@2024-05-01' = {
     ]
   }
 }
+
+
+
 
 resource virtualMachine 'Microsoft.Compute/virtualMachines@2024-11-01' = {
   name: name

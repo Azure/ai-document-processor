@@ -17,6 +17,12 @@
       "networkIsolation": {
         "value": "${AZURE_NETWORK_ISOLATION}"
       },
+      "ai_vision_enabled": {
+        "value": "${AI_VISION_ENABLED}"
+      },
+      "multimodal": {
+        "value": "${AOAI_MULTI_MODAL}"
+      },
       "deploymentTags":{
         "value": {}
       },
@@ -26,8 +32,8 @@
       "deployVPN": {
         "value": "${AZURE_DEPLOY_VPN}"
       },
-      "deployStaticWebApp": {
-        "value": "${AZURE_DEPLOY_STATIC_WEB_APP}"
+      "aoaiLocation": {
+        "value": "${AOAI_LOCATION}"
       },
       "azureReuseConfig":{
         "value": {
