@@ -982,6 +982,9 @@ var flexConsumptionAppSettings = (functionAppHostPlan == 'FlexConsumption') ? {
   AzureWebJobsStorage__blobServiceUri: 'https://${funcStorageName}.blob.${environment().suffixes.storage}'
   AzureWebJobsStorage__queueServiceUri: 'https://${funcStorageName}.queue.${environment().suffixes.storage}'
   AzureWebJobsStorage__tableServiceUri: 'https://${funcStorageName}.table.${environment().suffixes.storage}'
+  DataStorage__blobServiceUri: 'https://${storageAccountName}.blob.${environment().suffixes.storage}'
+  DataStorage__queueServiceUri: 'https://${storageAccountName}.queue.${environment().suffixes.storage}'
+  DataStorage__tableServiceUri: 'https://${storageAccountName}.table.${environment().suffixes.storage}'
 } : {}
 
 var dedicatedAppSettings = (functionAppHostPlan != 'FlexConsumption') ? {
