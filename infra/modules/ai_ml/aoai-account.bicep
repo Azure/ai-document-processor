@@ -33,6 +33,6 @@ resource openAIAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
 }
 
 output AOAI_ENDPOINT string = openAIAccount.properties.endpoint
-output AOAI_API_KEY string = openAIAccount.listKeys().key1
+// output AOAI_API_KEY string = openAIAccount.listKeys().key1
 output name string = openAIAccount.name
 output id string = openAIAccount.id
