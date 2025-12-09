@@ -307,12 +307,12 @@ module appInsights './modules/management_governance/application-insights.bicep' 
   }
 }
 
-var secureAppSettings = [
-  {
-    name: 'OPENAI_API_KEY'
-    value: aoaiAccountModule.outputs.AOAI_API_KEY
-  }
-]
+// var secureAppSettings = [
+//   {
+//     name: 'OPENAI_API_KEY'
+//     value: aoaiAccountModule.outputs.AOAI_API_KEY
+//   }
+// ]
 
 var appSettings = [
   {
@@ -451,7 +451,7 @@ module keyVault './modules/security/key-vault.bicep' = {
     //tenantId: tenantId
     keyVaultReuse: _azureReuseConfig.keyVaultReuse
     existingKeyVaultResourceGroupName: resourceGroupName
-    secureAppSettings: secureAppSettings
+    // secureAppSettings: secureAppSettings
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
     roleAssignments: concat(keyVaultSecretsUserIdentityAssignmentsAll, [])
     // subnets : (_networkIsolation && !_vnetReuse) ? [

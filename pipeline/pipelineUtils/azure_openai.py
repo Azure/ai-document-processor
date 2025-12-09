@@ -6,7 +6,7 @@ from pipelineUtils.db import save_chat_message
 from configuration import Configuration
 config = Configuration()
 
-OPENAI_API_KEY = config.get_value("OPENAI_API_KEY")
+# OPENAI_API_KEY = config.get_value("OPENAI_API_KEY")
 OPENAI_API_BASE = config.get_value("OPENAI_API_BASE")
 OPENAI_MODEL = config.get_value("OPENAI_MODEL")
 OPENAI_API_VERSION = config.get_value("OPENAI_API_VERSION")
