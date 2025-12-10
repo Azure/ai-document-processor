@@ -1,1 +1,0 @@
-az staticwebapp appsettings list -n $AZURE_STATIC_WEB_APP_NAME

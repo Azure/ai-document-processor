@@ -2,7 +2,7 @@ import azure.functions as func
 import azure.durable_functions as df
 
 
-from activities import getBlobContent, runDocIntel, callAoai, writeToBlob, speechToText, callAoaiMultiModal
+from activities import getBlobContent, runDocIntel, callAiFoundry, writeToBlob, speechToText, callFoundryMultiModal
 from configuration import Configuration
 
 from pipelineUtils.blob_functions import BlobMetadata
@@ -159,7 +159,7 @@ def process_blob(context):
 
 app.register_functions(getBlobContent.bp)
 app.register_functions(runDocIntel.bp)
-app.register_functions(callAoai.bp)
+app.register_functions(callAiFoundry.bp)
 app.register_functions(writeToBlob.bp)
-app.register_functions(speechToText.bp) 
-app.register_functions(callAoaiMultiModal.bp)
+app.register_functions(speechToText.bp)
+app.register_functions(callFoundryMultiModal.bp)
