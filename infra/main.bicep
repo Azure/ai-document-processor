@@ -349,7 +349,9 @@ var appSettings = [
   }
   {
     name: 'OPENAI_API_BASE'
-    value: aoaiAccountModule.outputs.AOAI_ENDPOINT
+    //jamespace
+    // Migration: Construct endpoint from AVM output name (AVM only outputs names, not URLs)
+    value: 'https://${aiFoundry.outputs.aiServicesName}.cognitiveservices.azure.com/'
   }
   {
     name: 'OPENAI_API_EMBEDDING_MODEL'
@@ -548,22 +550,8 @@ module openaiDnsZone './modules/network/private-dns-zones.bicep' = if (_networkI
   }
 }
 
-module aiServicesPe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
-  // scope : resourceGroup
-  name: 'aiServicesPe'
-  params: {
-    location: location
-    name: _azureAiServicesPe
-    tags: tags
-    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: aoaiAccountModule.outputs.id
-    groupIds: ['account']
-    dnsZoneId: _networkIsolation?openaiDnsZone.outputs.id:''
-  }
-  dependsOn: [
-    aoaiAccountModule
-  ]
-}
+//jamespace
+// Migration: aiServicesPe REMOVED - AVM handles private endpoint creation internally
 
 // Cosmos DB Module
 module documentsDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
@@ -610,30 +598,71 @@ module cosmos './modules/db/cosmos.bicep' = {
   }
 }
 
+//jamespace
+// 2. AI Foundry (replacing Azure OpenAI)
+// Migration: Using AVM pattern module with includeAssociatedResources: false
+// Note: baseName max 12 chars, so using substring of suffix
+var aiFoundryBaseName = substring(suffix, 0, 12)
 
-// 2. OpenAI
-module aoaiAccountModule './modules/ai_ml/aoai-account.bicep' = {
-  // scope : resourceGroup
-  name: 'aoaiAccountModuleDeployment'
+module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
+  name: 'aiFoundryDeployment'
   params: {
-    location: aoaiLocation
-    aoaiName: aoaiName
-    customSubDomainName: aoaiName
-    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
+    // Required: baseName is used for naming resources (max 12 chars)
+    baseName: aiFoundryBaseName
+    
+    // includeAssociatedResources: false means we don't want AVM to create 
+    // Key Vault, Storage, CosmosDB, AI Search - we have our own
+    includeAssociatedResources: false
+    
+    // AI Foundry configuration with location and networking
+    aiFoundryConfiguration: {
+      // Use our existing aoaiName for the account name
+      accountName: aoaiName
+      location: aoaiLocation
+      // Keep API key authentication enabled for local development
+      disableLocalAuth: false
+      // Networking configuration (only when network isolation is enabled)
+      networking: _networkIsolation ? {
+        //jamespace
+        // DNS zones - pass existing zone IDs (AVM doesn't create them)
+        cognitiveServicesPrivateDnsZoneResourceId: aiservicesDnsZone.outputs.id
+        openAiPrivateDnsZoneResourceId: openaiDnsZone.outputs.id
+        aiServicesPrivateDnsZoneResourceId: aiservicesDnsZone.outputs.id
+      } : null
+    }
+    
+    // Private endpoint subnet (for network isolation)
+    privateEndpointSubnetResourceId: _networkIsolation ? vnet.outputs.aiSubId : ''
+    
+    // Model deployments - using correct AVM schema
+    aiModelDeployments: [
+      {
+        name: 'gpt-4o'
+        model: {
+          format: 'OpenAI'
+          name: 'gpt-4o'
+          version: '2024-08-06'
+        }
+        sku: {
+          name: 'GlobalStandard'
+          capacity: 10
+        }
+      }
+      {
+        name: 'text-embedding-ada-002'
+        model: {
+          format: 'OpenAI'
+          name: 'text-embedding-ada-002'
+          version: '2'
+        }
+        sku: {
+          name: 'Standard'
+          capacity: 10
+        }
+      }
+    ]
   }
-}
-
-module aoaiModelDeploymentModule './modules/ai_ml/modelDeployment.bicep' = {
-  name: 'aoaiModelDeployment'
-  // scope: resourceGroup
-  params: {
-    aiServicesName: aoaiAccountModule.outputs.name
-    deploymentName: 'gpt-4o'
-    modelName: 'gpt-4o'
-  }
-  dependsOn: [
-    aoaiAccountModule
-  ]
+  dependsOn: _networkIsolation ? [vnet, aiservicesDnsZone, openaiDnsZone] : []
 }
 
 module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
@@ -1513,9 +1542,11 @@ resource cse 'Microsoft.Compute/virtualMachines/extensions@2024-11-01' = if (_de
 output RESOURCE_GROUP string = resourceGroup().name
 output FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
 output AZURE_STORAGE_ACCOUNT string = storage.outputs.name
+//jamespace
 // output FUNCTION_URL string = processingFunctionApp.outputs.uri
 output OPENAI_API_VERSION string = openaiApiVersion
-output OPENAI_API_BASE string = aoaiAccountModule.outputs.AOAI_ENDPOINT
+// Migration: Construct endpoint from AVM output name
+output OPENAI_API_BASE string = 'https://${aiFoundry.outputs.aiServicesName}.cognitiveservices.azure.com/'
 output OPENAI_MODEL string = openaiModel
 output FUNCTIONS_WORKER_RUNTIME string = functionRuntime
 output AIMULTISERVICES_NAME string = aiMultiServices.outputs.aiMultiServicesName
