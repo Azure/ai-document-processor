@@ -145,8 +145,8 @@ param functionAppHostPlan string
 @allowed(['B1', 'B2', 'S1', 'S2', 'S3', 'P1v2', 'P2v2', 'P3v2', 'FC1'])
 param functionAppSKU string = (functionAppHostPlan == 'FlexConsumption') ? 'FC1' : 'S2'
 
-var openaiApiVersion = '2024-05-01-preview'
-var openaiModel = 'gpt-4o'
+var openaiApiVersion = '2025-08-07'
+var openaiModel = 'gpt-5-mini'
 var functionRuntime = 'python'
 
 var hostingPlanName = '${abbrs.compute.appServicePlan}${suffix}'
@@ -154,7 +154,7 @@ var processingFunctionAppName = '${abbrs.compute.functionApp}processing-${suffix
 var storageAccountName = '${abbrs.storage.storageAccount}${suffix}data'
 var funcStorageName = '${abbrs.storage.storageAccount}${suffix}func'
 var keyVaultName = '${abbrs.security.keyVault}${suffix}'
-var aoaiName = '${abbrs.ai.openAIService}${suffix}'
+var aiFoundryName = '${abbrs.ai.aiFoundry}${suffix}'
 var cosmosAccountName = '${abbrs.databases.cosmosDBDatabase}${suffix}'
 var aiMultiServicesName = '${abbrs.ai.aiMultiServices}${suffix}'
 var appInsightsName = '${abbrs.managementGovernance.applicationInsights}${suffix}'
@@ -359,7 +359,7 @@ var appSettings = [
   }
   {
     name: 'OPENAI_MODEL'
-    value: 'gpt-4o'
+    value: 'gpt-5-mini'
   }
   {
     name: 'AIMULTISERVICES_ENDPOINT'
@@ -617,7 +617,7 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
     // AI Foundry configuration with location and networking
     aiFoundryConfiguration: {
       // Use our existing aoaiName for the account name
-      accountName: aoaiName
+      accountName: aiFoundryName
       location: aoaiLocation
       // Keep API key authentication enabled for local development
       disableLocalAuth: false
@@ -637,15 +637,15 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
     // Model deployments - using correct AVM schema
     aiModelDeployments: [
       {
-        name: 'gpt-4o'
+        name: 'gpt-5-mini'
         model: {
           format: 'OpenAI'
-          name: 'gpt-4o'
-          version: '2024-08-06'
+          name: 'gpt-5-mini'
+          version: '2025-09-07'
         }
         sku: {
           name: 'GlobalStandard'
-          capacity: 10
+          capacity: 100
         }
       }
       {
@@ -657,7 +657,7 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
         }
         sku: {
           name: 'Standard'
-          capacity: 10
+          capacity: 100
         }
       }
     ]
@@ -993,7 +993,7 @@ var commonAppSettings = {
   WEBSITE_HTTPLOGGING_RETENTION_DAYS: '7'
   FUNCTIONS_EXTENSION_VERSION: '~4'
   APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.outputs.instrumentationKey
-  ApplicationInsights__InstrumentationKey: appInsights.outputs.instrumentationKey
+  // ApplicationInsights__InstrumentationKey: appInsights.outputs.instrumentationKey
 
   AzureWebJobsStorage__credential: 'managedidentity'
   AzureWebJobsStorage__clientId: uaiFrontendMsi.outputs.clientId
@@ -1069,7 +1069,7 @@ module processingFunctionApp 'br/public:avm/res/web/site:0.16.0' = {
     } : null
     virtualNetworkSubnetId: _networkIsolation?vnet.outputs.appServicesSubId:''
     siteConfig: {
-      alwaysOn: true
+      alwaysOn: (functionAppHostPlan != 'FlexConsumption') ? true: null
       linuxFxVersion: (functionAppHostPlan != 'FlexConsumption') ? 'Python|3.11' : null
     }
     publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'

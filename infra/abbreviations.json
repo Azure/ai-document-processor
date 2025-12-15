@@ -1,5 +1,7 @@
 {
   "ai": {
+    "aiFoundry": "aif-",
+    "aiFoundryProject": "aifp-",
     "aiSearch": "srch-",
     "aiServices": "aisa-",
     "aiMultiServices": "aimsa-",
