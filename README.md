@@ -1,10 +1,10 @@
 # AI Document Processor (ADP)
 
-
 YouTube Videos: 
 - [Overview](https://www.youtube.com/watch?v=Sd6J3MQ4ouc&t=10s) 
 - [Deployment Instructions](https://www.youtube.com/watch?v=TkUfFDO-c98)
-
+- [Local Deploy](https://www.youtube.com/watch?v=8G7wWJQLxOU&t=9s)
+  
 ## Description
 AI Document Processor Accelerator is designed to help companies leverage LLMs to automate document and file processing tasks. The accelerator uses bicep templates to provision Azure Function App, Storage account,  to manage your documents life cycle from raw PDF, word doc, or .mp3, extract meaningful entities and insights, and write an output report, CSV, or JSON to a blob storage container. 
 
