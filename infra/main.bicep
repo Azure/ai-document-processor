@@ -657,7 +657,7 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
         }
         sku: {
           name: 'Standard'
-          capacity: 50
+          capacity: 100
         }
       }
     ]

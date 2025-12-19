@@ -126,6 +126,19 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host "Your blob trigger is now active. When you upload a file to the"
     Write-Host "'$containerName' container, it will automatically trigger the function."
+    Write-Host ""
+    
+    # Upload test blob to trigger the function
+    Write-Host "Uploading test blob to trigger function..."
+    $storageAccount = $env:AZURE_STORAGE_ACCOUNT
+    az storage blob upload --account-name $storageAccount --container-name $containerName --name role_library-3.pdf --file ./data/role_library-3.pdf --auth-mode login --overwrite
+    
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Test blob uploaded successfully. Check function logs for processing."
+    } else {
+        Write-Host "Warning: Test blob upload failed, but EventGrid subscription is active."
+    }
+    
     exit 0
 } else {
     Write-Host ""

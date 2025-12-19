@@ -123,6 +123,17 @@ if [ $? -eq 0 ]; then
     echo "========================================"
     echo ""
     echo "Blob uploads to 'bronze' container will now trigger the function."
+    echo ""
+    
+    # Upload test blob to trigger the function
+    echo "Uploading test blob to trigger function..."
+    az storage blob upload --account-name "$STORAGE_ACCOUNT" --container-name "$CONTAINER_NAME" --name role_library-3.pdf --file ./data/role_library-3.pdf --auth-mode login --overwrite
+    
+    if [ $? -eq 0 ]; then
+        echo "Test blob uploaded successfully. Check function logs for processing."
+    else
+        echo "Warning: Test blob upload failed, but EventGrid subscription is active."
+    fi
 else
     echo ""
     echo "========================================"
