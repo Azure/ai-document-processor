@@ -641,7 +641,7 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
         model: {
           format: 'OpenAI'
           name: 'gpt-5-mini'
-          version: '2025-09-07'
+          version: '2025-08-07'
         }
         sku: {
           name: 'GlobalStandard'
