@@ -22,6 +22,7 @@ import logging
     arg_name="blob",
     path="bronze/{name}",
     connection="DataStorage",
+    source="EventGrid",
 )
 @app.durable_client_input(client_name="client")
 async def start_orchestrator_blob(
