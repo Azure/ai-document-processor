@@ -99,12 +99,11 @@ def process_blob(context):
     document_extensions = ['pdf', 'docx', 'doc', 'xlsx', 'pptx', 'jpg', 'jpeg', 'png', 'tiff', 'bmp']
     
 
-    # Define retry options with exponential backoff for handling 429 rate limits
+    # Define retry options for handling transient failures
+    # Note: backoff_coefficient requires azure-functions-durable >= 1.3.0
     retry_options = RetryOptions(
         first_retry_interval_in_milliseconds=5000,    # 5 seconds initial wait
-        max_number_of_attempts=5,                      # More attempts for rate limit scenarios
-        backoff_coefficient=2.0,                       # Double wait time each retry
-        max_retry_interval_in_milliseconds=60000       # Cap at 60 seconds
+        max_number_of_attempts=5                       # More attempts for rate limit scenarios
     )
 
     # 1. Process Data Source based on file type
