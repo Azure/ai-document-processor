@@ -20,10 +20,10 @@ hooks:
       run: scripts/postprovision.ps1
   postdeploy:
     posix:
-      run: scripts/postdeploy.sh
+      run: scripts/postDeploy.sh
       interactive: true
       continueOnError: false
     windows:
-      run: scripts/postdeploy.ps1
+      run: scripts/postDeploy.ps1
       interactive: true
       continueOnError: false

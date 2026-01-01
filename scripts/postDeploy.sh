@@ -25,7 +25,7 @@ CONTAINER_NAME="${BRONZE_CONTAINER_NAME:-bronze}"
 
 # Fixed values
 FUNCTION_NAME="start_orchestrator_on_blob"
-SUBSCRIPTION_NAME="bronze-blob-created-${FUNCTION_NAME}"
+SUBSCRIPTION_NAME="bronze-blob-created-${FUNCTION_APP_NAME}"
 SUBJECT_FILTER="/blobServices/default/containers/${CONTAINER_NAME}/"
 
 echo ""
