@@ -49,7 +49,4 @@ def write_to_blob_activity(args: dict):
   except Exception as e:
       error_msg = f"Error writing output for blob {blob_name}: {str(e)}"
       logging.error(error_msg)
-      return {
-          "success": False,
-          "error": error_msg
-      }
+      raise  # Re-raise to allow Durable Functions to retry

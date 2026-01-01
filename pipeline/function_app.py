@@ -1,8 +1,9 @@
 import azure.functions as func
 import azure.durable_functions as df
+from azure.durable_functions import RetryOptions
 
 
-from activities import getBlobContent, runDocIntel, callAiFoundry, writeToBlob, speechToText, callFoundryMultiModal
+from activities import runDocIntel, callAiFoundry, writeToBlob, speechToText, callFoundryMultiModal
 from configuration import Configuration
 
 from pipelineUtils.blob_functions import BlobMetadata
@@ -99,6 +100,13 @@ def process_blob(context):
     document_extensions = ['pdf', 'docx', 'doc', 'xlsx', 'pptx', 'jpg', 'jpeg', 'png', 'tiff', 'bmp']
     
 
+    # Define retry options for handling transient failures
+    # Note: backoff_coefficient requires azure-functions-durable >= 1.3.0
+    retry_options = RetryOptions(
+        first_retry_interval_in_milliseconds=5000,    # 5 seconds initial wait
+        max_number_of_attempts=5                       # More attempts for rate limit scenarios
+    )
+
     # 1. Process Data Source based on file type
     if config.get_value("AOAI_MULTI_MODAL", "false").lower() == "true" and file_extension in document_extensions:
         aoai_input = {
@@ -108,7 +116,7 @@ def process_blob(context):
             "instance_id": sub_orchestration_id
         }
 
-        text_result = yield context.call_activity("callAoaiMultiModal", aoai_input)
+        text_result = yield context.call_activity_with_retry("callAoaiMultiModal", retry_options, aoai_input)
 
 
     elif config.get_value("AI_VISION_ENABLED", "false").lower() == "true":
@@ -117,12 +125,12 @@ def process_blob(context):
     elif file_extension in audio_extensions:
         # Process audio with speech-to-text
         logging.info(f"Processing audio file: {blob_name}")
-        text_result = yield context.call_activity("speechToText", blob_input)
+        text_result = yield context.call_activity_with_retry("speechToText", retry_options, blob_input)
 
     elif file_extension in document_extensions:
         # Process document with Document Intelligence
         logging.info(f"Processing document file: {blob_name}")
-        text_result = yield context.call_activity("runDocIntel", blob_input)
+        text_result = yield context.call_activity_with_retry("runDocIntel", retry_options, blob_input)
         
     else:
         # Unsupported file type
@@ -140,12 +148,13 @@ def process_blob(context):
         "instance_id": sub_orchestration_id 
     }
 
-    aoai_output = yield context.call_activity("callAoai", call_aoai_input)
+    aoai_output = yield context.call_activity_with_retry("callAoai", retry_options, call_aoai_input)
     
 
     # 3. Write AOAI output to Blob Storage
-    task_result = yield context.call_activity(
+    task_result = yield context.call_activity_with_retry(
         "writeToBlob", 
+        retry_options,
         {
             "json_str": aoai_output, 
             "blob_name": blob_input["name"],
@@ -158,7 +167,6 @@ def process_blob(context):
         "task_result": task_result
     }   
 
-app.register_functions(getBlobContent.bp)
 app.register_functions(runDocIntel.bp)
 app.register_functions(callAiFoundry.bp)
 app.register_functions(writeToBlob.bp)

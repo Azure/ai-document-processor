@@ -13,7 +13,7 @@ from pipelineUtils.prompts import load_prompts
 from pipelineUtils.blob_functions import get_blob_content, write_to_blob
 from pipelineUtils.azure_openai import run_prompt
 
-name = "callAoaiMultimodal"
+name = "callAoaiMultiModal"
 bp = df.Blueprint()
 
 def convert_to_base64_images(blob_input: dict):
