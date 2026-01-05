@@ -62,4 +62,4 @@ def extract_text_from_blob(blob_input: dict):
       
     except Exception as e:
         logging.error(f"Error processing {blob_input}: {e}")
-    return None
+        raise  # Re-raise to allow Durable Functions to retry

@@ -6,7 +6,9 @@
       "Host.Aggregator": "Error",
       "Host.Results": "Error",
       "Function": "Information",
-      "DurableTask": "Warning",
+      "Host.Triggers.DurableTask": "Information",
+      "DurableTask.Core": "Warning",
+      "DurableTask.AzureStorage": "Warning",
       "Worker": "Warning"
     },
     "applicationInsights": {
@@ -16,10 +18,14 @@
       }
     }
   },
-  "durableTask": {
-    "tracing": {
-      "traceInputsAndOutputs": false,
-      "traceReplayEvents": false
+  "extensions": {
+    "durableTask": {
+      "tracing": {
+        "traceInputsAndOutputs": true,
+        "traceReplayEvents": true,
+        "distributedTracingEnabled": true,
+        "version": "V2"
+      }
     }
   },
   "extensionBundle": {

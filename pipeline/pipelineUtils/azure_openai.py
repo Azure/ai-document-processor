@@ -72,6 +72,6 @@ def run_prompt(pipeline_id, system_prompt, user_prompt):
     
     except Exception as e:
         logging.error(f"Error calling OpenAI API: {e}")
-        return None
+        raise  # Re-raise to allow Durable Functions to retry
 
 

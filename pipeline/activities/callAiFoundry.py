@@ -43,4 +43,4 @@ def run(inputData: dict):
   
     except Exception as e:
         logging.error(f"Error processing Sub Orchestration (callAoai): {instance_id}: {e}")
-        return None
+        raise  # Re-raise to allow Durable Functions to retry

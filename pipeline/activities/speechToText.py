@@ -84,6 +84,6 @@ def run(blob_input: dict):
 
     except Exception as e:
         logging.error(f"Error during speech-to-text processing: {e}")
-        full_text = "Error during speech-to-text processing."
+        raise  # Re-raise to allow Durable Functions to retry
 
     return full_text
