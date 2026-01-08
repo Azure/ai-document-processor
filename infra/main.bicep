@@ -24,6 +24,13 @@ var _resourceGroupName = !empty(resourceGroupName) ? resourceGroupName : '${abbr
 
 var suffix = toLower(uniqueString(subscription().id, environmentName, location))
 var deploymentStorageContainerName = 'app-package'
+
+// start:RJ_added_for_v2v
+// Determine speech service region: use parameter if provided, otherwise use the deployment location
+// The location parameter is already in short format (e.g., "eastus2"), so we can use it directly
+var _speechServiceRegion = !empty(speechServiceRegion) ? speechServiceRegion : location
+// end:RJ_added_for_v2v
+
 @description('Identities to assign roles to.')
 param identities identityInfo[] = union([], [{
   principalId: principalId
@@ -144,6 +151,33 @@ param functionAppHostPlan string
 
 @allowed(['B1', 'B2', 'S1', 'S2', 'S3', 'P1v2', 'P2v2', 'P3v2', 'FC1'])
 param functionAppSKU string = (functionAppHostPlan == 'FlexConsumption') ? 'FC1' : 'S2'
+
+// start:RJ_added_for_v2v
+// Voice-to-Voice Translation Configuration Parameters
+@description('Enable voice-to-voice translation feature. When enabled, audio files will be translated to target language with audio output.')
+@allowed([false, true])
+param enableVoiceToVoiceTranslation bool = true
+
+@description('Target language for voice translation (e.g., es for Spanish, fr for French, de for German). Default: es (Spanish)')
+param translationTargetLanguage string = 'es'
+
+@description('Source language for voice translation (e.g., en-US for English). Default: en-US')
+param translationSourceLanguage string = 'en-US'
+
+@description('Speech service region (e.g., eastus, eastus2, westus). If not specified, will be automatically set based on the deployment location. Default: extracted from location parameter')
+param speechServiceRegion string = ''
+
+@description('Enable Personal Voice (voice cloning) feature. Requires Personal Voice access and SPEAKER_PROFILE_ID. Default: false')
+@allowed([false, true])
+param usePersonalVoice bool = false
+
+@description('Speaker Profile ID for Personal Voice (voice cloning). Required if USE_PERSONAL_VOICE is true.')
+param speakerProfileId string = ''
+
+@description('Speech Service subscription key (optional). If not provided, managed identity authentication will be used.')
+// end:RJ_added_for_v2v
+@secure()
+param speechServiceKey string = ''
 
 var openaiApiVersion = '2025-08-07'
 var openaiModel = 'gpt-5-mini'
@@ -361,10 +395,16 @@ var appSettings = [
     name: 'OPENAI_MODEL'
     value: 'gpt-5-mini'
   }
+  // start:RJ_added_for_v2v
   {
     name: 'AIMULTISERVICES_ENDPOINT'
     value: aiMultiServices.outputs.aiMultiServicesEndpoint
   }
+  {
+    name: 'AIMULTISERVICES_RESOURCE_ID'
+    value: aiMultiServices.outputs.id
+  }
+  // end:RJ_added_for_v2v
   {
     name: 'COSMOS_DB_DATABASE_NAME'
     value: cosmos.outputs.databaseName
@@ -389,6 +429,28 @@ var appSettings = [
     name: 'FINAL_OUTPUT_CONTAINER'
     value: 'silver'
   }
+  // start:RJ_added_for_v2v
+  {
+    name: 'ENABLE_VOICE_TO_VOICE_TRANSLATION'
+    value: enableVoiceToVoiceTranslation ? 'true' : 'false'
+  }
+  {
+    name: 'TRANSLATION_TARGET_LANGUAGE'
+    value: translationTargetLanguage
+  }
+  {
+    name: 'TRANSLATION_SOURCE_LANGUAGE'
+    value: translationSourceLanguage
+  }
+  {
+    name: 'SPEECH_SERVICE_REGION'
+    value: _speechServiceRegion
+  }
+  {
+    name: 'USE_PERSONAL_VOICE'
+    value: usePersonalVoice ? 'true' : 'false'
+  }
+  // end:RJ_added_for_v2v
 ]
 
 module vaultDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
@@ -1027,7 +1089,50 @@ var planSpecificAppSettings = functionAppHostPlan == 'FlexConsumption'
   ? flexConsumptionAppSettings
   : dedicatedAppSettings
 
-var functionAppSettings = union(commonAppSettings, planSpecificAppSettings)
+// Convert appSettings array to object format for merging
+var appSettingsObject = {
+  APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.outputs.connectionString
+  FUNC_STORAGE_ACCOUNT_NAME: funcStorageName
+  COSMOS_DB_CONVERSATION_HISTORY_CONTAINER: conversationHistoryContainerName
+  COSMOS_DB_URI: 'https://${cosmos.outputs.accountName}.documents.azure.com:443/'
+  DATA_STORAGE_ACCOUNT_NAME: storageAccountName
+  DATA_STORAGE_ENDPOINT: 'https://${storageAccountName}.blob.${environment().suffixes.storage}'
+  PROMPT_FILE: 'prompts.yaml'
+  OPENAI_API_VERSION: '2024-05-01-preview'
+  OPENAI_API_BASE: 'https://${aiFoundry.outputs.aiServicesName}.cognitiveservices.azure.com/'
+  OPENAI_API_EMBEDDING_MODEL: 'text-embedding-ada-002'
+  OPENAI_MODEL: 'gpt-5-mini'
+  // start:RJ_added_for_v2v
+  AIMULTISERVICES_ENDPOINT: aiMultiServices.outputs.aiMultiServicesEndpoint
+  AIMULTISERVICES_RESOURCE_ID: aiMultiServices.outputs.id
+  // end:RJ_added_for_v2v
+  COSMOS_DB_DATABASE_NAME: cosmos.outputs.databaseName
+  PROCESSING_FUNCTION_APP_NAME: processingFunctionAppName
+  PROCESSING_FUNCTION_APP_URL: '${processingFunctionAppName}.azurewebsites.net'
+  SAS_TOKEN_EXPIRY_HOURS: '24'
+  USE_SAS_TOKEN: 'false'
+  FINAL_OUTPUT_CONTAINER: 'silver'
+  // start:RJ_added_for_v2v
+  // Voice-to-Voice Translation Configuration
+  ENABLE_VOICE_TO_VOICE_TRANSLATION: enableVoiceToVoiceTranslation ? 'true' : 'false'
+  TRANSLATION_TARGET_LANGUAGE: translationTargetLanguage
+  TRANSLATION_SOURCE_LANGUAGE: translationSourceLanguage
+  SPEECH_SERVICE_REGION: _speechServiceRegion
+  USE_PERSONAL_VOICE: usePersonalVoice ? 'true' : 'false'
+  // end:RJ_added_for_v2v
+}
+
+// start:RJ_added_for_v2v
+// Add optional voice translation settings (only if provided)
+var voiceTranslationSettings = !empty(speakerProfileId) ? {
+  SPEAKER_PROFILE_ID: speakerProfileId
+} : {}
+var speechKeySettings = !empty(speechServiceKey) ? {
+  SPEECH_SERVICE_KEY: speechServiceKey
+} : {}
+
+var functionAppSettings = union(commonAppSettings, planSpecificAppSettings, appSettingsObject, voiceTranslationSettings, speechKeySettings)
+// end:RJ_added_for_v2v
 
   
 
