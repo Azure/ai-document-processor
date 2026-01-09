@@ -51,6 +51,8 @@ Write-Host "  Container: $containerName"
 Write-Host "  Function Name: $functionName"
 Write-Host "  Subscription Name: $subscriptionName"
 
+
+
 # Check if subscription already exists on the system topic
 Write-Host ""
 Write-Host "Checking for existing EventGrid subscription..."
@@ -62,27 +64,126 @@ if ($existingSubs -eq $subscriptionName) {
     exit 0
 }
 
-# Get the blobs_extension key
+# Wait for function app to be ready before attempting to get the key
+Write-Host ""
+Write-Host "Waiting for function app to be ready..."
+$maxWaitTime = 300  # 5 minutes total
+$waitInterval = 10  # Check every 10 seconds
+$elapsedTime = 0
+$functionReady = $false
+
+while ($elapsedTime -lt $maxWaitTime -and -not $functionReady) {
+    try {
+        $status = az functionapp show --name $functionAppName --resource-group $resourceGroup --query "state" -o tsv 2>$null
+        if ($status -eq "Running") {
+            # Try to ping the function app
+            try {
+                $response = Invoke-WebRequest -Uri "https://$functionAppName.azurewebsites.net" -TimeoutSec 30 -ErrorAction Stop -UseBasicParsing
+                $functionReady = $true
+                Write-Host "✓ Function app is ready"
+            } catch {
+                Write-Host "  Function app is running but not yet responding ($elapsedTime/$maxWaitTime seconds)..."
+            }
+        } else {
+            Write-Host "  Function app state: $status ($elapsedTime/$maxWaitTime seconds)..."
+        }
+    } catch {
+        Write-Host "  Waiting for function app... ($elapsedTime/$maxWaitTime seconds)..."
+    }
+    
+    if (-not $functionReady) {
+        Start-Sleep -Seconds $waitInterval
+        $elapsedTime += $waitInterval
+    }
+}
+
+if (-not $functionReady) {
+    Write-Host "WARNING: Function app may not be fully ready, but continuing anyway..." -ForegroundColor Yellow
+}
+
+# Get the blobs_extension key with retry logic
 Write-Host ""
 Write-Host "Getting blobs_extension key from function app..."
-$blobsExtensionKey = az functionapp keys list --name $functionAppName --resource-group $resourceGroup --query "systemKeys.blobs_extension" -o tsv
+$blobsExtensionKey = $null
+$maxRetries = 6
+$retryDelay = 15  # seconds
 
-if (-not $blobsExtensionKey) {
-    Write-Host "ERROR: Could not retrieve blobs_extension key."
-    Write-Host "The function app may not be fully initialized yet."
+for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
+    try {
+        Write-Host "  Attempt $attempt/$maxRetries..."
+        $blobsExtensionKey = az functionapp keys list `
+            --name $functionAppName `
+            --resource-group $resourceGroup `
+            --query "systemKeys.blobs_extension" `
+            -o tsv 2>&1
+        
+        # Check if we got a valid key (not an error message)
+        if ($blobsExtensionKey -and $blobsExtensionKey -notmatch "error|Error|ERROR" -and $blobsExtensionKey.Trim().Length -gt 0) {
+            Write-Host "✓ blobs_extension key retrieved successfully."
+            break
+        }
+        
+        if ($attempt -lt $maxRetries) {
+            Write-Host "  Key not available yet. Waiting $retryDelay seconds before retry..."
+            Start-Sleep -Seconds $retryDelay
+            # Exponential backoff
+            $retryDelay = [Math]::Min($retryDelay * 1.5, 60)
+        }
+    } catch {
+        if ($attempt -lt $maxRetries) {
+            Write-Host "  Error retrieving key: $($_.Exception.Message). Retrying in $retryDelay seconds..."
+            Start-Sleep -Seconds $retryDelay
+            $retryDelay = [Math]::Min($retryDelay * 1.5, 60)
+        } else {
+            Write-Host "  Final attempt failed: $($_.Exception.Message)"
+        }
+    }
+}
+
+if (-not $blobsExtensionKey -or $blobsExtensionKey -match "error|Error|ERROR" -or $blobsExtensionKey.Trim().Length -eq 0) {
     Write-Host ""
-    Write-Host "This can happen if:"
-    Write-Host "  1. The function code hasn't been deployed yet"
-    Write-Host "  2. The blob trigger function hasn't initialized"
+    Write-Host "ERROR: Could not retrieve blobs_extension key after $maxRetries attempts." -ForegroundColor Red
     Write-Host ""
-    Write-Host "Try running 'azd deploy' again, or wait a few minutes and run this script manually."
-    exit 1
+    Write-Host "This can happen if:" -ForegroundColor Yellow
+    Write-Host "  1. The function app hasn't fully initialized yet (common with Flex Consumption)"
+    Write-Host "  2. The blob trigger extension hasn't been activated"
+    Write-Host "  3. The function code hasn't been fully deployed"
+    Write-Host ""
+    Write-Host "SOLUTIONS:" -ForegroundColor Cyan
+    Write-Host "  1. Wait 5-10 minutes and run this script manually:" -ForegroundColor White
+    Write-Host "     pwsh scripts/postDeploy.ps1" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  2. Or create the EventGrid subscription manually via Azure Portal:" -ForegroundColor White
+    Write-Host "     a. Go to Azure Portal > Storage Account > Events" -ForegroundColor Gray
+    Write-Host "     b. Click '+ Event Subscription'" -ForegroundColor Gray
+    Write-Host "     c. Configure:" -ForegroundColor Gray
+    Write-Host "        - Name: $subscriptionName" -ForegroundColor Gray
+    Write-Host "        - System Topic: $systemTopicName" -ForegroundColor Gray
+    Write-Host "        - Event Types: Blob Created" -ForegroundColor Gray
+    Write-Host "        - Endpoint Type: Azure Function" -ForegroundColor Gray
+    Write-Host "        - Endpoint: Select '$functionAppName' > '$functionName'" -ForegroundColor Gray
+    Write-Host "        - Filters > Subject Begins With: $filter" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "  3. Or use Azure CLI with Function endpoint (alternative method):" -ForegroundColor White
+    Write-Host "     First, get the function key:" -ForegroundColor Gray
+    Write-Host "     \$funcKey = az functionapp keys list -n $functionAppName -g $resourceGroup --query functionKeys.default -o tsv" -ForegroundColor Gray
+    Write-Host "     Then create subscription with manual endpoint URL" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "The deployment succeeded, but the EventGrid subscription needs to be created manually." -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "You can run this script again later when the function app is fully initialized:" -ForegroundColor Cyan
+    Write-Host "  pwsh scripts/postDeploy.ps1" -ForegroundColor White
+    Write-Host ""
+    # Exit with 0 to allow deployment to succeed - EventGrid can be set up manually
+    exit 0
 }
 
 Write-Host "blobs_extension key retrieved successfully."
 
 # Build webhook URL (using triple quotes for proper escaping in az CLI - same as quickstart)
+# Format: https://{functionApp}.azurewebsites.net/runtime/webhooks/blobs?functionName=Host.Functions.{functionName}&code={blobs_extension_key}
 $endpointUrl = """https://$functionAppName.azurewebsites.net/runtime/webhooks/blobs?functionName=Host.Functions.$functionName&code=$blobsExtensionKey"""
+Write-Host "  Using webhook endpoint with blobs_extension key"
 
 # Build filter for bronze container
 $filter = "/blobServices/default/containers/$containerName/"
@@ -106,7 +207,12 @@ Write-Host "Creating EventGrid subscription on System Topic..."
 Write-Host "  System Topic: $systemTopicName"
 Write-Host "  Endpoint: https://$functionAppName.azurewebsites.net/runtime/webhooks/blobs?functionName=Host.Functions.$functionName"
 Write-Host "  Filter: $filter"
+Write-Host "  Event Type: Microsoft.Storage.BlobCreated"
 Write-Host ""
+
+# Add a small delay before creating subscription to ensure function is ready
+Write-Host "Waiting 10 seconds to ensure function is fully ready..."
+Start-Sleep -Seconds 10
 
 $result = az eventgrid system-topic event-subscription create `
     -n $subscriptionName `

@@ -3,7 +3,9 @@ import azure.durable_functions as df
 from azure.durable_functions import RetryOptions
 
 
-from activities import runDocIntel, callAiFoundry, writeToBlob, speechToText, callFoundryMultiModal
+# start:RJ_added_for_v2v
+from activities import runDocIntel, callAiFoundry, writeToBlob, speechToText, callFoundryMultiModal, voiceToVoiceTranslation
+# end:RJ_added_for_v2v
 from configuration import Configuration
 
 from pipelineUtils.blob_functions import BlobMetadata
@@ -123,9 +125,28 @@ def process_blob(context):
         pass
 
     elif file_extension in audio_extensions:
-        # Process audio with speech-to-text
-        logging.info(f"Processing audio file: {blob_name}")
-        text_result = yield context.call_activity_with_retry("speechToText", retry_options, blob_input)
+        # start:RJ_added_for_v2v
+        # Check if voice-to-voice translation is enabled
+        enable_voice_translation = config.get_value("ENABLE_VOICE_TO_VOICE_TRANSLATION", "false").lower() == "true"
+        
+        if enable_voice_translation:
+            # Process audio with voice-to-voice translation
+            logging.info(f"Processing audio file with voice-to-voice translation: {blob_name}")
+            translation_result = yield context.call_activity_with_retry("voiceToVoiceTranslation", retry_options, blob_input)
+            
+            # For voice-to-voice translation, we can optionally also get the text
+            # If translation_result contains translated_text, use it; otherwise do speech-to-text
+            if translation_result.get("translated_text"):
+                text_result = translation_result.get("translated_text")
+            else:
+                # Fallback to speech-to-text if translation didn't provide text
+                logging.info(f"Getting text transcription for translated audio: {blob_name}")
+                text_result = yield context.call_activity_with_retry("speechToText", retry_options, blob_input)
+        else:
+            # end:RJ_added_for_v2v
+            # Process audio with speech-to-text (original behavior)
+            logging.info(f"Processing audio file: {blob_name}")
+            text_result = yield context.call_activity_with_retry("speechToText", retry_options, blob_input)
 
     elif file_extension in document_extensions:
         # Process document with Document Intelligence
@@ -172,3 +193,6 @@ app.register_functions(callAiFoundry.bp)
 app.register_functions(writeToBlob.bp)
 app.register_functions(speechToText.bp)
 app.register_functions(callFoundryMultiModal.bp)
+# start:RJ_added_for_v2v
+app.register_functions(voiceToVoiceTranslation.bp)
+# end:RJ_added_for_v2v

@@ -17,13 +17,13 @@ hooks:
     posix:
       run: scripts/postprovision.sh
     windows:
-      run: scripts/postprovision.ps1
+      run: pwsh -ExecutionPolicy Bypass -File scripts/postprovision.ps1
   postdeploy:
     posix:
       run: scripts/postDeploy.sh
       interactive: true
       continueOnError: false
     windows:
-      run: scripts/postDeploy.ps1
+      run: pwsh -ExecutionPolicy Bypass -File scripts/postDeploy.ps1
       interactive: true
       continueOnError: false
