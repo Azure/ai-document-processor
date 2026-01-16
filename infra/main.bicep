@@ -156,7 +156,6 @@ var funcStorageName = '${abbrs.storage.storageAccount}${suffix}func'
 var keyVaultName = '${abbrs.security.keyVault}${suffix}'
 var aiFoundryName = '${abbrs.ai.aiFoundry}${suffix}'
 var cosmosAccountName = '${abbrs.databases.cosmosDBDatabase}${suffix}'
-var aiMultiServicesName = '${abbrs.ai.aiMultiServices}${suffix}'
 var appInsightsName = '${abbrs.managementGovernance.applicationInsights}${suffix}'
 var logAnalyticsName = '${abbrs.managementGovernance.logAnalyticsWorkspace}${suffix}'
 var appConfigName = '${abbrs.configuration.appConfiguration}${suffix}'
@@ -179,10 +178,6 @@ var _azureAppConfigPe = !empty(azureAppConfigPe) ? azureAppConfigPe : '${abbrs.c
 param azureAiServicesPe string = ''
 var _azureAiServicesPe = !empty(azureAiServicesPe) ? azureAiServicesPe : '${abbrs.ai.aiServices}${abbrs.networking.privateEndpoint}${suffix}'
 
-
-@description('The name of the Azure AI Services Private Endpoint. If left empty, a random name will be generated.')
-param azureAiMultiServicesPe string = ''
-var _azureAiMultiServicesPe = !empty(azureAiMultiServicesPe) ? azureAiMultiServicesPe : '${abbrs.ai.aiMultiServices}${abbrs.networking.privateEndpoint}${suffix}'
 
 @description('The name of the Azure Storage Account Private Endpoint. If left empty, a random name will be generated.')
 param azureBlobStorageAccountPe string = ''
@@ -354,16 +349,16 @@ var appSettings = [
     value: 'https://${aiFoundry.outputs.aiServicesName}.cognitiveservices.azure.com/'
   }
   {
+    name: 'AI_SERVICES_ENDPOINT'
+    value: 'https://${aiFoundry.outputs.aiServicesName}.cognitiveservices.azure.com/'
+  }
+  {
     name: 'OPENAI_API_EMBEDDING_MODEL'
     value: 'text-embedding-ada-002'
   }
   {
     name: 'OPENAI_MODEL'
     value: 'gpt-5-mini'
-  }
-  {
-    name: 'AIMULTISERVICES_ENDPOINT'
-    value: aiMultiServices.outputs.aiMultiServicesEndpoint
   }
   {
     name: 'COSMOS_DB_DATABASE_NAME'
@@ -530,7 +525,7 @@ module cosmosContributorUser './modules/rbac/cosmos-contributor.bicep' = {
   }
 }
 
-module aiservicesDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
+module cogservicesDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
   // scope : resourceGroup
   name: 'aiservices-dnzones'
   params: {
@@ -549,6 +544,19 @@ module openaiDnsZone './modules/network/private-dns-zones.bicep' = if (_networkI
     virtualNetworkName: _networkIsolation?vnet.outputs.name:''
   }
 }
+
+
+module aiServicesDnsZone './modules/network/private-dns-zones.bicep' = if (_networkIsolation && !_vnetReuse) {
+  // scope : resourceGroup
+  name: 'aiservices-services-dnzones'
+  params: {
+    dnsZoneName: 'privatelink.services.ai.azure.com'
+    tags: tags
+    virtualNetworkName: _networkIsolation?vnet.outputs.name:''
+  }
+}
+
+
 
 //jamespace
 // Migration: aiServicesPe REMOVED - AVM handles private endpoint creation internally
@@ -625,9 +633,9 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
       networking: _networkIsolation ? {
         //jamespace
         // DNS zones - pass existing zone IDs (AVM doesn't create them)
-        cognitiveServicesPrivateDnsZoneResourceId: aiservicesDnsZone.outputs.id
+        cognitiveServicesPrivateDnsZoneResourceId: cogservicesDnsZone.outputs.id
         openAiPrivateDnsZoneResourceId: openaiDnsZone.outputs.id
-        aiServicesPrivateDnsZoneResourceId: aiservicesDnsZone.outputs.id
+        aiServicesPrivateDnsZoneResourceId: aiServicesDnsZone.outputs.id
       } : null
     }
     
@@ -662,7 +670,7 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
       }
     ]
   }
-  dependsOn: _networkIsolation ? [vnet, aiservicesDnsZone, openaiDnsZone] : []
+  dependsOn: _networkIsolation ? [vnet, aiServicesDnsZone, cogservicesDnsZone, openaiDnsZone] : []
 }
 
 module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
@@ -1127,16 +1135,6 @@ var allstorageDataOwnerIdentityAssignments = concat([], [
     roleDefinitionId: storageDataOwnerRole.id
     principalType: 'ServicePrincipal'
   }
-  {
-    principalId: aiMultiServiceManagedIdentity.outputs.principalId
-    roleDefinitionId: storageDataOwnerRole.id
-    principalType: 'ServicePrincipal'
-  }
-  {
-    principalId: aiMultiServices.outputs.aimsaSystemAssignedPrincipalId
-    roleDefinitionId: storageDataOwnerRole.id
-    principalType: 'ServicePrincipal'
-  }
 ])
 
 module storageDataOwnerResourceGroupRoleAssignment './modules/security/resource-group-role-assignment.bicep' = {
@@ -1306,11 +1304,6 @@ var appConfigDataOwnerIdentityAssignments = [
 
 var allConfigDataOwnerIdentityAssignments = concat(appConfigDataOwnerIdentityAssignments, [
   {
-    principalId: aiMultiServiceManagedIdentity.outputs.principalId
-    roleDefinitionId: appConfigDataOwnerRole.id
-    principalType: 'ServicePrincipal'
-  }
-  {
     principalId: uaiFrontendMsi.outputs.principalId
     roleDefinitionId: appConfigDataOwnerRole.id
     principalType: 'ServicePrincipal'
@@ -1342,43 +1335,6 @@ resource keyVaultSecretsUserRole 'Microsoft.Authorization/roleDefinitions@2022-0
   name: roles.security.keyVaultSecretsUser
 }
 
-
-var aiMultiServiceManagedIdentityName = '${abbrs.security.managedIdentity}${abbrs.ai.aiMultiServices}${suffix}'
-module aiMultiServiceManagedIdentity './modules/security/managed-identity.bicep' = {
-  // scope: resourceGroup
-  name: aiMultiServiceManagedIdentityName
-  params: {
-    name: aiMultiServiceManagedIdentityName
-    location: location
-    tags: union(tags, {})
-  }
-}
-
-module aiMultiServicesPe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
-  // scope : resourceGroup
-  name: 'aiMultiServicesPe'
-  params: {
-    location: location
-    name: _azureAiMultiServicesPe
-    tags: tags
-    subnetId: _networkIsolation?vnet.outputs.aiSubId:''
-    serviceId: aiMultiServices.outputs.id
-    groupIds: ['account']
-    dnsZoneId: _networkIsolation?aiservicesDnsZone.outputs.id:''
-  }
-}
-
-// 6. Azure AI Multi Services
-module aiMultiServices './modules/ai_ml/aimultiservices.bicep' = {
-  // scope : resourceGroup
-  name: 'aiMultiServicesModule'
-  params: {
-    aiMultiServicesName: aiMultiServicesName
-    location: location
-    identityId: aiMultiServiceManagedIdentity.outputs.id
-    publicNetworkAccess: _networkIsolation?'Disabled':'Enabled'
-  }
-}
 
 // module testvm './modules/vm/dsvm.bicep' = if ((_networkIsolation && !_vnetReuse) || _deployVM)  {
 //   scope : resourceGroup
@@ -1565,8 +1521,6 @@ output OPENAI_API_VERSION string = openaiApiVersion
 output OPENAI_API_BASE string = 'https://${aiFoundry.outputs.aiServicesName}.cognitiveservices.azure.com/'
 output OPENAI_MODEL string = openaiModel
 output FUNCTIONS_WORKER_RUNTIME string = functionRuntime
-output AIMULTISERVICES_NAME string = aiMultiServices.outputs.aiMultiServicesName
-output AIMULTISERVICES_ENDPOINT string = aiMultiServices.outputs.aiMultiServicesEndpoint
 output PROCESSING_FUNCTION_APP_NAME string = processingFunctionApp.outputs.name
 output PROCESSING_FUNCTION_URL string = 'https://${processingFunctionApp.outputs.defaultHostname}'
 output APP_CONFIG_NAME string = appConfig.outputs.name

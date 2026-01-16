@@ -50,7 +50,7 @@ The AI Document Processor (ADP) is an Azure-based accelerator that automates doc
 |----------|---------|
 | **Azure Function App** | Hosts the Durable Functions processing pipeline |
 | **Azure AI Foundry** | Provides Azure OpenAI model deployments (gpt-5-mini, text-embedding-ada-002) |
-| **Azure AI Multi-Services** | Document Intelligence and Speech-to-Text capabilities |
+| **Azure AI Services** | Document Intelligence and Speech-to-Text capabilities |
 | **Azure Storage Account (Data)** | Bronze/Silver/Gold containers for document lifecycle |
 | **Azure Storage Account (Func)** | Function App deployment and runtime storage |
 | **Azure App Configuration** | Centralized configuration management |
@@ -302,7 +302,7 @@ openai_model = config.get_value("OPENAI_MODEL")
 | `OPENAI_API_EMBEDDING_MODEL` | Embedding model name (text-embedding-ada-002) |
 | `DATA_STORAGE_ENDPOINT` | Blob storage endpoint |
 | `DATA_STORAGE_ACCOUNT_NAME` | Data storage account name |
-| `AIMULTISERVICES_ENDPOINT` | Document Intelligence / Speech endpoint |
+| `AI_SERVICES_ENDPOINT` | Document Intelligence / Speech endpoint |
 | `COSMOS_DB_URI` | Cosmos DB endpoint URL |
 | `COSMOS_DB_DATABASE_NAME` | Cosmos DB database name |
 | `COSMOS_DB_CONVERSATION_HISTORY_CONTAINER` | Container for conversation history |
@@ -356,7 +356,7 @@ When enabled, PDFs are converted to images page-by-page and sent to the vision-c
 
 ### Audio Processing
 
-Audio files are automatically detected and processed via Azure AI Multi-Services Speech-to-Text:
+Audio files are automatically detected and processed via Azure AI Services Speech-to-Text:
 
 ```python
 # Automatic based on file extension
@@ -489,7 +489,7 @@ az eventgrid system-topic event-subscription list -g $resourceGroup --system-top
 
 2. **Audio Processing**
    - Added `speechToText.py` for audio transcription
-   - Uses Azure AI Multi-Services batch transcription API
+   - Uses Azure AI Services batch transcription API
 
 3. **Configuration Module**
    - Centralized configuration via Azure App Configuration

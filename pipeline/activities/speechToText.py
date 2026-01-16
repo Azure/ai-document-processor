@@ -45,7 +45,7 @@ def run(blob_input: dict):
         credential = config.credential
         token = credential.get_token("https://cognitiveservices.azure.com/.default").token
         
-        endpoint = config.get_value("AIMULTISERVICES_ENDPOINT") # e.g., "https://your-resource.cognitiveservices.azure.com"
+        endpoint = config.get_value("AI_SERVICES_ENDPOINT")
         api_version = "2025-10-15"
         url = f"{endpoint}/speechtotext/transcriptions:submit?api-version={api_version}"
 

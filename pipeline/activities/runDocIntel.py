@@ -31,7 +31,7 @@ def extract_text_from_blob(blob_input: dict):
     blob_name = blob_input.get('name')
     container = blob_input.get('container')
 
-    endpoint = config.get_value("AIMULTISERVICES_ENDPOINT") # Add the AI Services Endpoint value from Azure Function App settings
+    endpoint = config.get_value("AI_SERVICES_ENDPOINT")
 
     try:
     
