@@ -19,7 +19,7 @@ app = df.DFApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 import logging
 
-# # Blob-triggered starter
+# Blob-triggered starter
 @app.function_name(name="start_orchestrator_on_blob")
 @app.blob_trigger(
     arg_name="blob",
@@ -134,14 +134,15 @@ def process_blob(context):
             logging.info(f"Processing audio file with voice-to-voice translation: {blob_name}")
             translation_result = yield context.call_activity_with_retry("voiceToVoiceTranslation", retry_options, blob_input)
             
-            # For voice-to-voice translation, we can optionally also get the text
-            # If translation_result contains translated_text, use it; otherwise do speech-to-text
-            if translation_result.get("translated_text"):
-                text_result = translation_result.get("translated_text")
-            else:
-                # Fallback to speech-to-text if translation didn't provide text
-                logging.info(f"Getting text transcription for translated audio: {blob_name}")
-                text_result = yield context.call_activity_with_retry("speechToText", retry_options, blob_input)
+            # Voice-to-voice translation produces the translated audio file directly
+            # No need for AOAI analysis - return the translation result immediately
+            logging.info(f"Voice-to-voice translation completed successfully for {blob_name}")
+            return {
+                "blob": blob_input,
+                "translation_result": translation_result,
+                "status": "completed",
+                "processing_type": "voice_to_voice_translation"
+            }
         else:
             # end:RJ_added_for_v2v
             # Process audio with speech-to-text (original behavior)

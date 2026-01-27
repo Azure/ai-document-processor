@@ -11,7 +11,7 @@ var tags = union(azdTags, deploymentTags)
 param environmentName string = ''
 
 // Tag settings
-// default required tags for azd deployment
+// default required tags for azd deployment sss
 var azdTags = { 'azd-env-name': environmentName }
 
 var abbrs = loadJsonContent('./abbreviations.json')
@@ -402,6 +402,10 @@ var appSettings = [
   }
   {
     name: 'AIMULTISERVICES_RESOURCE_ID'
+    value: aiMultiServices.outputs.id
+  }
+  {
+    name: 'TRANSLATOR_RESOURCE_ID'
     value: aiMultiServices.outputs.id
   }
   // end:RJ_added_for_v2v
@@ -1105,6 +1109,7 @@ var appSettingsObject = {
   // start:RJ_added_for_v2v
   AIMULTISERVICES_ENDPOINT: aiMultiServices.outputs.aiMultiServicesEndpoint
   AIMULTISERVICES_RESOURCE_ID: aiMultiServices.outputs.id
+  TRANSLATOR_RESOURCE_ID: aiMultiServices.outputs.id
   // end:RJ_added_for_v2v
   COSMOS_DB_DATABASE_NAME: cosmos.outputs.databaseName
   PROCESSING_FUNCTION_APP_NAME: processingFunctionAppName
