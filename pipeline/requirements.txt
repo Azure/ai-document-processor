@@ -11,7 +11,7 @@ azure-ai-textanalytics==5.2.0
 azure-appconfiguration==1.7.1
 azure-appconfiguration-provider==2.0.1
 azure-common==1.1.28
-azure-core==1.32.0
+azure-core==1.38.0
 azure-cosmos==4.9.0
 azure-functions==1.21.3
 azure-functions-durable==1.4.0
