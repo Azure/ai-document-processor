@@ -144,18 +144,40 @@ pipeline/
 az login
 azd auth login
 
-# 2. Deploy infrastructure and code
+# 2. (Optional) Pre-configure environment variables to avoid interactive prompts
+azd env set AZURE_NETWORK_ISOLATION true
+azd env set AZURE_DEPLOY_VM true
+azd env set AZURE_VM_SIZE "Standard_D8s_v5"
+azd env set AZURE_VM_ANTIMALWARE false          # Disable for isolated VNets without internet
+azd env set FUNCTION_APP_HOST_PLAN FlexConsumption
+azd env set AOAI_LOCATION "eastus2"             # Defaults to deployment region if not set
+
+# 3. Deploy infrastructure and code
 azd up
 
-# 3. When prompted, provide:
+# 4. When prompted (if not pre-configured), provide:
 #    - Environment name
 #    - Azure region
-#    - AOAI region (East US, East US 2, etc.)
 #    - User Principal ID: az ad signed-in-user show --query id -o tsv
-#    - Hosting plan: Dedicated or FlexConsumption
 #    - Network isolation: true or false
 #    - VM deployment (if network isolated): true or false
 ```
+
+### Environment Variables Reference
+
+All parameters can be set via `azd env set <VAR> <VALUE>` before running `azd up` or `azd provision` to avoid interactive prompts.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AZURE_LOCATION` | *(prompted)* | Azure region for all resources (e.g., `eastus2`) |
+| `AOAI_LOCATION` | Same as `AZURE_LOCATION` | AI Foundry/OpenAI region. Defaults to deployment region. Accepts short names (`eastus2`) or display names (`East US 2`) |
+| `AZURE_NETWORK_ISOLATION` | `false` | Enable VNet isolation with private endpoints |
+| `AZURE_DEPLOY_VM` | `false` | Deploy a Windows VM for accessing network-isolated resources via Bastion |
+| `AZURE_DEPLOY_VPN` | `false` | Deploy a VPN Gateway for on-premises connectivity |
+| `AZURE_VM_SIZE` | `Standard_D8s_v5` | VM SKU for the test VM (e.g., `Standard_D4s_v5`, `Standard_D2s_v3`) |
+| `AZURE_VM_ANTIMALWARE` | `true` | Install Microsoft AntiMalware extension on the VM. **Set to `false`** in network-isolated VNets without outbound internet access to prevent deployment failures |
+| `FUNCTION_APP_HOST_PLAN` | `FlexConsumption` | `FlexConsumption` (serverless, uses Container Apps quota) or `Dedicated` (uses App Service Plan VM quota) |
+| `AZURE_VM_SIZE` | `Standard_D8s_v5` | VM size for the test VM |
 
 ### Post-Deployment
 
@@ -398,8 +420,6 @@ Use `test_client.ipynb` to test the HTTP trigger endpoint locally or against dep
 
 ## Troubleshooting
 
-### Common Issues
-
 #### EventGrid Subscription Creation Fails
 
 **Symptom:** postDeploy script fails to create subscription
@@ -453,7 +473,37 @@ az eventgrid system-topic event-subscription list -g $resourceGroup --system-top
 
 ## Recent Changes & Improvements
 
-### Infrastructure (Bicep)
+### Infrastructure Fixes & Enhancements (April 2025)
+
+1. **AI Foundry PE Race Condition Fix**
+   - Moved private endpoint creation out of the AVM module into a dedicated `aiFoundryPe` module
+   - Added `dependsOn: [aiFoundry]` to prevent `AccountProvisioningStateInvalid` errors
+   - Extended `private-endpoint.bicep` to support multiple DNS zones via new `dnsZoneIds` array parameter
+
+2. **FlexConsumption Subnet Delegation Fix**
+   - VNet module now conditionally sets `Microsoft.App/environments` delegation for FlexConsumption
+   - Falls back to `Microsoft.Web/serverFarms` for Dedicated plans
+   - Added `functionAppHostPlan` parameter to the VNet module
+
+3. **functionAppHostPlan Default to FlexConsumption**
+   - Changed default from no value (prompted) to `'FlexConsumption'`
+   - Works on MCAP subscriptions where Dedicated plans are blocked by ANT quota restrictions
+
+4. **aoaiLocation Simplified**
+   - Removed the hardcoded `@allowed` list (was causing format mismatch between `eastus2` and `East US 2`)
+   - Now defaults to same `location` as the resource group
+   - Can be overridden via `AOAI_LOCATION` environment variable
+
+5. **VM Size Configurable via Environment Variable**
+   - Added `AZURE_VM_SIZE` env var mapped to `vmSize` parameter
+   - Wired through `main.parameters.json`, `deploy.sh`, and `deploy.ps1`
+   - Default: `Standard_D8s_v5`
+
+6. **VM AntiMalware Extension Toggle**
+   - New `vmAntiMalware` parameter (default: `true`) with `AZURE_VM_ANTIMALWARE` env var
+   - Set to `false` for network-isolated environments without outbound internet to prevent `VMAgentStatusCommunicationError`
+
+### Infrastructure (Bicep) — Original
 
 1. **AI Foundry Migration**
    - Migrated from standalone Azure OpenAI to AI Foundry AVM pattern

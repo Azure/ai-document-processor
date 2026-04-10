@@ -33,32 +33,8 @@ param identities identityInfo[] = union([], [{
 @description('Location for the Static Web App and Azure Function App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
 param location string
 
-@description('Location for the Azure AI Foundry account')
-@allowed([
-  'East US'
-  'East US 2'
-  'France Central'
-  'Germany West Central'
-  'Japan East'
-  'Korea Central'
-  'North Central US'
-  'Norway East'
-  'Poland Central'
-  'South Africa North'
-  'South Central US'
-  'South India'
-  'Southeast Asia'
-  'Spain Central'
-  'Sweden Central'
-  'Switzerland North'
-  'Switzerland West'
-  'UAE North'
-  'UK South'
-  'West Europe'
-  'West US'
-  'West US 3'
-])
-param aoaiLocation string
+@description('Location for the Azure AI Foundry account. Defaults to the same location as the resource group. Can be overridden via AOAI_LOCATION env var.')
+param aoaiLocation string = location
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([false, true])
@@ -75,6 +51,7 @@ param vmUserInitialPassword string
 @allowed([false, true])
 param deployVM bool
 var _deployVM = deployVM
+
 
 @description('Deploy VPN?')
 @allowed([false, true])
@@ -121,6 +98,10 @@ param vmImageOffer string = 'windows-11'
 @description('Image version (use latest unless you need a pinned build).')
 param vmImageVersion string = 'latest'
 
+@description('Install Microsoft AntiMalware extension on the test VM. Disable in network-isolated environments without outbound internet access. Override via AZURE_VM_ANTIMALWARE env var.')
+@allowed([false, true])
+param vmAntiMalware bool = true
+
 // flag that indicates if we're reusing a vnet
 var _vnetReuse = _azureReuseConfig.vnetReuse
 
@@ -136,11 +117,11 @@ var _vnetAddress = !empty(vnetAddress) ? vnetAddress : '10.0.0.0/23'
 param userPrincipalId string = principalId
 
 // Environment name. This is automatically set by the 'azd' tool.
-@description('Environment name used as a tag for all resources. This is directly mapped to the azd-environment.')
 // param environmentName string = 'dev'
 
+@description('Function App hosting plan. FlexConsumption uses Container Apps quota (works on MCAP). Dedicated uses Standard VM quota (blocked on MCAP subscriptions where Standard VM limit is 0).')
 @allowed(['Dedicated', 'FlexConsumption'])
-param functionAppHostPlan string
+param functionAppHostPlan string = 'FlexConsumption'
 
 @description('Enable storage account key access for local development. Should be false in production.')
 param allowStorageKeyAccess bool = false
@@ -628,18 +609,16 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
       location: aoaiLocation
       // Keep API key authentication enabled for local development
       disableLocalAuth: false
-      // Networking configuration (only when network isolation is enabled)
-      networking: _networkIsolation ? {
-        //jamespace
-        // DNS zones - pass existing zone IDs (AVM doesn't create them)
-        cognitiveServicesPrivateDnsZoneResourceId: cogservicesDnsZone.outputs.id
-        openAiPrivateDnsZoneResourceId: openaiDnsZone.outputs.id
-        aiServicesPrivateDnsZoneResourceId: aiServicesDnsZone.outputs.id
-      } : null
+      // networking / privateEndpointSubnetResourceId intentionally omitted here.
+      // The AVM module creates the Private Endpoint in the SAME deployment as the account,
+      // which causes a race condition: ARM reports the account "Done" while its internal
+      // provisioningState is still "Accepted", making the PE creation fail with
+      // AccountProvisioningStateInvalid. The PE is instead created in a dedicated
+      // module (aiFoundryPe) below, with an explicit dependsOn to run sequentially.
     }
     
-    // Private endpoint subnet (for network isolation)
-    privateEndpointSubnetResourceId: _networkIsolation ? vnet.outputs.aiSubId : ''
+    // Do NOT pass privateEndpointSubnetResourceId here — see comment above.
+    privateEndpointSubnetResourceId: ''
     
     // Model deployments - using correct AVM schema
     aiModelDeployments: [
@@ -660,6 +639,30 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
   dependsOn: _networkIsolation ? [vnet, aiServicesDnsZone, cogservicesDnsZone, openaiDnsZone] : []
 }
 
+// Fix: AccountProvisioningStateInvalid race condition
+// The AVM module creates the account first and the PE second within the SAME deployment,
+// so ARM can start the PE before the account's internal provisioningState reaches "Succeeded".
+// By creating the PE here — outside the AVM module — with dependsOn: [aiFoundry], ARM guarantees
+// the entire aiFoundry deployment (account + project) is fully complete before this PE starts.
+module aiFoundryPe './modules/network/private-endpoint.bicep' = if (_networkIsolation && !_vnetReuse) {
+  name: 'aiFoundryPe'
+  params: {
+    location: location
+    name: 'pep-${aiFoundryName}-account'
+    tags: tags
+    subnetId: vnet.outputs.aiSubId
+    serviceId: resourceId('Microsoft.CognitiveServices/accounts', aiFoundryName)
+    groupIds: ['account']
+    // CognitiveServices accounts require three DNS zones for the single 'account' PE
+    dnsZoneIds: [
+      cogservicesDnsZone.outputs.id
+      openaiDnsZone.outputs.id
+      aiServicesDnsZone.outputs.id
+    ]
+  }
+  dependsOn: [aiFoundry]
+}
+
 module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReuse) {
   // scope : resourceGroup
   name: 'virtual-network'
@@ -673,6 +676,7 @@ module vnet './modules/network/vnet.bicep' = if (_networkIsolation && !_vnetReus
     vnetAddress: _vnetAddress
     appServicePlanId: hostingPlan.outputs.resourceId
     appServicePlanName: hostingPlan.outputs.name
+    functionAppHostPlan: functionAppHostPlan
   }
 }
 
@@ -1418,6 +1422,9 @@ module testVm 'br/public:avm/res/compute/virtual-machine:0.15.0' = if (_deployVM
     }
     osType: 'Windows'
     zone: 0
+    extensionAntiMalwareConfig: {
+      enabled: vmAntiMalware
+    }
     nicConfigurations: [
       {
         nicSuffix: '-nic-01'

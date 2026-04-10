@@ -53,6 +53,7 @@ AOAI_LOCATION="${AOAI_LOCATION:-East US}"
 AZURE_NETWORK_ISOLATION="${AZURE_NETWORK_ISOLATION:-false}"
 AZURE_DEPLOY_VM="${AZURE_DEPLOY_VM:-false}"
 AZURE_DEPLOY_VPN="${AZURE_DEPLOY_VPN:-false}"
+AZURE_VM_SIZE="${AZURE_VM_SIZE:-Standard_D8s_v5}"  # e.g., Standard_D4s_v5, Standard_D8s_v5, Standard_D16s_v5
 VM_USER_PASSWORD="${VM_USER_PASSWORD:-}"
 
 # Feature flags
@@ -219,6 +220,7 @@ deploy_bicep() {
         "networkIsolation=$AZURE_NETWORK_ISOLATION"
         "deployVM=$AZURE_DEPLOY_VM"
         "deployVPN=$AZURE_DEPLOY_VPN"
+        "vmSize=$AZURE_VM_SIZE"
         "ai_vision_enabled=$AI_VISION_ENABLED"
         "multiModal=$AOAI_MULTI_MODAL"
         "functionAppHostPlan=$FUNCTION_APP_HOST_PLAN"

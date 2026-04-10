@@ -20,6 +20,7 @@ param bastionSubnetPrefix string = '10.0.1.128/26'
 
 param appServicePlanId string
 param appServicePlanName string
+param functionAppHostPlan string = 'FlexConsumption'
 param tags object = {}
 param vnetReuse bool
 param existingVnetResourceGroupName string
@@ -225,9 +226,9 @@ var subnets = [
       }
       delegations: [
         {
-          name : appServicePlanName
+          name: functionAppHostPlan == 'FlexConsumption' ? 'flexConsumptionDelegation' : appServicePlanName
           properties: {
-            serviceName: 'Microsoft.Web/serverFarms'
+            serviceName: functionAppHostPlan == 'FlexConsumption' ? 'Microsoft.App/environments' : 'Microsoft.Web/serverFarms'
             actions: [
               'Microsoft.Network/virtualNetworks/subnets/action'
             ]
