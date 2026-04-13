@@ -170,7 +170,7 @@ All parameters can be set via `azd env set <VAR> <VALUE>` before running `azd up
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `AZURE_LOCATION` | *(prompted)* | Azure region for all resources (e.g., `eastus2`) |
-| `AOAI_LOCATION` | Same as `AZURE_LOCATION` | AI Foundry/OpenAI region. Defaults to deployment region. Accepts short names (`eastus2`) or display names (`East US 2`) |
+| `AOAI_LOCATION` | Same as `AZURE_LOCATION` | AI Foundry/OpenAI region. If not set, defaults to the same region as `AZURE_LOCATION`. Use short names (e.g., `eastus2`, `westeurope`) |
 | `AZURE_NETWORK_ISOLATION` | `false` | Enable VNet isolation with private endpoints |
 | `AZURE_DEPLOY_VM` | `false` | Deploy a Windows VM for accessing network-isolated resources via Bastion |
 | `AZURE_DEPLOY_VPN` | `false` | Deploy a VPN Gateway for on-premises connectivity |
@@ -199,7 +199,7 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
     includeAssociatedResources: false  // We manage our own resources
     aiFoundryConfiguration: {
       accountName: aiFoundryName
-      location: aoaiLocation
+      location: _aoaiLocation  // resolves to AOAI_LOCATION if set, else falls back to location
       disableLocalAuth: false  // Enable for local development
     }
     aiModelDeployments: [
@@ -580,8 +580,9 @@ azd env set AZURE_VM_SIZE "$VM_SKU"
 
 4. **aoaiLocation Simplified**
    - Removed the hardcoded `@allowed` list (was causing format mismatch between `eastus2` and `East US 2`)
-   - Now defaults to same `location` as the resource group
-   - Can be overridden via `AOAI_LOCATION` environment variable
+   - Parameter accepts empty string; resolved via `var _aoaiLocation = !empty(aoaiLocation) ? aoaiLocation : location`
+   - When `AOAI_LOCATION` is set: uses that value; when not set: azd passes `""` and Bicep falls back to `location`
+   - This ensures the default always works correctly regardless of whether the env var is present
 
 5. **VM Size Configurable via Environment Variable**
    - Added `AZURE_VM_SIZE` env var mapped to `vmSize` parameter

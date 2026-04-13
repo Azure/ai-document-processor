@@ -33,8 +33,11 @@ param identities identityInfo[] = union([], [{
 @description('Location for the Static Web App and Azure Function App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
 param location string
 
-@description('Location for the Azure AI Foundry account. If not specified, azd will prompt. Can be set in advance via AOAI_LOCATION env var.')
-param aoaiLocation string
+@description('Location for the Azure AI Foundry account. If AOAI_LOCATION env var is set, that value is used. Otherwise defaults to the same region as AZURE_LOCATION. Set via: azd env set AOAI_LOCATION <region>')
+param aoaiLocation string = ''
+// Use the provided value if non-empty; otherwise fall back to the main deployment location.
+// This handles the case where azd passes an empty string when AOAI_LOCATION is not set.
+var _aoaiLocation = !empty(aoaiLocation) ? aoaiLocation : location
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([false, true])
@@ -606,7 +609,7 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
     aiFoundryConfiguration: {
       // Use our existing aoaiName for the account name
       accountName: aiFoundryName
-      location: aoaiLocation
+      location: _aoaiLocation
       // Keep API key authentication enabled for local development
       disableLocalAuth: false
       // networking / privateEndpointSubnetResourceId intentionally omitted here.
