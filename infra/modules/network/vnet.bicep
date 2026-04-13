@@ -226,7 +226,7 @@ var subnets = [
       }
       delegations: [
         {
-          name: functionAppHostPlan == 'FlexConsumption' ? 'flexConsumptionDelegation' : appServicePlanName
+          name: 'appServicesDelegation'
           properties: {
             serviceName: functionAppHostPlan == 'FlexConsumption' ? 'Microsoft.App/environments' : 'Microsoft.Web/serverFarms'
             actions: [

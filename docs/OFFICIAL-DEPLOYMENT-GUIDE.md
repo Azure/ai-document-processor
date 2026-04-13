@@ -177,7 +177,6 @@ All parameters can be set via `azd env set <VAR> <VALUE>` before running `azd up
 | `AZURE_VM_SIZE` | `Standard_D8s_v5` | VM SKU for the test VM (e.g., `Standard_D4s_v5`, `Standard_D2s_v3`) |
 | `AZURE_VM_ANTIMALWARE` | `true` | Install Microsoft AntiMalware extension on the VM. **Set to `false`** in network-isolated VNets without outbound internet access to prevent deployment failures |
 | `FUNCTION_APP_HOST_PLAN` | `FlexConsumption` | `FlexConsumption` (serverless, uses Container Apps quota) or `Dedicated` (uses App Service Plan VM quota) |
-| `AZURE_VM_SIZE` | `Standard_D8s_v5` | VM size for the test VM |
 
 ### Post-Deployment
 

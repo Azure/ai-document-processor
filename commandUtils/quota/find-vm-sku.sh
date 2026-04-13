@@ -162,10 +162,19 @@ if [[ -n "$NAME_PATTERN" ]]; then
 fi
 
 # ── Execute ───────────────────────────────────────────────────────────────────
-RAW=$(az vm list-skus \
+AZ_STDERR_FILE=$(mktemp)
+if ! RAW=$(az vm list-skus \
   --location "$LOCATION" \
   --resource-type virtualMachines \
-  --output json 2>/dev/null)
+  --output json 2>"$AZ_STDERR_FILE"); then
+  echo "❌ Failed to query VM SKUs in $LOCATION via Azure CLI" >&2
+  if [[ -s "$AZ_STDERR_FILE" ]]; then
+    cat "$AZ_STDERR_FILE" >&2
+  fi
+  rm -f "$AZ_STDERR_FILE"
+  exit 1
+fi
+rm -f "$AZ_STDERR_FILE"
 
 if [[ "$ALL" == "true" ]]; then
   MATCHES=$(echo "$RAW" | jq -r "
