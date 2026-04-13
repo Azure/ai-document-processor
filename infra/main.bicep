@@ -33,8 +33,8 @@ param identities identityInfo[] = union([], [{
 @description('Location for the Static Web App and Azure Function App. Only the following locations are allowed: centralus, eastus2, westeurope, westus2, southeastasia')
 param location string
 
-@description('Location for the Azure AI Foundry account. Defaults to the same location as the resource group. Can be overridden via AOAI_LOCATION env var.')
-param aoaiLocation string = location
+@description('Location for the Azure AI Foundry account. If not specified, azd will prompt. Can be set in advance via AOAI_LOCATION env var.')
+param aoaiLocation string
 
 @description('Network isolation? If yes it will create the private endpoints.')
 @allowed([false, true])
@@ -119,9 +119,9 @@ param userPrincipalId string = principalId
 // Environment name. This is automatically set by the 'azd' tool.
 // param environmentName string = 'dev'
 
-@description('Function App hosting plan. FlexConsumption uses Container Apps quota (works on MCAP). Dedicated uses Standard VM quota (blocked on MCAP subscriptions where Standard VM limit is 0).')
+@description('Function App hosting plan. FlexConsumption uses Container Apps quota. Dedicated uses Standard VM quota. Can be set in advance via FUNCTION_APP_HOST_PLAN env var.')
 @allowed(['Dedicated', 'FlexConsumption'])
-param functionAppHostPlan string = 'FlexConsumption'
+param functionAppHostPlan string
 
 @description('Enable storage account key access for local development. Should be false in production.')
 param allowStorageKeyAccess bool = false
