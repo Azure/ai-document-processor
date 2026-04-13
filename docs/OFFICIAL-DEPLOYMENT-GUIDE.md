@@ -471,6 +471,96 @@ az eventgrid system-topic event-subscription list -g $resourceGroup --system-top
 
 ---
 
+## Local Quota & SKU Diagnostic Scripts
+
+The `commandUtils/quota/` directory contains helper scripts for diagnosing Azure quota and VM SKU availability issues before deploying.
+
+### `check-asp-quota.sh` — App Service Plan Quota Check
+
+Validates which App Service Plan SKUs are available on your subscription using the Azure Quota API (`az quota`).
+
+**Prerequisites:**
+```bash
+az extension add --name quota
+az provider register --namespace Microsoft.Quota
+```
+
+**Usage:**
+```bash
+./commandUtils/quota/check-asp-quota.sh                          # Current subscription + eastus2
+./commandUtils/quota/check-asp-quota.sh -l westus2               # Specify location
+./commandUtils/quota/check-asp-quota.sh -s <subscription-id>     # Specify subscription
+./commandUtils/quota/check-asp-quota.sh -l eastus2 -s <sub-id>   # Both
+```
+
+**When to use:** If you receive an `InternalSubscriptionIsOverQuotaForSku` error when deploying a Dedicated App Service Plan, run this script to see which App Service SKUs have available quota in a given region before retrying.
+
+---
+
+### `check-vm-quota.sh` — VM SKU Family Quota Check
+
+Validates which VM SKU families are available on your subscription using the Azure Quota API.
+
+**Prerequisites:**
+```bash
+az extension add --name quota
+az provider register --namespace Microsoft.Quota
+```
+
+**Usage:**
+```bash
+./commandUtils/quota/check-vm-quota.sh                          # Current subscription + eastus2
+./commandUtils/quota/check-vm-quota.sh -l westus2               # Specify location
+./commandUtils/quota/check-vm-quota.sh -s <subscription-id>     # Specify subscription
+./commandUtils/quota/check-vm-quota.sh -l eastus2 -s <sub-id>   # Both
+```
+
+**When to use:** Run before deploying the jumpbox VM (`AZURE_DEPLOY_VM=true`) to verify that the selected `AZURE_VM_SIZE` family has quota in the target region.
+
+---
+
+### `find-vm-sku.sh` — Find Available VM SKU
+
+Finds an available VM SKU in a given Azure region based on filters (vCPU count, architecture, encryption-at-host, etc.). Replicates the behavior of the Terraform `Azure/avm-utl-sku-finder/azapi` module.
+
+**Prerequisites:** Azure CLI (`az`) authenticated + `jq >= 1.6`
+
+**Usage:**
+```bash
+./commandUtils/quota/find-vm-sku.sh --location <region> [options]
+
+Options:
+  --location <region>             Azure region (required). E.g. eastus2
+  --min-vcpus <n>                 Minimum vCPU count (default: 1)
+  --max-vcpus <n>                 Maximum vCPU count (default: 999)
+  --arch <x64|Arm64>              CPU architecture (default: x64)
+  --encryption-at-host <true|false>
+  --accelerated-networking <true|false>
+  --name-pattern <regex>          Regex applied to SKU name (e.g. "Standard_D[0-9]+s_v[34]$")
+  --exclude-zone-restrictions     Only return SKUs with no zone restrictions
+  --all                           Print all matching SKUs with details
+```
+
+**Examples:**
+```bash
+# Find a secure 2-vCPU SKU (equivalent to Terraform vm_sku module):
+./commandUtils/quota/find-vm-sku.sh \
+  --location eastus2 \
+  --min-vcpus 2 --max-vcpus 2 \
+  --encryption-at-host true \
+  --accelerated-networking true
+
+# Find and set the VM size environment variable:
+VM_SKU=$(./commandUtils/quota/find-vm-sku.sh --location eastus2 --min-vcpus 2 --max-vcpus 2)
+azd env set AZURE_VM_SIZE "$VM_SKU"
+```
+
+**Exit codes:** `0` — at least one match found | `1` — no match found
+
+**When to use:** When the default `Standard_D8s_v5` is not available in your region, use this script to find an alternative SKU with the required capabilities, then set it via `azd env set AZURE_VM_SIZE <result>`.
+
+---
+
 ## Recent Changes & Improvements
 
 ### Infrastructure Fixes & Enhancements (April 2025)

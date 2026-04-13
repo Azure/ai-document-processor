@@ -11,7 +11,7 @@
 #   - jq >= 1.6
 #
 # Usage:
-#   ./scripts/find-vm-sku.sh --location <region> [options]
+#   ./commandUtils/quota/find-vm-sku.sh --location <region> [options]
 #
 # Options:
 #   --location <region>             Azure region (required). E.g. eastus2
@@ -36,26 +36,26 @@
 #
 # Examples:
 #   # Equivalent to the Terraform "vm_sku" module (2 vCPUs, secure):
-#   ./scripts/find-vm-sku.sh \
+#   ./commandUtils/quota/find-vm-sku.sh \
 #     --location eastus2 \
 #     --min-vcpus 2 --max-vcpus 2 \
 #     --encryption-at-host true \
 #     --accelerated-networking true
 #
 #   # Equivalent to the Terraform "linux_vm_sku" module (relaxed, 1-2 vCPUs):
-#   ./scripts/find-vm-sku.sh \
+#   ./commandUtils/quota/find-vm-sku.sh \
 #     --location eastus2 \
 #     --min-vcpus 1 --max-vcpus 2
 #
 #   # DSv3/v4 family only, 4-8 vCPUs, show all matches:
-#   ./scripts/find-vm-sku.sh \
+#   ./commandUtils/quota/find-vm-sku.sh \
 #     --location eastus2 \
 #     --min-vcpus 4 --max-vcpus 8 \
 #     --name-pattern "Standard_D[0-9]+s_v[34]$" \
 #     --all
 #
 #   # Capture result and set it as the azd VM size:
-#   VM_SKU=$(./scripts/find-vm-sku.sh \
+#   VM_SKU=$(./commandUtils/quota/find-vm-sku.sh \
 #     --location eastus2 \
 #     --min-vcpus 4 --max-vcpus 8 \
 #     --name-pattern "Standard_D[0-9]+s_v[34]$")

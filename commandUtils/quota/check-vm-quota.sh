@@ -9,10 +9,10 @@
 #   az provider register --namespace Microsoft.Quota
 #
 # Usage:
-#   ./check-vm-quota.sh                          # Uses current subscription + eastus2
-#   ./check-vm-quota.sh -l westus2               # Specify location
-#   ./check-vm-quota.sh -s <subscription-id>     # Specify subscription
-#   ./check-vm-quota.sh -l eastus2 -s <sub-id>   # Both
+#   ./commandUtils/quota/check-vm-quota.sh                          # Uses current subscription + eastus2
+#   ./commandUtils/quota/check-vm-quota.sh -l westus2               # Specify location
+#   ./commandUtils/quota/check-vm-quota.sh -s <subscription-id>     # Specify subscription
+#   ./commandUtils/quota/check-vm-quota.sh -l eastus2 -s <sub-id>   # Both
 #==============================================================================
 set -euo pipefail
 
@@ -49,6 +49,7 @@ echo ""
 echo "Checking prerequisites..."
 az extension add --name quota --only-show-errors 2>/dev/null || true
 
+# Register Microsoft.Quota — required by the 'az quota' extension
 QUOTA_STATE=$(az provider show --namespace Microsoft.Quota --query "registrationState" -o tsv 2>/dev/null || echo "NotRegistered")
 if [[ "$QUOTA_STATE" != "Registered" ]]; then
   echo "  Registering Microsoft.Quota provider (may take up to 2 min)..."
@@ -63,6 +64,13 @@ fi
 if [[ "$QUOTA_STATE" != "Registered" ]]; then
   echo "  ⚠ Microsoft.Quota provider not registered."
   echo "  Run: az provider register --namespace Microsoft.Quota"
+fi
+
+# Register Microsoft.Compute — the quota scope provider for VM SKU families
+COMPUTE_STATE=$(az provider show --namespace Microsoft.Compute --query "registrationState" -o tsv 2>/dev/null || echo "NotRegistered")
+if [[ "$COMPUTE_STATE" != "Registered" ]]; then
+  echo "  Registering Microsoft.Compute provider..."
+  az provider register --namespace Microsoft.Compute $SUB_FLAG 2>/dev/null
 fi
 echo ""
 

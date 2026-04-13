@@ -2,7 +2,6 @@ localScripts/*
 *.bicepparam
 local.settings.json
 oldsettings.json
-commandUtils
 *.ipynb
 # Byte-compiled / optimized / DLL files
 __pycache__/

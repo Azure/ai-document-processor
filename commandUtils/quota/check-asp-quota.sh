@@ -9,10 +9,10 @@
 #   az provider register --namespace Microsoft.Quota
 #
 # Usage:
-#   ./check-asp-quota.sh                          # Uses current subscription + eastus2
-#   ./check-asp-quota.sh -l westus2               # Specify location
-#   ./check-asp-quota.sh -s <subscription-id>     # Specify subscription
-#   ./check-asp-quota.sh -l eastus2 -s <sub-id>   # Both
+#   ./commandUtils/quota/check-asp-quota.sh                          # Uses current subscription + eastus2
+#   ./commandUtils/quota/check-asp-quota.sh -l westus2               # Specify location
+#   ./commandUtils/quota/check-asp-quota.sh -s <subscription-id>     # Specify subscription
+#   ./commandUtils/quota/check-asp-quota.sh -l eastus2 -s <sub-id>   # Both
 #==============================================================================
 set -euo pipefail
 
@@ -49,6 +49,7 @@ echo ""
 echo "Checking prerequisites..."
 az extension add --name quota --only-show-errors 2>/dev/null || true
 
+# Register Microsoft.Quota — required by the 'az quota' extension
 QUOTA_STATE=$(az provider show --namespace Microsoft.Quota --query "registrationState" -o tsv 2>/dev/null || echo "NotRegistered")
 if [[ "$QUOTA_STATE" != "Registered" ]]; then
   echo "  Registering Microsoft.Quota provider (may take up to 2 min)..."
@@ -63,6 +64,13 @@ fi
 if [[ "$QUOTA_STATE" != "Registered" ]]; then
   echo "  ⚠ Microsoft.Quota provider not registered. CHECKs 1-2 may fail."
   echo "  Run: az provider register --namespace Microsoft.Quota"
+fi
+
+# Register Microsoft.Web — the quota scope provider for App Service Plans
+WEB_STATE=$(az provider show --namespace Microsoft.Web --query "registrationState" -o tsv 2>/dev/null || echo "NotRegistered")
+if [[ "$WEB_STATE" != "Registered" ]]; then
+  echo "  Registering Microsoft.Web provider..."
+  az provider register --namespace Microsoft.Web $SUB_FLAG 2>/dev/null
 fi
 echo ""
 
