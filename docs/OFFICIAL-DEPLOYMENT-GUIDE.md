@@ -144,18 +144,39 @@ pipeline/
 az login
 azd auth login
 
-# 2. Deploy infrastructure and code
+# 2. (Optional) Pre-configure environment variables to avoid interactive prompts
+azd env set AZURE_NETWORK_ISOLATION true
+azd env set AZURE_DEPLOY_VM true
+azd env set AZURE_VM_SIZE "Standard_D8s_v5"
+azd env set AZURE_VM_ANTIMALWARE false          # Disable for isolated VNets without internet
+azd env set FUNCTION_APP_HOST_PLAN FlexConsumption
+azd env set AOAI_LOCATION "eastus2"             # Defaults to deployment region if not set
+
+# 3. Deploy infrastructure and code
 azd up
 
-# 3. When prompted, provide:
+# 4. When prompted (if not pre-configured), provide:
 #    - Environment name
 #    - Azure region
-#    - AOAI region (East US, East US 2, etc.)
 #    - User Principal ID: az ad signed-in-user show --query id -o tsv
-#    - Hosting plan: Dedicated or FlexConsumption
 #    - Network isolation: true or false
 #    - VM deployment (if network isolated): true or false
 ```
+
+### Environment Variables Reference
+
+All parameters can be set via `azd env set <VAR> <VALUE>` before running `azd up` or `azd provision` to avoid interactive prompts.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `AZURE_LOCATION` | *(prompted)* | Azure region for all resources (e.g., `eastus2`) |
+| `AOAI_LOCATION` | Same as `AZURE_LOCATION` | AI Foundry/OpenAI region. If not set, defaults to the same region as `AZURE_LOCATION`. Use short names (e.g., `eastus2`, `westeurope`) |
+| `AZURE_NETWORK_ISOLATION` | `false` | Enable VNet isolation with private endpoints |
+| `AZURE_DEPLOY_VM` | `false` | Deploy a Windows VM for accessing network-isolated resources via Bastion |
+| `AZURE_DEPLOY_VPN` | `false` | Deploy a VPN Gateway for on-premises connectivity |
+| `AZURE_VM_SIZE` | `Standard_D8s_v5` | VM SKU for the test VM (e.g., `Standard_D4s_v5`, `Standard_D2s_v3`) |
+| `AZURE_VM_ANTIMALWARE` | `true` | Install Microsoft AntiMalware extension on the VM. **Set to `false`** in network-isolated VNets without outbound internet access to prevent deployment failures |
+| `FUNCTION_APP_HOST_PLAN` | `FlexConsumption` | `FlexConsumption` (serverless, uses Container Apps quota) or `Dedicated` (uses App Service Plan VM quota) |
 
 ### Post-Deployment
 
@@ -178,7 +199,7 @@ module aiFoundry 'br/public:avm/ptn/ai-ml/ai-foundry:0.6.0' = {
     includeAssociatedResources: false  // We manage our own resources
     aiFoundryConfiguration: {
       accountName: aiFoundryName
-      location: aoaiLocation
+      location: _aoaiLocation  // resolves to AOAI_LOCATION if set, else falls back to location
       disableLocalAuth: false  // Enable for local development
     }
     aiModelDeployments: [
@@ -398,8 +419,6 @@ Use `test_client.ipynb` to test the HTTP trigger endpoint locally or against dep
 
 ## Troubleshooting
 
-### Common Issues
-
 #### EventGrid Subscription Creation Fails
 
 **Symptom:** postDeploy script fails to create subscription
@@ -451,9 +470,130 @@ az eventgrid system-topic event-subscription list -g $resourceGroup --system-top
 
 ---
 
+## Local Quota & SKU Diagnostic Scripts
+
+The `commandUtils/quota/` directory contains helper scripts for diagnosing Azure quota and VM SKU availability issues before deploying.
+
+### `check-asp-quota.sh` — App Service Plan Quota Check
+
+Validates which App Service Plan SKUs are available on your subscription using the Azure Quota API (`az quota`).
+
+**Prerequisites:**
+```bash
+az extension add --name quota
+az provider register --namespace Microsoft.Quota
+```
+
+**Usage:**
+```bash
+./commandUtils/quota/check-asp-quota.sh                          # Current subscription + eastus2
+./commandUtils/quota/check-asp-quota.sh -l westus2               # Specify location
+./commandUtils/quota/check-asp-quota.sh -s <subscription-id>     # Specify subscription
+./commandUtils/quota/check-asp-quota.sh -l eastus2 -s <sub-id>   # Both
+```
+
+**When to use:** If you receive an `InternalSubscriptionIsOverQuotaForSku` error when deploying a Dedicated App Service Plan, run this script to see which App Service SKUs have available quota in a given region before retrying.
+
+---
+
+### `check-vm-quota.sh` — VM SKU Family Quota Check
+
+Validates which VM SKU families are available on your subscription using the Azure Quota API.
+
+**Prerequisites:**
+```bash
+az extension add --name quota
+az provider register --namespace Microsoft.Quota
+```
+
+**Usage:**
+```bash
+./commandUtils/quota/check-vm-quota.sh                          # Current subscription + eastus2
+./commandUtils/quota/check-vm-quota.sh -l westus2               # Specify location
+./commandUtils/quota/check-vm-quota.sh -s <subscription-id>     # Specify subscription
+./commandUtils/quota/check-vm-quota.sh -l eastus2 -s <sub-id>   # Both
+```
+
+**When to use:** Run before deploying the jumpbox VM (`AZURE_DEPLOY_VM=true`) to verify that the selected `AZURE_VM_SIZE` family has quota in the target region.
+
+---
+
+### `find-vm-sku.sh` — Find Available VM SKU
+
+Finds an available VM SKU in a given Azure region based on filters (vCPU count, architecture, encryption-at-host, etc.). Replicates the behavior of the Terraform `Azure/avm-utl-sku-finder/azapi` module.
+
+**Prerequisites:** Azure CLI (`az`) authenticated + `jq >= 1.6`
+
+**Usage:**
+```bash
+./commandUtils/quota/find-vm-sku.sh --location <region> [options]
+
+Options:
+  --location <region>             Azure region (required). E.g. eastus2
+  --min-vcpus <n>                 Minimum vCPU count (default: 1)
+  --max-vcpus <n>                 Maximum vCPU count (default: 999)
+  --arch <x64|Arm64>              CPU architecture (default: x64)
+  --encryption-at-host <true|false>
+  --accelerated-networking <true|false>
+  --name-pattern <regex>          Regex applied to SKU name (e.g. "Standard_D[0-9]+s_v[34]$")
+  --exclude-zone-restrictions     Only return SKUs with no zone restrictions
+  --all                           Print all matching SKUs with details
+```
+
+**Examples:**
+```bash
+# Find a secure 2-vCPU SKU (equivalent to Terraform vm_sku module):
+./commandUtils/quota/find-vm-sku.sh \
+  --location eastus2 \
+  --min-vcpus 2 --max-vcpus 2 \
+  --encryption-at-host true \
+  --accelerated-networking true
+
+# Find and set the VM size environment variable:
+VM_SKU=$(./commandUtils/quota/find-vm-sku.sh --location eastus2 --min-vcpus 2 --max-vcpus 2)
+azd env set AZURE_VM_SIZE "$VM_SKU"
+```
+
+**Exit codes:** `0` — at least one match found | `1` — no match found
+
+**When to use:** When the default `Standard_D8s_v5` is not available in your region, use this script to find an alternative SKU with the required capabilities, then set it via `azd env set AZURE_VM_SIZE <result>`.
+
+---
+
 ## Recent Changes & Improvements
 
-### Infrastructure (Bicep)
+### Infrastructure Fixes & Enhancements (April 2025)
+
+1. **AI Foundry PE Race Condition Fix**
+   - Moved private endpoint creation out of the AVM module into a dedicated `aiFoundryPe` module
+   - Added `dependsOn: [aiFoundry]` to prevent `AccountProvisioningStateInvalid` errors
+   - Extended `private-endpoint.bicep` to support multiple DNS zones via new `dnsZoneIds` array parameter
+
+2. **FlexConsumption Subnet Delegation Fix**
+   - VNet module now conditionally sets `Microsoft.App/environments` delegation for FlexConsumption
+   - Falls back to `Microsoft.Web/serverFarms` for Dedicated plans
+   - Added `functionAppHostPlan` parameter to the VNet module
+
+3. **functionAppHostPlan Default to FlexConsumption**
+   - Changed default from no value (prompted) to `'FlexConsumption'`
+   - Works on MCAP subscriptions where Dedicated plans are blocked by ANT quota restrictions
+
+4. **aoaiLocation Simplified**
+   - Removed the hardcoded `@allowed` list (was causing format mismatch between `eastus2` and `East US 2`)
+   - Parameter accepts empty string; resolved via `var _aoaiLocation = !empty(aoaiLocation) ? aoaiLocation : location`
+   - When `AOAI_LOCATION` is set: uses that value; when not set: azd passes `""` and Bicep falls back to `location`
+   - This ensures the default always works correctly regardless of whether the env var is present
+
+5. **VM Size Configurable via Environment Variable**
+   - Added `AZURE_VM_SIZE` env var mapped to `vmSize` parameter
+   - Wired through `main.parameters.json`, `deploy.sh`, and `deploy.ps1`
+   - Default: `Standard_D8s_v5`
+
+6. **VM AntiMalware Extension Toggle**
+   - New `vmAntiMalware` parameter (default: `true`) with `AZURE_VM_ANTIMALWARE` env var
+   - Set to `false` for network-isolated environments without outbound internet to prevent `VMAgentStatusCommunicationError`
+
+### Infrastructure (Bicep) — Original
 
 1. **AI Foundry Migration**
    - Migrated from standalone Azure OpenAI to AI Foundry AVM pattern

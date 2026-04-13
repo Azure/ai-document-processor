@@ -32,6 +32,9 @@
       "deployVPN": {
         "value": "${AZURE_DEPLOY_VPN}"
       },
+      "vmSize": {
+        "value": "${AZURE_VM_SIZE}"
+      },
       "aoaiLocation": {
         "value": "${AOAI_LOCATION}"
       },

@@ -60,6 +60,7 @@ $AoaiLocation = if ($env:AOAI_LOCATION) { $env:AOAI_LOCATION } else { "East US" 
 $AzureNetworkIsolation = if ($env:AZURE_NETWORK_ISOLATION) { $env:AZURE_NETWORK_ISOLATION } else { "false" }
 $AzureDeployVm = if ($env:AZURE_DEPLOY_VM) { $env:AZURE_DEPLOY_VM } else { "false" }
 $AzureDeployVpn = if ($env:AZURE_DEPLOY_VPN) { $env:AZURE_DEPLOY_VPN } else { "false" }
+$AzureVmSize = if ($env:AZURE_VM_SIZE) { $env:AZURE_VM_SIZE } else { "Standard_D8s_v5" }  # e.g., Standard_D4s_v5, Standard_D8s_v5, Standard_D16s_v5
 $VmUserPassword = if ($env:VM_USER_PASSWORD) { $env:VM_USER_PASSWORD } else { "" }
 
 # Feature flags
@@ -234,6 +235,7 @@ function Start-BicepDeployment {
         networkIsolation = $script:AzureNetworkIsolation
         deployVM = $script:AzureDeployVm
         deployVPN = $script:AzureDeployVpn
+        vmSize = $script:AzureVmSize
         ai_vision_enabled = $script:AiVisionEnabled
         multiModal = $script:AoaiMultiModal
         functionAppHostPlan = $script:FunctionAppHostPlan
@@ -344,6 +346,7 @@ function Show-DeploymentSummary {
     Write-Info "Network Isolation:   $($script:AzureNetworkIsolation)"
     Write-Info "Deploy VM:           $($script:AzureDeployVm)"
     Write-Info "Deploy VPN:          $($script:AzureDeployVpn)"
+    Write-Info "VM Size:             $($script:AzureVmSize)"
     Write-Info "Function App Plan:   $($script:FunctionAppHostPlan)"
     Write-Info "Function App SKU:    $($script:FunctionAppSku)"
     Write-Info "==================================================="
