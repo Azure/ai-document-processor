@@ -29,17 +29,11 @@
       "deployVM": {
         "value": "${AZURE_DEPLOY_VM}"
       },
-      "functionAppHostPlan": {
-        "value": "${FUNCTION_APP_HOST_PLAN}"
-      },
       "deployVPN": {
         "value": "${AZURE_DEPLOY_VPN}"
       },
       "vmSize": {
         "value": "${AZURE_VM_SIZE}"
-      },
-      "vmAntiMalware": {
-        "value": "${AZURE_VM_ANTIMALWARE}"
       },
       "aoaiLocation": {
         "value": "${AOAI_LOCATION}"
